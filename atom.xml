@@ -6,17 +6,17 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://microliao.club/"/>
-  <updated>2023-04-13T03:08:31.778Z</updated>
+  <updated>2023-04-15T11:40:51.377Z</updated>
   <id>https://microliao.club/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>5W2H | 关于写博客的七点反思</title>
+    <title>上传git仓库</title>
     <link href="https://microliao.club/2023/04/13/chuang-jian-bo-ke-chu-zhong/"/>
     <id>https://microliao.club/2023/04/13/chuang-jian-bo-ke-chu-zhong/</id>
     <published>2023-04-13T03:05:31.000Z</published>
-    <updated>2023-04-13T03:08:31.778Z</updated>
+    <updated>2023-04-15T11:40:51.377Z</updated>
     
     <summary type="html">
     
@@ -24,17 +24,17 @@
       
         
         
-          &lt;h2 id=&quot;写博客的初衷？&quot;&gt;&lt;a href=&quot;#写博客的初衷？&quot; class=&quot;headerlink&quot; title=&quot;写博客的初衷？&quot;&gt;&lt;/a&gt;写博客的初衷？&lt;/h2&gt;&lt;p&gt;用来记录自己的阶段性总结，自己的一些学习笔记。&lt;/p&gt;
-&lt;h2 id=&quot;&quot;&gt;&lt;a href=&quot;#&quot;
+          &lt;p&gt;上传git仓库：&lt;br&gt;1.首先需要通过 $git init 初始化本地仓库，即需要cd 到需要上传仓库的目录下，使用当前目录作为Git仓库，也可以指定目录作为Git仓库 $git init reponame&lt;/p&gt;
+&lt;p&gt;2.在本地仓库中添加内容 git add
         
       
     
     </summary>
     
-      <category term="随笔" scheme="https://microliao.club/categories/%E9%9A%8F%E7%AC%94/"/>
+      <category term="git" scheme="https://microliao.club/categories/git/"/>
     
     
-      <category term="博客" scheme="https://microliao.club/tags/%E5%8D%9A%E5%AE%A2/"/>
+      <category term="git" scheme="https://microliao.club/tags/git/"/>
     
   </entry>
   
