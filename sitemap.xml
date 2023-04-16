@@ -38,7 +38,7 @@
   </url>
   
   <url>
-    <loc>https://microliao.club/archives/index.html</loc>
+    <loc>https://microliao.club/categories/index.html</loc>
     
     <lastmod>2023-04-12</lastmod>
     
@@ -47,7 +47,7 @@
   </url>
   
   <url>
-    <loc>https://microliao.club/categories/index.html</loc>
+    <loc>https://microliao.club/archives/index.html</loc>
     
     <lastmod>2023-04-12</lastmod>
     
@@ -76,7 +76,7 @@
 
   <url>
     <loc>https://microliao.club/</loc>
-    <lastmod>2023-04-15</lastmod>
+    <lastmod>2023-04-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -84,7 +84,7 @@
   
   <url>
     <loc>https://microliao.club/tags/git/</loc>
-    <lastmod>2023-04-15</lastmod>
+    <lastmod>2023-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -93,7 +93,7 @@
   
   <url>
     <loc>https://microliao.club/categories/git/</loc>
-    <lastmod>2023-04-15</lastmod>
+    <lastmod>2023-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
