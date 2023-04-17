@@ -4,11 +4,36 @@
   
     
     <entry>
-      <title>上传git仓库</title>
-      <link href="/2023/04/13/chuang-jian-bo-ke-chu-zhong/"/>
-      <url>/2023/04/13/chuang-jian-bo-ke-chu-zhong/</url>
+      <title>git commit 规范</title>
+      <link href="/2023/04/17/git-commit-gui-fan/"/>
+      <url>/2023/04/17/git-commit-gui-fan/</url>
       
-        <content type="html"><![CDATA[<p>上传git仓库：<br>1.首先需要通过 $git init 初始化本地仓库，即需要cd 到需要上传仓库的目录下，使用当前目录作为Git仓库，也可以指定目录作为Git仓库 $git init reponame</p><p>2.在本地仓库中添加内容 git add （可以是文件也可以是文件夹）git add README.md  or git add .   </p><p>3.提交到本地仓库$git commit -m “提交说明”.                                   4. 完成上述步骤后，即完成了本地仓库的提交，我们需要将其Push到远程仓库。  </p><p>5.首先设置提交代码时的用户信息： $ git config –global user.name “name”<br>　　　　　　　　　　　　　　　　$ git config –global user.email “emai”</p><p>6.连接github与本地        ssh-keygen　　</p><p>　~得到生成的密钥：cat  ~&#x2F;.ssh&#x2F;id_rsa.pub</p><p>　~将密钥在github中进行配置：打开github，在头像下边的settings里面找到SSH and GPG keys，新建SSH，随便取个名字，并将上面得到的密钥粘贴进去。</p><p>　~通过命令查看本地与github是否连接成功：ssh -T <a href="mailto:&#x67;&#105;&#116;&#x40;&#x67;&#105;&#116;&#x68;&#117;&#x62;&#x2e;&#99;&#x6f;&#x6d;">&#x67;&#105;&#116;&#x40;&#x67;&#105;&#116;&#x68;&#117;&#x62;&#x2e;&#99;&#x6f;&#x6d;</a>　　　　　　</p><p>_7.将远程仓库链接git remote add origin <a href="https://github.com/">https://github.com/</a>…..<br>8.创建分支 git branch -M main<br>9.将本地仓库push到远程仓库 git push origin main<br>当出现推送失败“hint”的时候，可以强制推送上去。例如，更改远程仓库的名字后，本地仓库的内容将无法推送上去，可以通过-f强制推送，如：git push origin main -f<br>_</p>]]></content>
+        <content type="html"><![CDATA[<h1 id="commit-message格式"><a href="#commit-message格式" class="headerlink" title="commit message格式"></a>commit message格式</h1><p>&lt;type&gt;(&lt;scope&gt;):&lt;subject&gt;  即：&lt;commit类型&gt;(影响范围)：具体描述</p><p>举例 fix(DOA):fixed invalid user table indexes.</p><p>type:指明git commit的类别， 应该使用下面的类型</p><blockquote><ul><li>【feat】:新增功能</li><li>【fix】:修复bug</li><li>【docs】:仅仅修改了文档， 比如README，CHANGELOG等等</li><li>【test】:增加&#x2F;修改测试用例，包括单元测试、集成测试等</li><li>【style】:修改了空行、缩进格式、引用包排序等等（不改变代码逻辑）</li><li>【perf】:优化相关内容，比如提升性能、体验、算法等</li><li>【refactor】:重构代码，没有新功能或者bug修复</li><li>【chore】:改变构建流程、或者增加依赖库、工具等</li><li>【revert】:回滚到上一个版本</li><li>【merge】:代码合并</li></ul></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> git </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> git </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>上传git仓库</title>
+      <link href="/2023/04/13/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/"/>
+      <url>/2023/04/13/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/</url>
+      
+        <content type="html"><![CDATA[<p>上传git仓库：<br>1.首先需要通过 $git init 初始化本地仓库，即需要cd 到需要上传仓库的目录下，使用当前目录作为Git仓库，也可以指定目录作为Git仓库 $git init reponame</p><p>2.在本地仓库中添加内容 git add （可以是文件也可以是文件夹）git add README.md  or git add .   </p><p>3.提交到本地仓库$git commit -m “提交说明”.                                   4. 完成上述步骤后，即完成了本地仓库的提交，我们需要将其Push到远程仓库。  </p><p>5.首先设置提交代码时的用户信息： $ git config –global user.name “name”<br>　　　　　　　　　　　　　　　　$ git config –global user.email “emai”</p><p>6.连接github与本地        ssh-keygen　　</p><p>　~得到生成的密钥：cat  ~&#x2F;.ssh&#x2F;id_rsa.pub</p><p>　~将密钥在github中进行配置：打开github，在头像下边的settings里面找到SSH and GPG keys，新建SSH，随便取个名字，并将上面得到的密钥粘贴进去。</p><p>　~通过命令查看本地与github是否连接成功：ssh -T <a href="mailto:&#103;&#x69;&#x74;&#x40;&#103;&#105;&#116;&#x68;&#x75;&#x62;&#46;&#99;&#111;&#109;">&#103;&#x69;&#x74;&#x40;&#103;&#105;&#116;&#x68;&#x75;&#x62;&#46;&#99;&#111;&#109;</a>　　　　　　</p><p>_7.将远程仓库链接git remote add origin <a href="https://github.com/">https://github.com/</a>…..<br>8.创建分支 git branch -M main<br>9.将本地仓库push到远程仓库 git push origin main<br>当出现推送失败“hint”的时候，可以强制推送上去。例如，更改远程仓库的名字后，本地仓库的内容将无法推送上去，可以通过-f强制推送，如：git push origin main -f<br>_</p>]]></content>
       
       
       <categories>

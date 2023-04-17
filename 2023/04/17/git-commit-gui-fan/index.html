@@ -6,7 +6,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,inital-scale=1,user-scalable=no">
-  <title>tags [ twlelev的博客 ]</title>
+  <title>git commit 规范 [ twlelev的博客 ]</title>
   <!-- bootstrapcss文件 -->
  <!--  <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
 <!--   
@@ -89,9 +89,48 @@
     </div>
     <div id="content-right" class="col-md-8">
     
-<article id="page">
-  <h1>tags</h1>
-  
+<article id="post">
+	<div class="post-title">
+  <h1>git commit 规范</h1>
+  	</div>
+  <div class="page-meta">
+  	<span class="fa-wrap">
+  		<i class="fa fa-clock-o"></i>
+  		<span class="date-meta">2023-04-17</span>
+  	</span>
+  	<span class="fa-wrap">
+  		
+  		<i class="fa fa-tags"></i>
+  		<span class="tags-meta">git</span>
+  		
+  	</span>
+  	<span class="fa-wrap">
+  		
+  		<i class="fa fa-th"></i>
+  		<span class="categories-meta">git</span>
+  		
+  	</span>
+  </div>
+  <div class="post-content">
+  <h1 id="commit-message格式"><a href="#commit-message格式" class="headerlink" title="commit message格式"></a>commit message格式</h1><p>&lt;type&gt;(&lt;scope&gt;):&lt;subject&gt;  即：&lt;commit类型&gt;(影响范围)：具体描述</p>
+<p>举例 fix(DOA):fixed invalid user table indexes.</p>
+<p>type:指明git commit的类别， 应该使用下面的类型</p>
+<blockquote>
+<ul>
+<li>【feat】:新增功能</li>
+<li>【fix】:修复bug</li>
+<li>【docs】:仅仅修改了文档， 比如README，CHANGELOG等等</li>
+<li>【test】:增加&#x2F;修改测试用例，包括单元测试、集成测试等</li>
+<li>【style】:修改了空行、缩进格式、引用包排序等等（不改变代码逻辑）</li>
+<li>【perf】:优化相关内容，比如提升性能、体验、算法等</li>
+<li>【refactor】:重构代码，没有新功能或者bug修复</li>
+<li>【chore】:改变构建流程、或者增加依赖库、工具等</li>
+<li>【revert】:回滚到上一个版本</li>
+<li>【merge】:代码合并</li>
+</ul>
+</blockquote>
+
+	</div>
 </article>
 
 
