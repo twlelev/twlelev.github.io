@@ -6,10 +6,28 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://microliao.club/"/>
-  <updated>2023-04-17T02:31:48.639Z</updated>
+  <updated>2023-04-24T11:04:35.315Z</updated>
   <id>https://microliao.club/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>hexo 简介</title>
+    <link href="https://microliao.club/2023/04/21/hexo-jian-jie/"/>
+    <id>https://microliao.club/2023/04/21/hexo-jian-jie/</id>
+    <published>2023-04-20T16:00:00.000Z</published>
+    <updated>2023-04-24T11:04:35.315Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="hexo" scheme="https://microliao.club/categories/hexo/"/>
+    
+    
+      <category term="hexo" scheme="https://microliao.club/tags/hexo/"/>
+    
+  </entry>
   
   <entry>
     <title>git commit 规范</title>
@@ -42,7 +60,7 @@
     <link href="https://microliao.club/2023/04/13/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/"/>
     <id>https://microliao.club/2023/04/13/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/</id>
     <published>2023-04-13T03:05:31.000Z</published>
-    <updated>2023-04-15T11:40:51.377Z</updated>
+    <updated>2023-04-24T10:19:04.974Z</updated>
     
     <summary type="html">
     
