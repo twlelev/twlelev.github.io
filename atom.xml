@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://microliao.club/"/>
-  <updated>2023-04-25T08:59:49.403Z</updated>
+  <updated>2023-04-25T09:11:11.563Z</updated>
   <id>https://microliao.club/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
@@ -16,7 +16,7 @@
     <link href="https://microliao.club/2023/04/25/deeplearning/"/>
     <id>https://microliao.club/2023/04/25/deeplearning/</id>
     <published>2023-04-24T16:00:00.000Z</published>
-    <updated>2023-04-25T08:59:49.403Z</updated>
+    <updated>2023-04-25T09:11:11.563Z</updated>
     
     <summary type="html">
     
@@ -24,13 +24,7 @@
       
         
         
-          &lt;p&gt;&lt;img src=&quot;/videos/score_rl.mp4&quot;&gt;&lt;/p&gt;
-&lt;iframe 
-src=&quot;视频或者网页路径&quot; 
-scrolling=&quot;no&quot; 
-border=&quot;0&quot; 
-frameborder=&quot;no&quot; 
-framespacing=&quot;0&quot;
+          &lt;h3 id=&quot;下面视频为通过RL技术训练出来的足球游戏智能体&quot;&gt;&lt;a href=&quot;#下面视频为通过RL技术训练出来的足球游戏智能体&quot; class=&quot;headerlink&quot;
         
       
     
