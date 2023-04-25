@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://microliao.club/"/>
-  <updated>2023-04-24T11:04:35.315Z</updated>
+  <updated>2023-04-25T06:43:12.346Z</updated>
   <id>https://microliao.club/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
@@ -16,9 +16,17 @@
     <link href="https://microliao.club/2023/04/21/hexo-jian-jie/"/>
     <id>https://microliao.club/2023/04/21/hexo-jian-jie/</id>
     <published>2023-04-20T16:00:00.000Z</published>
-    <updated>2023-04-24T11:04:35.315Z</updated>
+    <updated>2023-04-25T06:43:12.346Z</updated>
     
     <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;1-什么是Hexo&quot;&gt;&lt;a href=&quot;#1-什么是Hexo&quot; class=&quot;headerlink&quot;
+        
+      
     
     </summary>
     
@@ -31,8 +39,8 @@
   
   <entry>
     <title>git commit 规范</title>
-    <link href="https://microliao.club/2023/04/17/git-commit-gui-fan/"/>
-    <id>https://microliao.club/2023/04/17/git-commit-gui-fan/</id>
+    <link href="https://microliao.club/2023/04/17/git/git-commit-gui-fan/"/>
+    <id>https://microliao.club/2023/04/17/git/git-commit-gui-fan/</id>
     <published>2023-04-17T02:15:31.000Z</published>
     <updated>2023-04-17T02:31:48.639Z</updated>
     
@@ -56,9 +64,35 @@
   </entry>
   
   <entry>
+    <title>git commit 规范</title>
+    <link href="https://microliao.club/2023/04/17/linux/linux-chmod-yong-fa/"/>
+    <id>https://microliao.club/2023/04/17/linux/linux-chmod-yong-fa/</id>
+    <published>2023-04-17T02:15:31.000Z</published>
+    <updated>2023-04-25T07:57:19.053Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;1-查看文件夹权限&quot;&gt;&lt;a href=&quot;#1-查看文件夹权限&quot; class=&quot;headerlink&quot; title=&quot;1.查看文件夹权限&quot;&gt;&lt;/a&gt;1.查看文件夹权限&lt;/h1&gt;&lt;p&gt;通过命令ll 或者 ls -l
+        
+      
+    
+    </summary>
+    
+      <category term="linux" scheme="https://microliao.club/categories/linux/"/>
+    
+    
+      <category term="chmod" scheme="https://microliao.club/tags/chmod/"/>
+    
+  </entry>
+  
+  <entry>
     <title>上传git仓库</title>
-    <link href="https://microliao.club/2023/04/13/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/"/>
-    <id>https://microliao.club/2023/04/13/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/</id>
+    <link href="https://microliao.club/2023/04/13/git/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/"/>
+    <id>https://microliao.club/2023/04/13/git/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/</id>
     <published>2023-04-13T03:05:31.000Z</published>
     <updated>2023-04-24T10:19:04.974Z</updated>
     

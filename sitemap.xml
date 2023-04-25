@@ -2,8 +2,26 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://microliao.club/2023/04/17/linux/linux-chmod-yong-fa/</loc>
+    
+    <lastmod>2023-04-25</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://microliao.club/2023/04/21/hexo-jian-jie/</loc>
     
+    <lastmod>2023-04-25</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://microliao.club/2023/04/13/git/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/</loc>
+    
     <lastmod>2023-04-24</lastmod>
     
     <changefreq>monthly</changefreq>
@@ -11,16 +29,7 @@
   </url>
   
   <url>
-    <loc>https://microliao.club/2023/04/13/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/</loc>
-    
-    <lastmod>2023-04-24</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://microliao.club/2023/04/17/git-commit-gui-fan/</loc>
+    <loc>https://microliao.club/2023/04/17/git/git-commit-gui-fan/</loc>
     
     <lastmod>2023-04-17</lastmod>
     
@@ -56,7 +65,7 @@
   </url>
   
   <url>
-    <loc>https://microliao.club/archives/index.html</loc>
+    <loc>https://microliao.club/categories/index.html</loc>
     
     <lastmod>2023-04-12</lastmod>
     
@@ -65,7 +74,7 @@
   </url>
   
   <url>
-    <loc>https://microliao.club/categories/index.html</loc>
+    <loc>https://microliao.club/archives/index.html</loc>
     
     <lastmod>2023-04-12</lastmod>
     
@@ -94,22 +103,29 @@
 
   <url>
     <loc>https://microliao.club/</loc>
-    <lastmod>2023-04-24</lastmod>
+    <lastmod>2023-04-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   
   <url>
-    <loc>https://microliao.club/tags/git/</loc>
-    <lastmod>2023-04-24</lastmod>
+    <loc>https://microliao.club/tags/hexo/</loc>
+    <lastmod>2023-04-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://microliao.club/tags/hexo/</loc>
-    <lastmod>2023-04-24</lastmod>
+    <loc>https://microliao.club/tags/git/</loc>
+    <lastmod>2023-04-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://microliao.club/tags/chmod/</loc>
+    <lastmod>2023-04-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -117,15 +133,22 @@
 
   
   <url>
-    <loc>https://microliao.club/categories/git/</loc>
-    <lastmod>2023-04-24</lastmod>
+    <loc>https://microliao.club/categories/hexo/</loc>
+    <lastmod>2023-04-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://microliao.club/categories/hexo/</loc>
-    <lastmod>2023-04-24</lastmod>
+    <loc>https://microliao.club/categories/git/</loc>
+    <lastmod>2023-04-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://microliao.club/categories/linux/</loc>
+    <lastmod>2023-04-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
