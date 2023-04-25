@@ -6,10 +6,42 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://microliao.club/"/>
-  <updated>2023-04-25T06:43:12.346Z</updated>
+  <updated>2023-04-25T08:33:45.056Z</updated>
   <id>https://microliao.club/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>deeplearning</title>
+    <link href="https://microliao.club/2023/04/25/deeplearning/"/>
+    <id>https://microliao.club/2023/04/25/deeplearning/</id>
+    <published>2023-04-24T16:00:00.000Z</published>
+    <updated>2023-04-25T08:33:45.056Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;&lt;img src=&quot;/score_rl.mp4&quot;&gt;&lt;/p&gt;
+&lt;iframe 
+src=&quot;视频或者网页路径&quot; 
+scrolling=&quot;no&quot; 
+border=&quot;0&quot; 
+frameborder=&quot;no&quot; 
+framespacing=&quot;0&quot;
+        
+      
+    
+    </summary>
+    
+      <category term="deeplearning" scheme="https://microliao.club/categories/deeplearning/"/>
+    
+    
+      <category term="gfootball" scheme="https://microliao.club/tags/gfootball/"/>
+    
+  </entry>
   
   <entry>
     <title>hexo 简介</title>
@@ -64,11 +96,11 @@
   </entry>
   
   <entry>
-    <title>git commit 规范</title>
+    <title>linux chmod用法</title>
     <link href="https://microliao.club/2023/04/17/linux/linux-chmod-yong-fa/"/>
     <id>https://microliao.club/2023/04/17/linux/linux-chmod-yong-fa/</id>
     <published>2023-04-17T02:15:31.000Z</published>
-    <updated>2023-04-25T07:57:19.053Z</updated>
+    <updated>2023-04-25T08:30:52.096Z</updated>
     
     <summary type="html">
     
@@ -85,7 +117,7 @@
       <category term="linux" scheme="https://microliao.club/categories/linux/"/>
     
     
-      <category term="chmod" scheme="https://microliao.club/tags/chmod/"/>
+      <category term="linux" scheme="https://microliao.club/tags/linux/"/>
     
   </entry>
   
