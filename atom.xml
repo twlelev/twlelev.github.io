@@ -6,10 +6,36 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://microliao.club/"/>
-  <updated>2023-04-25T09:18:13.694Z</updated>
+  <updated>2023-04-25T14:48:29.515Z</updated>
   <id>https://microliao.club/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>cuda编程 简介</title>
+    <link href="https://microliao.club/2023/04/26/cuda/cuda-bian-cheng-jian-jie/"/>
+    <id>https://microliao.club/2023/04/26/cuda/cuda-bian-cheng-jian-jie/</id>
+    <published>2023-04-25T16:00:00.000Z</published>
+    <updated>2023-04-25T14:48:29.515Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;CUDA编程模型&quot;&gt;&lt;a href=&quot;#CUDA编程模型&quot; class=&quot;headerlink&quot;
+        
+      
+    
+    </summary>
+    
+      <category term="cuda" scheme="https://microliao.club/categories/cuda/"/>
+    
+    
+      <category term="cuda" scheme="https://microliao.club/tags/cuda/"/>
+    
+  </entry>
   
   <entry>
     <title>deeplearning</title>
