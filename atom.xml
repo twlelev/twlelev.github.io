@@ -6,36 +6,35 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2025-12-18T02:50:11.063Z</updated>
+  <updated>2025-12-18T02:57:58.383Z</updated>
   <id>http://example.com/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
     <title>git常用命令</title>
-    <link href="http://example.com/2025/12/18/git-chang-yong-ming-ling-1/"/>
-    <id>http://example.com/2025/12/18/git-chang-yong-ming-ling-1/</id>
-    <published>2025-12-18T02:50:11.000Z</published>
-    <updated>2025-12-18T02:50:11.063Z</updated>
-    
-    <summary type="html">
-    
-    </summary>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>git常用命令</title>
-    <link href="http://example.com/2025/12/18/git-chang-yong-ming-ling/"/>
-    <id>http://example.com/2025/12/18/git-chang-yong-ming-ling/</id>
+    <link href="http://example.com/2025/12/18/git/git-chang-yong-ming-ling/"/>
+    <id>http://example.com/2025/12/18/git/git-chang-yong-ming-ling/</id>
     <published>2025-12-18T02:37:52.000Z</published>
-    <updated>2025-12-18T02:37:52.239Z</updated>
+    <updated>2025-12-18T02:57:58.383Z</updated>
     
     <summary type="html">
     
+      
+      
+        
+        
+          &lt;h1 id=&quot;硬重置到远程分支&quot;&gt;&lt;a href=&quot;#硬重置到远程分支&quot; class=&quot;headerlink&quot; title=&quot;硬重置到远程分支&quot;&gt;&lt;/a&gt;硬重置到远程分支&lt;/h1&gt;&lt;p&gt;需要重新拉取远程分支，放弃本地更改。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;git fetch
+        
+      
+    
     </summary>
     
+      <category term="git" scheme="http://example.com/categories/git/"/>
+    
+    
+      <category term="git" scheme="http://example.com/tags/git/"/>
     
   </entry>
   
@@ -57,31 +56,6 @@
       
     
     </summary>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>git常用命令</title>
-    <link href="http://example.com/2025/12/17/git/git-chang-yong-ming-ling/"/>
-    <id>http://example.com/2025/12/17/git/git-chang-yong-ming-ling/</id>
-    <published>2025-12-17T07:38:32.000Z</published>
-    <updated>2025-12-18T02:52:27.649Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h1 id=&quot;硬重置到远程分支&quot;&gt;&lt;a href=&quot;#硬重置到远程分支&quot; class=&quot;headerlink&quot; title=&quot;硬重置到远程分支&quot;&gt;&lt;/a&gt;硬重置到远程分支&lt;/h1&gt;&lt;p&gt;需要重新拉取远程分支，放弃本地更改。&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;git fetch
-        
-      
-    
-    </summary>
-    
-      <category term="git" scheme="http://example.com/categories/git/"/>
     
     
   </entry>
@@ -247,7 +221,7 @@
     <link href="http://example.com/2023/04/21/hexo-jian-jie/"/>
     <id>http://example.com/2023/04/21/hexo-jian-jie/</id>
     <published>2023-04-20T16:00:00.000Z</published>
-    <updated>2025-12-18T02:22:36.015Z</updated>
+    <updated>2025-12-18T02:55:48.324Z</updated>
     
     <summary type="html">
     

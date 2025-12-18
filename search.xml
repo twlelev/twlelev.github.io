@@ -5,25 +5,24 @@
     
     <entry>
       <title>git常用命令</title>
-      <link href="/2025/12/18/git-chang-yong-ming-ling-1/"/>
-      <url>/2025/12/18/git-chang-yong-ming-ling-1/</url>
+      <link href="/2025/12/18/git/git-chang-yong-ming-ling/"/>
+      <url>/2025/12/18/git/git-chang-yong-ming-ling/</url>
       
-        <content type="html"><![CDATA[]]></content>
-      
-      
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>git常用命令</title>
-      <link href="/2025/12/18/git-chang-yong-ming-ling/"/>
-      <url>/2025/12/18/git-chang-yong-ming-ling/</url>
-      
-        <content type="html"><![CDATA[]]></content>
+        <content type="html"><![CDATA[<h1 id="硬重置到远程分支"><a href="#硬重置到远程分支" class="headerlink" title="硬重置到远程分支"></a>硬重置到远程分支</h1><p>需要重新拉取远程分支，放弃本地更改。</p><pre><code>git fetch origingit reset --hard origin/master//master代表拉取重新拉取远程master分支</code></pre><p><strong>git fetch 与git pull</strong><br>git fetch 仅下载远程更新，本地分支不修改<br>git pull 下载远程分支+自动合并，本地分支修改，自动合并到当前分支</p><pre><code>git fetch origin:远程仓库 ──下载──&gt; 远程跟踪分支(origin/master)    本地分支(master)                        ↓                              ↓                   已更新                           未改变git pull origin master:远程仓库 ──下载──&gt; 远程跟踪分支(origin/master) ──合并──&gt; 本地分支(master)                                                        ↓                                                     已更新</code></pre><h1 id="合并解决冲突"><a href="#合并解决冲突" class="headerlink" title="合并解决冲突"></a>合并解决冲突</h1><h2 id="git-pull冲突情况"><a href="#git-pull冲突情况" class="headerlink" title="git pull冲突情况"></a>git pull冲突情况</h2><p>当本地有未提交的修改(工作区有改动)，执行git pull时，git 会阻止pull操作</p><pre><code>error: Your local changes to the following files would be overwritten by merge:        path/to/file.csPlease commit your changes or stash them before you merge.Aborting</code></pre><p><strong>解决方案：使用stash暂存本地修改</strong></p><pre><code>git stash  # 暂存本地修改git pull origin master  # 拉取远程更新git pop    # 恢复本地修改# 如果有冲突，手动解决</code></pre><h2 id="git-push冲突情况"><a href="#git-push冲突情况" class="headerlink" title="git push冲突情况"></a>git push冲突情况</h2><p><strong>git push到远程分支出现冲突</strong></p><pre><code>git pull origin mastergit add [文件]git commit -m &quot;&quot;git push origin master # 出现冲突</code></pre><p><strong>首先运行git status查看工作区状态</strong><br><strong>情况一：本地没有未提交的修改</strong></p><pre><code>$ git statusOn branch masterYour branch is ahead of &#39;origin/master&#39; by X commits.nothing to commit, working tree clean</code></pre><p>工作区是干净的(“nothing to commit,working tree clean”)，push失败通常是因为远程有新的提交。拉取分支更新与本地仓库合并后再git push</p><pre><code>git pull origin mastergit push origin master</code></pre><p><strong>情况二：本地有未提交的修改</strong></p><pre><code>$ git statusOn branch masterChanges not staged for commit:  modified:   some_file.cs  Untracked files:  new_file.cs</code></pre><p>如果本地不需要保留修改:</p><pre><code>git checkout -- .git pull origin mastergit push origin master</code></pre><p>如果本地需要保留修改:</p><pre><code>git stash git pull origin mastergit push origin mastergit stash pop</code></pre><h3 id="情况三-git-pull-出现合并冲突"><a href="#情况三-git-pull-出现合并冲突" class="headerlink" title="情况三:git pull 出现合并冲突"></a>情况三:git pull 出现合并冲突</h3><p>如果本地需要保留修改，git pull origin master可能出现合并冲突。这是因为本地修改和远程提交的修改有冲突，需要手动解决</p><pre><code>$ git pull origin masterAuto-merging some_file.csCONFLICT (content): Merge conflict in some_file.csAutomatic merge failed; fix conflicts and then commit the result.</code></pre><p><strong>解决冲突</strong></p><pre><code># 手动编辑冲突文件，解决 &lt;&lt;&lt;&lt;&lt;&lt;&lt; ======= &gt;&gt;&gt;&gt;&gt;&gt;&gt; 标记# 解决后git add [冲突文件]    # 标记冲突已经解决git commit -m &quot;解决合并冲突&quot;git push origin master</code></pre><pre><code>git status 显示：Unmerged paths:                    ← 冲突的已跟踪文件    both modified: xxx.cs          → git checkout --theirs xxx.cs    both modified: xxx.asset       → git checkout --theirs xxx.asset    deleted by them: yyy.bytes     → git rm yyy.bytes Untracked files:                   ← 未跟踪的文件    zzz.png                        → git clean -fd 或 rm zzz.png    zzz.meta                       → git clean -fd 或 rm zzz.meta# 1.接受所有冲突文件的远程版本git checkout --theirs .# 2. 删除所有 untracked 文件git clean -fd</code></pre>]]></content>
       
       
+      <categories>
+          
+          <category> git </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> git </tag>
+            
+        </tags>
       
     </entry>
     
@@ -36,25 +35,6 @@
       
         <content type="html"><![CDATA[<h1 id="LMDeploy的量化和部署"><a href="#LMDeploy的量化和部署" class="headerlink" title="LMDeploy的量化和部署"></a>LMDeploy的量化和部署</h1><h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><h2 id="2服务部署"><a href="#2服务部署" class="headerlink" title="2服务部署"></a>2服务部署</h2><h3 id="2-1模型转换"><a href="#2-1模型转换" class="headerlink" title="2.1模型转换"></a>2.1模型转换</h3><p>使用TurboMind推理模型需要先将模型转换为TurboMind的格式，目前支持在线转换和李离线转换两种形式。在线转换可以直接加载Huggingface模型，离线转换需要先保存模型再加载。<br>TurboMind是一款关于LLM推理的高效推理引擎，基于英伟达的FasterTransformer研发而成。它的主要供功能包括：LLaMa结构模型的支持，persistent batch推理模式和可扩展的KV缓存管理器。</p><h4 id="2-1-1"><a href="#2-1-1" class="headerlink" title="2.1.1"></a>2.1.1</h4><ul><li>(<strong>IBAction</strong>)predict:(<strong>id</strong>)sender {</li></ul><p>    &#x2F;&#x2F; load image</p><p>    UIImage* image &#x3D; [UIImage imageNamed:@”test.jpg”];</p><p>    &#x2F;&#x2F; get rgba pixels from image</p><p>    <strong>int</strong> w &#x3D; image.size.width;</p><p>    <strong>int</strong> h &#x3D; image.size.height;</p><p>    fprintf(stderr, “%d x %d\n”, w, h);</p><p>    <strong>unsigned</strong> <strong>char</strong>* rgba &#x3D; <strong>new</strong> <strong>unsigned</strong> <strong>char</strong>[w<em>h</em>4];</p><p>    {</p><p>        CGColorSpaceRef colorSpace &#x3D; CGImageGetColorSpace(image.CGImage);</p><p>        CGContextRef contextRef &#x3D; CGBitmapContextCreate(rgba, w, h, 8, w*4,</p><p>                                                        colorSpace,</p><p>                                                        kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault);</p><p>        CGContextDrawImage(contextRef, CGRectMake(0, 0, w, h), image.CGImage);</p><p>        CGContextRelease(contextRef);</p><p>    }</p><p>    NSString *paramPath &#x3D; [[NSBundle mainBundle] pathForResource:@”squeezenet_v1.1” ofType:@”param”];</p><p>    NSString *binPath &#x3D; [[NSBundle mainBundle] pathForResource:@”squeezenet_v1.1” ofType:@”bin”];</p><p>    &#x2F;&#x2F; init net</p><p>    ncnn::Net net;</p><p>    {</p><p>        <strong>int</strong> r0 &#x3D; net.load_param([paramPath UTF8String]);</p><p>        <strong>int</strong> r1 &#x3D; net.load_model([binPath UTF8String]);</p><p>        fprintf(stderr, “net load %d %d\n”, r0, r1);</p><p>    }</p><p>    std::vector<a href="std::string">std::string</a> labels;</p><p>    NSString *labelPath &#x3D; [[NSBundle mainBundle] pathForResource:@”synset_words” ofType:@”txt”];</p><p>    load_labels([labelPath UTF8String], labels);</p><p>    &#x2F;&#x2F; run forward</p><p>    ncnn::Mat <strong>out</strong>;</p><p>    {</p><p>        ncnn::Extractor ex &#x3D; net.create_extractor();</p><p>        ex.set_light_mode(<strong>true</strong>);</p><p>        ex.set_num_threads(2);</p><p>        ncnn::Mat <strong>in</strong> &#x3D; ncnn::Mat::from_pixels_resize(rgba, ncnn::Mat::PIXEL_RGBA2BGR, w, h, 227, 227);</p><p>        <strong>const</strong> <strong>float</strong> mean_vals[3] &#x3D; {104.f, 117.f, 123.f};</p><p>        <strong>in</strong>.substract_mean_normalize(mean_vals, 0);</p><p>        ex.input(“data”, <strong>in</strong>);</p><p>        ex.extract(“prob”, <strong>out</strong>);</p><p>    }</p><p>    &#x2F;&#x2F; get prob</p><p>    std::vector&lt;**float**&gt; cls_scores;</p><p>    {</p><p>        cls_scores.resize(<strong>out</strong>.c);</p><p>        <strong>for</strong> (<strong>int</strong> j&#x3D;0; j&lt;<strong>out</strong>.c; j++)</p><p>        {</p><p>            <strong>const</strong> <strong>float</strong>* prob &#x3D; <strong>out</strong>.data + <strong>out</strong>.cstep * j;</p><p>            cls_scores[j] &#x3D; prob[0];</p><p>        }</p><p>    }</p><p>    NSString *result &#x3D; print_topk(cls_scores, 3, labels);</p><p>    <strong>self</strong>.resultLabel.text &#x3D; result;</p><p>    &#x2F;&#x2F; clean</p><p>    <strong>delete</strong>[] rgba;</p><p>}</p>]]></content>
       
-      
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>git常用命令</title>
-      <link href="/2025/12/17/git/git-chang-yong-ming-ling/"/>
-      <url>/2025/12/17/git/git-chang-yong-ming-ling/</url>
-      
-        <content type="html"><![CDATA[<h1 id="硬重置到远程分支"><a href="#硬重置到远程分支" class="headerlink" title="硬重置到远程分支"></a>硬重置到远程分支</h1><p>需要重新拉取远程分支，放弃本地更改。</p><pre><code>git fetch origingit reset --hard origin/master//master代表拉取重新拉取远程master分支</code></pre><p><strong>git fetch 与git pull</strong><br>git fetch 仅下载远程更新，本地分支不修改<br>git pull 下载远程分支+自动合并，本地分支修改，自动合并到当前分支</p><pre><code>git fetch origin:远程仓库 ──下载──&gt; 远程跟踪分支(origin/master)    本地分支(master)                        ↓                              ↓                   已更新                           未改变git pull origin master:远程仓库 ──下载──&gt; 远程跟踪分支(origin/master) ──合并──&gt; 本地分支(master)                                                        ↓                                                     已更新</code></pre><h1 id="合并解决冲突"><a href="#合并解决冲突" class="headerlink" title="合并解决冲突"></a>合并解决冲突</h1><h2 id="git-pull冲突情况"><a href="#git-pull冲突情况" class="headerlink" title="git pull冲突情况"></a>git pull冲突情况</h2><p>当本地有未提交的修改(工作区有改动)，执行git pull时，git 会阻止pull操作</p><pre><code>error: Your local changes to the following files would be overwritten by merge:        path/to/file.csPlease commit your changes or stash them before you merge.Aborting</code></pre><p><strong>解决方案：使用stash暂存本地修改</strong></p><pre><code>git stash  # 暂存本地修改git pull origin master  # 拉取远程更新git pop    # 恢复本地修改# 如果有冲突，手动解决</code></pre><h2 id="git-push冲突情况"><a href="#git-push冲突情况" class="headerlink" title="git push冲突情况"></a>git push冲突情况</h2><p><strong>git push到远程分支出现冲突</strong></p><pre><code>git pull origin mastergit add [文件]git commit -m &quot;&quot;git push origin master # 出现冲突</code></pre><p><strong>首先运行git status查看工作区状态</strong><br><strong>情况一：本地没有未提交的修改</strong></p><pre><code>$ git statusOn branch masterYour branch is ahead of &#39;origin/master&#39; by X commits.nothing to commit, working tree clean</code></pre><p>工作区是干净的(“nothing to commit,working tree clean”)，push失败通常是因为远程有新的提交。拉取分支更新与本地仓库合并后再git push</p><pre><code>git pull origin mastergit push origin master</code></pre><p><strong>情况二：本地有未提交的修改</strong></p><pre><code>$ git statusOn branch masterChanges not staged for commit:  modified:   some_file.cs  Untracked files:  new_file.cs</code></pre><p>如果本地不需要保留修改:</p><pre><code>git checkout -- .git pull origin mastergit push origin master</code></pre><p>如果本地需要保留修改:</p><pre><code>git stash git pull origin mastergit push origin mastergit stash pop</code></pre><h3 id="情况三-git-pull-出现合并冲突"><a href="#情况三-git-pull-出现合并冲突" class="headerlink" title="情况三:git pull 出现合并冲突"></a>情况三:git pull 出现合并冲突</h3><p>如果本地需要保留修改，git pull origin master可能出现合并冲突。这是因为本地修改和远程提交的修改有冲突，需要手动解决</p><pre><code>$ git pull origin masterAuto-merging some_file.csCONFLICT (content): Merge conflict in some_file.csAutomatic merge failed; fix conflicts and then commit the result.</code></pre><p><strong>解决冲突</strong></p><pre><code># 手动编辑冲突文件，解决 &lt;&lt;&lt;&lt;&lt;&lt;&lt; ======= &gt;&gt;&gt;&gt;&gt;&gt;&gt; 标记# 解决后git add [冲突文件]    # 标记冲突已经解决git commit -m &quot;解决合并冲突&quot;git push origin master</code></pre><pre><code>git status 显示：Unmerged paths:                    ← 冲突的已跟踪文件    both modified: xxx.cs          → git checkout --theirs xxx.cs    both modified: xxx.asset       → git checkout --theirs xxx.asset    deleted by them: yyy.bytes     → git rm yyy.bytes Untracked files:                   ← 未跟踪的文件    zzz.png                        → git clean -fd 或 rm zzz.png    zzz.meta                       → git clean -fd 或 rm zzz.meta# 1.接受所有冲突文件的远程版本git checkout --theirs .# 2. 删除所有 untracked 文件git clean -fd</code></pre>]]></content>
-      
-      
-      <categories>
-          
-          <category> git </category>
-          
-      </categories>
       
       
     </entry>
