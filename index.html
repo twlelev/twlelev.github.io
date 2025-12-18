@@ -88,7 +88,7 @@
   <script>
     try {
       var typed = new Typed("#subtitle", {
-        strings: ['不必在乎别人提前拥有', '学海无涯，学无止境', '愿你的努力都能得到回报'],
+        strings: ['再努力一点', '不必在乎别人提前拥有', '愿你的努力都能得到回报'],
         startDelay: 0,
         typeSpeed: 200,
         loop: true,
@@ -150,6 +150,290 @@
     
     
     
+    
+    <article
+  id="post-git常用命令"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2025/12/18/git-chang-yong-ming-ling/"
+    >git常用命令</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2025/12/18/git-chang-yong-ming-ling/" class="article-date">
+  <time datetime="2025-12-18T02:37:52.000Z" itemprop="datePublished">2025-12-18</time>
+</a>    
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+   
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
+  id="post-LLM/大模型实战营"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+     
+    <div class="article-meta">
+      <a href="/2025/12/18/llm/da-mo-xing-shi-zhan-ying/" class="article-date">
+  <time datetime="2025-12-18T02:22:36.013Z" itemprop="datePublished">2025-12-18</time>
+</a>    
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="LMDeploy的量化和部署"><a href="#LMDeploy的量化和部署" class="headerlink" title="LMDeploy的量化和部署"></a>LMDeploy的量化和部署</h1><h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><h2 id="2服务部署"><a href="#2服务部署" class="headerlink" title="2服务部署"></a>2服务部署</h2><h3 id="2-1模型转换"><a href="#2-1模型转换" class="headerlink" title="2.1模型转换"></a>2.1模型转换</h3><p>使用TurboMind推理模型需要先将模型转换为TurboMind的格式，目前支持在线转换和李离线转换两种形式。在线转换可以直接加载Huggingface模型，离线转换需要先保存模型再加载。<br>TurboMind是一款关于LLM推理的高效推理引擎，基于英伟达的FasterTransformer研发而成。它的主要供功能包括：LLaMa结构模型的支持，persistent batch推理模式和可扩展的KV缓存管理器。</p>
+<h4 id="2-1-1"><a href="#2-1-1" class="headerlink" title="2.1.1"></a>2.1.1</h4><ul>
+<li>(<strong>IBAction</strong>)predict:(<strong>id</strong>)sender {</li>
+</ul>
+<p>    &#x2F;&#x2F; load image</p>
+<p>    UIImage* image &#x3D; [UIImage imageNamed:@”test.jpg”];</p>
+<p>    &#x2F;&#x2F; get rgba pixels from image</p>
+<p>    <strong>int</strong> w &#x3D; image.size.width;</p>
+<p>    <strong>int</strong> h &#x3D; image.size.height;</p>
+<p>    fprintf(stderr, “%d x %d\n”, w, h);</p>
+<p>    <strong>unsigned</strong> <strong>char</strong>* rgba &#x3D; <strong>new</strong> <strong>unsigned</strong> <strong>char</strong>[w<em>h</em>4];</p>
+<p>    {</p>
+<p>        CGColorSpaceRef colorSpace &#x3D; CGImageGetColorSpace(image.CGImage);</p>
+<p>        CGContextRef contextRef &#x3D; CGBitmapContextCreate(rgba, w, h, 8, w*4,</p>
+<p>                                                        colorSpace,</p>
+<p>                                                        kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault);</p>
+<p>        CGContextDrawImage(contextRef, CGRectMake(0, 0, w, h), image.CGImage);</p>
+<p>        CGContextRelease(contextRef);</p>
+<p>    }</p>
+<p>    NSString *paramPath &#x3D; [[NSBundle mainBundle] pathForResource:@”squeezenet_v1.1” ofType:@”param”];</p>
+<p>    NSString *binPath &#x3D; [[NSBundle mainBundle] pathForResource:@”squeezenet_v1.1” ofType:@”bin”];</p>
+<p>    &#x2F;&#x2F; init net</p>
+<p>    ncnn::Net net;</p>
+<p>    {</p>
+<p>        <strong>int</strong> r0 &#x3D; net.load_param([paramPath UTF8String]);</p>
+<p>        <strong>int</strong> r1 &#x3D; net.load_model([binPath UTF8String]);</p>
+<p>        fprintf(stderr, “net load %d %d\n”, r0, r1);</p>
+<p>    }</p>
+<p>    std::vector<a href="std::string">std::string</a> labels;</p>
+<p>    NSString *labelPath &#x3D; [[NSBundle mainBundle] pathForResource:@”synset_words” ofType:@”txt”];</p>
+<p>    load_labels([labelPath UTF8String], labels);</p>
+<p>    &#x2F;&#x2F; run forward</p>
+<p>    ncnn::Mat <strong>out</strong>;</p>
+<p>    {</p>
+<p>        ncnn::Extractor ex &#x3D; net.create_extractor();</p>
+<p>        ex.set_light_mode(<strong>true</strong>);</p>
+<p>        ex.set_num_threads(2);</p>
+<p>        ncnn::Mat <strong>in</strong> &#x3D; ncnn::Mat::from_pixels_resize(rgba, ncnn::Mat::PIXEL_RGBA2BGR, w, h, 227, 227);</p>
+<p>        <strong>const</strong> <strong>float</strong> mean_vals[3] &#x3D; {104.f, 117.f, 123.f};</p>
+<p>        <strong>in</strong>.substract_mean_normalize(mean_vals, 0);</p>
+<p>        ex.input(“data”, <strong>in</strong>);</p>
+<p>        ex.extract(“prob”, <strong>out</strong>);</p>
+<p>    }</p>
+<p>    &#x2F;&#x2F; get prob</p>
+<p>    std::vector&lt;**float**&gt; cls_scores;</p>
+<p>    {</p>
+<p>        cls_scores.resize(<strong>out</strong>.c);</p>
+<p>        <strong>for</strong> (<strong>int</strong> j&#x3D;0; j&lt;<strong>out</strong>.c; j++)</p>
+<p>        {</p>
+<p>            <strong>const</strong> <strong>float</strong>* prob &#x3D; <strong>out</strong>.data + <strong>out</strong>.cstep * j;</p>
+<p>            cls_scores[j] &#x3D; prob[0];</p>
+<p>        }</p>
+<p>    }</p>
+<p>    NSString *result &#x3D; print_topk(cls_scores, 3, labels);</p>
+<p>    <strong>self</strong>.resultLabel.text &#x3D; result;</p>
+<p>    &#x2F;&#x2F; clean</p>
+<p>    <strong>delete</strong>[] rgba;</p>
+<p>}</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
+  id="post-git/git常用命令"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2025/12/17/git/git-chang-yong-ming-ling/"
+    >git</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2025/12/17/git/git-chang-yong-ming-ling/" class="article-date">
+  <time datetime="2025-12-17T07:38:32.000Z" itemprop="datePublished">2025-12-17</time>
+</a>    
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="硬重置到远程分支"><a href="#硬重置到远程分支" class="headerlink" title="硬重置到远程分支"></a>硬重置到远程分支</h1><p>需要重新拉取远程分支，放弃本地更改。</p>
+<pre><code>git fetch origin
+git reset --hard origin/master
+//master代表拉取重新拉取远程master分支
+</code></pre>
+<p><strong>git fetch 与git pull</strong><br>git fetch 仅下载远程更新，本地分支不修改<br>git pull 下载远程分支+自动合并，本地分支修改，自动合并到当前分支</p>
+<pre><code>git fetch origin:
+远程仓库 ──下载──&gt; 远程跟踪分支(origin/master)    本地分支(master)
+                        ↓                              ↓
+                   已更新                           未改变
+
+git pull origin master:
+远程仓库 ──下载──&gt; 远程跟踪分支(origin/master) ──合并──&gt; 本地分支(master)
+                                                        ↓
+                                                     已更新
+</code></pre>
+<h1 id="合并解决冲突"><a href="#合并解决冲突" class="headerlink" title="合并解决冲突"></a>合并解决冲突</h1><h2 id="git-pull冲突情况"><a href="#git-pull冲突情况" class="headerlink" title="git pull冲突情况"></a>git pull冲突情况</h2><p>当本地有未提交的修改(工作区有改动)，执行git pull时，git 会阻止pull操作</p>
+<pre><code>error: Your local changes to the following files would be overwritten by merge:
+        path/to/file.cs
+Please commit your changes or stash them before you merge.
+Aborting
+</code></pre>
+<p><strong>解决方案：使用stash暂存本地修改</strong></p>
+<pre><code>git stash  # 暂存本地修改
+git pull origin master  # 拉取远程更新
+git pop    # 恢复本地修改
+# 如果有冲突，手动解决
+</code></pre>
+<h2 id="git-push冲突情况"><a href="#git-push冲突情况" class="headerlink" title="git push冲突情况"></a>git push冲突情况</h2><p><strong>git push到远程分支出现冲突</strong></p>
+<pre><code>git pull origin master
+git add [文件]
+git commit -m &quot;&quot;
+git push origin master 
+# 出现冲突
+</code></pre>
+<p><strong>首先运行git status查看工作区状态</strong><br><strong>情况一：本地没有未提交的修改</strong></p>
+<pre><code>$ git status
+On branch master
+Your branch is ahead of &#39;origin/master&#39; by X commits.
+nothing to commit, working tree clean
+</code></pre>
+<p>工作区是干净的(“nothing to commit,working tree clean”)，push失败通常是因为远程有新的提交。拉取分支更新与本地仓库合并后再git push</p>
+<pre><code>git pull origin master
+git push origin master
+</code></pre>
+<p><strong>情况二：本地有未提交的修改</strong></p>
+<pre><code>$ git status
+On branch master
+Changes not staged for commit:
+  modified:   some_file.cs
+  
+Untracked files:
+  new_file.cs
+</code></pre>
+<p>如果本地不需要保留修改:</p>
+<pre><code>git checkout -- .
+git pull origin master
+git push origin master
+</code></pre>
+<p>如果本地需要保留修改:</p>
+<pre><code>git stash 
+git pull origin master
+git push origin master
+git stash pop
+</code></pre>
+<h3 id="情况三-git-pull-出现合并冲突"><a href="#情况三-git-pull-出现合并冲突" class="headerlink" title="情况三:git pull 出现合并冲突"></a>情况三:git pull 出现合并冲突</h3><p>如果本地需要保留修改，git pull origin master可能出现合并冲突。这是因为本地修改和远程提交的修改有冲突，需要手动解决</p>
+<pre><code>$ git pull origin master
+Auto-merging some_file.cs
+CONFLICT (content): Merge conflict in some_file.cs
+Automatic merge failed; fix conflicts and then commit the result.
+</code></pre>
+<p><strong>解决冲突</strong></p>
+<pre><code># 手动编辑冲突文件，解决 &lt;&lt;&lt;&lt;&lt;&lt;&lt; ======= &gt;&gt;&gt;&gt;&gt;&gt;&gt; 标记
+
+# 解决后
+git add [冲突文件]    # 标记冲突已经解决
+git commit -m &quot;解决合并冲突&quot;
+git push origin master
+</code></pre>
+<pre><code>git status 显示：
+
+Unmerged paths:                    ← 冲突的已跟踪文件
+    both modified: xxx.cs          → git checkout --theirs xxx.cs
+    both modified: xxx.asset       → git checkout --theirs xxx.asset
+    deleted by them: yyy.bytes     → git rm yyy.bytes 
+
+Untracked files:                   ← 未跟踪的文件
+    zzz.png                        → git clean -fd 或 rm zzz.png
+    zzz.meta                       → git clean -fd 或 rm zzz.meta
+
+
+# 1.接受所有冲突文件的远程版本
+git checkout --theirs .
+# 2. 删除所有 untracked 文件
+git clean -fd
+</code></pre>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
     
     <article
   id="post-强化学习/PPO Trick"
@@ -224,100 +508,6 @@
        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/DRL/" rel="tag">DRL</a></li></ul>
 
-    </footer>
-  </div>
-
-   
-   
-  
-</article>
-
-    
-    <article
-  id="post-LLM/大模型实战营"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-     
-    <div class="article-meta">
-      <a href="/2024/01/07/llm/da-mo-xing-shi-zhan-ying/" class="article-date">
-  <time datetime="2024-01-07T13:09:52.169Z" itemprop="datePublished">2024-01-07</time>
-</a>    
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h1 id="LMDeploy的量化和部署"><a href="#LMDeploy的量化和部署" class="headerlink" title="LMDeploy的量化和部署"></a>LMDeploy的量化和部署</h1><h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><h2 id="2服务部署"><a href="#2服务部署" class="headerlink" title="2服务部署"></a>2服务部署</h2><h3 id="2-1模型转换"><a href="#2-1模型转换" class="headerlink" title="2.1模型转换"></a>2.1模型转换</h3><p>使用TurboMind推理模型需要先将模型转换为TurboMind的格式，目前支持在线转换和李离线转换两种形式。在线转换可以直接加载Huggingface模型，离线转换需要先保存模型再加载。<br>TurboMind是一款关于LLM推理的高效推理引擎，基于英伟达的FasterTransformer研发而成。它的主要供功能包括：LLaMa结构模型的支持，persistent batch推理模式和可扩展的KV缓存管理器。</p>
-<h4 id="2-1-1"><a href="#2-1-1" class="headerlink" title="2.1.1"></a>2.1.1</h4><ul>
-<li>(<strong>IBAction</strong>)predict:(<strong>id</strong>)sender {</li>
-</ul>
-<p>    &#x2F;&#x2F; load image</p>
-<p>    UIImage* image &#x3D; [UIImage imageNamed:@”test.jpg”];</p>
-<p>    &#x2F;&#x2F; get rgba pixels from image</p>
-<p>    <strong>int</strong> w &#x3D; image.size.width;</p>
-<p>    <strong>int</strong> h &#x3D; image.size.height;</p>
-<p>    fprintf(stderr, “%d x %d\n”, w, h);</p>
-<p>    <strong>unsigned</strong> <strong>char</strong>* rgba &#x3D; <strong>new</strong> <strong>unsigned</strong> <strong>char</strong>[w<em>h</em>4];</p>
-<p>    {</p>
-<p>        CGColorSpaceRef colorSpace &#x3D; CGImageGetColorSpace(image.CGImage);</p>
-<p>        CGContextRef contextRef &#x3D; CGBitmapContextCreate(rgba, w, h, 8, w*4,</p>
-<p>                                                        colorSpace,</p>
-<p>                                                        kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault);</p>
-<p>        CGContextDrawImage(contextRef, CGRectMake(0, 0, w, h), image.CGImage);</p>
-<p>        CGContextRelease(contextRef);</p>
-<p>    }</p>
-<p>    NSString *paramPath &#x3D; [[NSBundle mainBundle] pathForResource:@”squeezenet_v1.1” ofType:@”param”];</p>
-<p>    NSString *binPath &#x3D; [[NSBundle mainBundle] pathForResource:@”squeezenet_v1.1” ofType:@”bin”];</p>
-<p>    &#x2F;&#x2F; init net</p>
-<p>    ncnn::Net net;</p>
-<p>    {</p>
-<p>        <strong>int</strong> r0 &#x3D; net.load_param([paramPath UTF8String]);</p>
-<p>        <strong>int</strong> r1 &#x3D; net.load_model([binPath UTF8String]);</p>
-<p>        fprintf(stderr, “net load %d %d\n”, r0, r1);</p>
-<p>    }</p>
-<p>    std::vector<a href="std::string">std::string</a> labels;</p>
-<p>    NSString *labelPath &#x3D; [[NSBundle mainBundle] pathForResource:@”synset_words” ofType:@”txt”];</p>
-<p>    load_labels([labelPath UTF8String], labels);</p>
-<p>    &#x2F;&#x2F; run forward</p>
-<p>    ncnn::Mat <strong>out</strong>;</p>
-<p>    {</p>
-<p>        ncnn::Extractor ex &#x3D; net.create_extractor();</p>
-<p>        ex.set_light_mode(<strong>true</strong>);</p>
-<p>        ex.set_num_threads(2);</p>
-<p>        ncnn::Mat <strong>in</strong> &#x3D; ncnn::Mat::from_pixels_resize(rgba, ncnn::Mat::PIXEL_RGBA2BGR, w, h, 227, 227);</p>
-<p>        <strong>const</strong> <strong>float</strong> mean_vals[3] &#x3D; {104.f, 117.f, 123.f};</p>
-<p>        <strong>in</strong>.substract_mean_normalize(mean_vals, 0);</p>
-<p>        ex.input(“data”, <strong>in</strong>);</p>
-<p>        ex.extract(“prob”, <strong>out</strong>);</p>
-<p>    }</p>
-<p>    &#x2F;&#x2F; get prob</p>
-<p>    std::vector&lt;**float**&gt; cls_scores;</p>
-<p>    {</p>
-<p>        cls_scores.resize(<strong>out</strong>.c);</p>
-<p>        <strong>for</strong> (<strong>int</strong> j&#x3D;0; j&lt;<strong>out</strong>.c; j++)</p>
-<p>        {</p>
-<p>            <strong>const</strong> <strong>float</strong>* prob &#x3D; <strong>out</strong>.data + <strong>out</strong>.cstep * j;</p>
-<p>            cls_scores[j] &#x3D; prob[0];</p>
-<p>        }</p>
-<p>    }</p>
-<p>    NSString *result &#x3D; print_topk(cls_scores, 3, labels);</p>
-<p>    <strong>self</strong>.resultLabel.text &#x3D; result;</p>
-<p>    &#x2F;&#x2F; clean</p>
-<p>    <strong>delete</strong>[] rgba;</p>
-<p>}</p>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
     </footer>
   </div>
 
@@ -1032,100 +1222,14 @@ ls -lh：查看当前路径下所有文件以及文件夹大小，以KB、MB等�
 </article>
 
     
-    <article
-  id="post-git/git 上传本地仓库到远程仓库"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2023/04/13/git/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/"
-    >上传git仓库</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2023/04/13/git/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/" class="article-date">
-  <time datetime="2023-04-13T03:05:31.000Z" itemprop="datePublished">2023-04-13</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/git/">git</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <p>上传git仓库：<br>1.首先需要通过 $git init 初始化本地仓库，即需要cd 到需要上传仓库的目录下，使用当前目录作为Git仓库，也可以指定目录作为Git仓库 $git init reponame</p>
-<p>2.在本地仓库中添加内容 git add （可以是文件也可以是文件夹）git add README.md  or git add .   </p>
-<p>3.提交到本地仓库$git commit -m “提交说明”.                                   </p>
-<p>4.完成上述步骤后，即完成了本地仓库的提交，我们需要将其Push到远程仓库。  </p>
-<p>5.首先设置提交代码时的用户信息：</p>
-<blockquote>
-<ul>
-<li>$ git config –global user.name “name”  </li>
-<li>$ git config –global user.email “emai”</li>
-</ul>
-</blockquote>
-<p>6.连接github与本地       </p>
-<blockquote>
-<ul>
-<li>命令行输入：ssh-keygen　　</li>
-<li>得到生成的密钥：cat  ~&#x2F;.ssh&#x2F;id_rsa.pub</li>
-<li>将密钥在github中进行配置：打开github，在头像下边的settings里面找到SSH and GPG keys，新建SSH，随便取个名字，并将上面得到的密钥粘贴进去。</li>
-<li>通过命令查看本地与github是否连接成功：ssh -T <a href="mailto:&#x67;&#105;&#x74;&#64;&#103;&#x69;&#116;&#104;&#117;&#98;&#x2e;&#x63;&#x6f;&#x6d;">&#x67;&#105;&#x74;&#64;&#103;&#x69;&#116;&#104;&#117;&#98;&#x2e;&#x63;&#x6f;&#x6d;</a></li>
-</ul>
-<p>　　　　　　</p>
-</blockquote>
-<p>7.将远程仓库链接</p>
-<blockquote>
-<p>git remote add origin <a target="_blank" rel="noopener" href="https://github.com/">https://github.com/</a>…..  </p>
-</blockquote>
-<p>8.创建分支 </p>
-<blockquote>
-<p>git branch -M main  </p>
-</blockquote>
-<p>9.将本地仓库push到远程仓库 </p>
-<blockquote>
-<p>git push origin main  </p>
-</blockquote>
-<p>当出现推送失败“hint”的时候，可以强制推送上去。例如，更改远程仓库的名字后，本地仓库的内容将无法推送上去，可以通过-f强制推送，如：git push origin main -f </p>
-<p><strong>补充：</strong></p>
-<ul>
-<li>切换分支以及分支映射：<br>   git checkout -b master origin&#x2F;master   将本地分支master与远程分支origin&#x2F;master进行映射<br>   git branch -a  显示本地分支以及远程分支<br>   git branch  仅显示本地分支</li>
-</ul>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/git/" rel="tag">git</a></li></ul>
-
-    </footer>
-  </div>
-
-   
-   
-  
-</article>
-
-    
   </article>
   
 
+  
+  <nav class="page-nav">
+    
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">下一页</a>
+  </nav>
   
 </section>
 </div>

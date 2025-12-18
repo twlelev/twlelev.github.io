@@ -13,7 +13,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>归档 |  twlelev的博客</title>
+      <title>git |  twlelev的博客</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -55,305 +55,266 @@
       
     <main class="content on">
       <section class="outer">
-  
-  
-  <article class="articles">
+  <article
+  id="post-git/git常用命令"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
     
-    
-    <h1 class="page-type-title">归档</h1>
-    
-    
-  
-  
-  
-  
-  
-  
-  <div class="archives-wrap">
-    <div class="archive-year-wrap">
-      <a href="/archives/2025" class="archive-year">2025</a>
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  git
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2025/12/17/git/git-chang-yong-ming-ling/" class="article-date">
+  <time datetime="2025-12-17T07:38:32.000Z" itemprop="datePublished">2025-12-17</time>
+</a>   
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">719</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">3 分钟</span>
+        </span>
+    </span>
+</div>
+ 
     </div>
-    <div class="archives">
       
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2025/12/18/git-chang-yong-ming-ling/" class="archive-article-date">
-  <time datetime="2025-12-18T02:37:52.000Z" itemprop="datePublished">12/18</time>
-</a>
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
        
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2025/12/18/git-chang-yong-ming-ling/"
-    >git常用命令</a> 
-</h2>
+  <h1 id="硬重置到远程分支"><a href="#硬重置到远程分支" class="headerlink" title="硬重置到远程分支"></a>硬重置到远程分支</h1><p>需要重新拉取远程分支，放弃本地更改。</p>
+<pre><code>git fetch origin
+git reset --hard origin/master
+//master代表拉取重新拉取远程master分支
+</code></pre>
+<p><strong>git fetch 与git pull</strong><br>git fetch 仅下载远程更新，本地分支不修改<br>git pull 下载远程分支+自动合并，本地分支修改，自动合并到当前分支</p>
+<pre><code>git fetch origin:
+远程仓库 ──下载──&gt; 远程跟踪分支(origin/master)    本地分支(master)
+                        ↓                              ↓
+                   已更新                           未改变
+
+git pull origin master:
+远程仓库 ──下载──&gt; 远程跟踪分支(origin/master) ──合并──&gt; 本地分支(master)
+                                                        ↓
+                                                     已更新
+</code></pre>
+<h1 id="合并解决冲突"><a href="#合并解决冲突" class="headerlink" title="合并解决冲突"></a>合并解决冲突</h1><h2 id="git-pull冲突情况"><a href="#git-pull冲突情况" class="headerlink" title="git pull冲突情况"></a>git pull冲突情况</h2><p>当本地有未提交的修改(工作区有改动)，执行git pull时，git 会阻止pull操作</p>
+<pre><code>error: Your local changes to the following files would be overwritten by merge:
+        path/to/file.cs
+Please commit your changes or stash them before you merge.
+Aborting
+</code></pre>
+<p><strong>解决方案：使用stash暂存本地修改</strong></p>
+<pre><code>git stash  # 暂存本地修改
+git pull origin master  # 拉取远程更新
+git pop    # 恢复本地修改
+# 如果有冲突，手动解决
+</code></pre>
+<h2 id="git-push冲突情况"><a href="#git-push冲突情况" class="headerlink" title="git push冲突情况"></a>git push冲突情况</h2><p><strong>git push到远程分支出现冲突</strong></p>
+<pre><code>git pull origin master
+git add [文件]
+git commit -m &quot;&quot;
+git push origin master 
+# 出现冲突
+</code></pre>
+<p><strong>首先运行git status查看工作区状态</strong><br><strong>情况一：本地没有未提交的修改</strong></p>
+<pre><code>$ git status
+On branch master
+Your branch is ahead of &#39;origin/master&#39; by X commits.
+nothing to commit, working tree clean
+</code></pre>
+<p>工作区是干净的(“nothing to commit,working tree clean”)，push失败通常是因为远程有新的提交。拉取分支更新与本地仓库合并后再git push</p>
+<pre><code>git pull origin master
+git push origin master
+</code></pre>
+<p><strong>情况二：本地有未提交的修改</strong></p>
+<pre><code>$ git status
+On branch master
+Changes not staged for commit:
+  modified:   some_file.cs
+  
+Untracked files:
+  new_file.cs
+</code></pre>
+<p>如果本地不需要保留修改:</p>
+<pre><code>git checkout -- .
+git pull origin master
+git push origin master
+</code></pre>
+<p>如果本地需要保留修改:</p>
+<pre><code>git stash 
+git pull origin master
+git push origin master
+git stash pop
+</code></pre>
+<h3 id="情况三-git-pull-出现合并冲突"><a href="#情况三-git-pull-出现合并冲突" class="headerlink" title="情况三:git pull 出现合并冲突"></a>情况三:git pull 出现合并冲突</h3><p>如果本地需要保留修改，git pull origin master可能出现合并冲突。这是因为本地修改和远程提交的修改有冲突，需要手动解决</p>
+<pre><code>$ git pull origin master
+Auto-merging some_file.cs
+CONFLICT (content): Merge conflict in some_file.cs
+Automatic merge failed; fix conflicts and then commit the result.
+</code></pre>
+<p><strong>解决冲突</strong></p>
+<pre><code># 手动编辑冲突文件，解决 &lt;&lt;&lt;&lt;&lt;&lt;&lt; ======= &gt;&gt;&gt;&gt;&gt;&gt;&gt; 标记
+
+# 解决后
+git add [冲突文件]    # 标记冲突已经解决
+git commit -m &quot;解决合并冲突&quot;
+git push origin master
+</code></pre>
+<pre><code>git status 显示：
+
+Unmerged paths:                    ← 冲突的已跟踪文件
+    both modified: xxx.cs          → git checkout --theirs xxx.cs
+    both modified: xxx.asset       → git checkout --theirs xxx.asset
+    deleted by them: yyy.bytes     → git rm yyy.bytes 
+
+Untracked files:                   ← 未跟踪的文件
+    zzz.png                        → git clean -fd 或 rm zzz.png
+    zzz.meta                       → git clean -fd 或 rm zzz.meta
+
+
+# 1.接受所有冲突文件的远程版本
+git checkout --theirs .
+# 2. 删除所有 untracked 文件
+git clean -fd
+</code></pre>
  
-
-    </header>
-    
-    
-  </div>
-</article>
+      <!-- reward -->
       
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2025/12/18/llm/da-mo-xing-shi-zhan-ying/" class="archive-article-date">
-  <time datetime="2025-12-18T02:22:36.013Z" itemprop="datePublished">12/18</time>
-</a>
-      
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2025/12/17/git/git-chang-yong-ming-ling/" class="archive-article-date">
-  <time datetime="2025-12-17T07:38:32.000Z" itemprop="datePublished">12/17</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2025/12/17/git/git-chang-yong-ming-ling/"
-    >git</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-  
-  </div>
-  </div>
-  
-  
-  <div class="archives-wrap">
-    <div class="archive-year-wrap">
-      <a href="/archives/2024" class="archive-year">2024</a>
-    </div>
-    <div class="archives">
-      
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2024/06/12/qiang-hua-xue-xi/ppo-trick/" class="archive-article-date">
-  <time datetime="2024-06-12T12:15:00.000Z" itemprop="datePublished">06/12</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2024/06/12/qiang-hua-xue-xi/ppo-trick/"
-    >强化学习</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-  
-  </div>
-  </div>
-  
-  
-  <div class="archives-wrap">
-    <div class="archive-year-wrap">
-      <a href="/archives/2023" class="archive-year">2023</a>
-    </div>
-    <div class="archives">
-      
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2023/08/12/muduo-xue-xi/muduo-xue-xi/" class="archive-article-date">
-  <time datetime="2023-08-12T02:15:31.000Z" itemprop="datePublished">08/12</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2023/08/12/muduo-xue-xi/muduo-xue-xi/"
-    >muduo</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2023/07/17/shi-pin-bian-ma/shi-pin-bian-ma-ji-chu/" class="archive-article-date">
-  <time datetime="2023-07-17T12:15:00.000Z" itemprop="datePublished">07/17</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2023/07/17/shi-pin-bian-ma/shi-pin-bian-ma-ji-chu/"
-    >视频编码基础</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2023/07/08/ncnn/ncnn/" class="archive-article-date">
-  <time datetime="2023-07-08T06:54:31.000Z" itemprop="datePublished">07/08</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2023/07/08/ncnn/ncnn/"
-    >ncnn基础</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2023/04/27/c/c-ji-chu/" class="archive-article-date">
-  <time datetime="2023-04-27T02:15:31.000Z" itemprop="datePublished">04/27</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2023/04/27/c/c-ji-chu/"
-    >c++基础</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2023/04/26/cuda/cuda-bian-cheng-jian-jie/" class="archive-article-date">
-  <time datetime="2023-04-25T16:00:00.000Z" itemprop="datePublished">04/26</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2023/04/26/cuda/cuda-bian-cheng-jian-jie/"
-    >cuda编程 简介</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2023/04/21/hexo-jian-jie/" class="archive-article-date">
-  <time datetime="2023-04-20T16:00:00.000Z" itemprop="datePublished">04/21</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2023/04/21/hexo-jian-jie/"
-    >hexo 简介</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2023/04/17/git/git-commit-gui-fan/" class="archive-article-date">
-  <time datetime="2023-04-17T02:15:31.000Z" itemprop="datePublished">04/17</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2023/04/17/git/git-commit-gui-fan/"
-    >git commit 规范</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2023/04/17/linux/linux-chmod-yong-fa/" class="archive-article-date">
-  <time datetime="2023-04-17T02:15:31.000Z" itemprop="datePublished">04/17</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2023/04/17/linux/linux-chmod-yong-fa/"
-    >linux chmod用法</a> 
-</h2>
- 
-
-    </header>
-    
-    
-  </div>
-</article>
-      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
       
     </div>
-  </div>
-  
-  
-
-  
-  <nav class="page-nav">
     
-    <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="extend next" rel="next" href="/archives/page/2/">下一页</a>
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2025/12/17/git/git-chang-yong-ming-ling/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2025/12/18/llm/da-mo-xing-shi-zhan-ying/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            (no title)
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2024/06/12/qiang-hua-xue-xi/ppo-trick/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">强化学习</div>
+      </a>
+    
   </nav>
+
   
+   
+  
+   
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
 </section>
       <footer class="footer">
   <div class="outer">
@@ -477,6 +438,22 @@
 <script src="/js/lazyload.min.js"></script>
 
 <!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
 
 <script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
 <link
