@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="用于记录学习笔记的个人网站" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title> twlelev的博客</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      
+<section class="cover">
+    
+  <div class="cover-frame">
+    <div class="bg-box">
+      <img src="/images/cat.jpg" alt="image frame" />
+    </div>
+    <div class="cover-inner text-center text-white">
+      <h1><a href="/">twlelev的博客</a></h1>
+      <div id="subtitle-box">
+        
+        <span id="subtitle"></span>
+        
+      </div>
+      <div>
+        
+      </div>
+    </div>
+  </div>
+  <div class="cover-learn-more">
+    <a href="javascript:void(0)" class="anchor"><i class="ri-arrow-down-line"></i></a>
+  </div>
+</section>
+
+
+
+<script src="https://cdn.staticfile.org/typed.js/2.0.12/typed.min.js"></script>
+
+
+<!-- Subtitle -->
+
+  <script>
+    try {
+      var typed = new Typed("#subtitle", {
+        strings: ['再努力一点', '不必在乎别人提前拥有', '愿你的努力都能得到回报'],
+        startDelay: 0,
+        typeSpeed: 200,
+        loop: true,
+        backSpeed: 100,
+        showCursor: true
+      });
+    } catch (err) {
+      console.log(err)
+    }
+  </script>
+  
+<div id="main">
+  <section class="outer">
+  
+  
+  
+
+<div class="notice" style="margin-top:50px">
+    <i class="ri-heart-fill"></i>
+    <div class="notice-content" id="broad"></div>
+</div>
+<script type="text/javascript">
+    fetch('https://v1.hitokoto.cn')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("broad").innerHTML = data.hitokoto;
+        })
+        .catch(console.error)
+</script>
+
+<style>
+    .notice {
+        padding: 20px;
+        border: 1px dashed #e6e6e6;
+        color: #969696;
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        background: #fbfbfb50;
+        border-radius: 10px;
+    }
+
+    .notice i {
+        float: left;
+        color: #999;
+        font-size: 16px;
+        padding-right: 10px;
+        vertical-align: middle;
+        margin-top: -2px;
+    }
+
+    .notice-content {
+        display: initial;
+        vertical-align: middle;
+    }
+</style>
+  
+  <article class="articles">
+    
+    
+    
+    
+    <article
+  id="post-hexo 简介"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2023/04/21/hexo-jian-jie/"
+    >hexo 简介</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/04/21/hexo-jian-jie/" class="article-date">
+  <time datetime="2023-04-20T16:00:00.000Z" itemprop="datePublished">2023-04-21</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/hexo/">hexo</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="1-什么是Hexo"><a href="#1-什么是Hexo" class="headerlink" title="1.什么是Hexo?"></a>1.什么是Hexo?</h1><p>Hexo是一个快速、简洁且高效的静态博客框架，使用Node.js编写，支持Markdown语法和EJS模板引擎。</p>
+<h1 id="2-Hexo常用命令"><a href="#2-Hexo常用命令" class="headerlink" title="2.Hexo常用命令"></a>2.Hexo常用命令</h1><blockquote>
+<ul>
+<li>hexo clean：清除缓存文件</li>
+<li>hexo g: 生成静态文件，即将Markdown文件生成为HTML文件。</li>
+<li>hexo s: 启动本地服务器，用于本地浏览。</li>
+<li>hexo d: 部署博客，将静态文件上传到远程服务器或者GitHub Pages.</li>
+<li>hexo new post “article”: 新建一篇名为article的文章。</li>
+<li>hexo new page “title”: 用于新建一个空的页面，相当于生成一个文件夹并在文件夹里面有一个初始md文件。</li>
+<li>hexo init：新建博客，相当于初始化一个Hexo博客demo，需要空文件夹下执行该命令。</li>
+</ul>
+</blockquote>
+<h1 id="3-简述Hexo构建流程"><a href="#3-简述Hexo构建流程" class="headerlink" title="3.简述Hexo构建流程"></a>3.简述Hexo构建流程</h1><p>该部分只对hexo搭建个人博客所需环境以及步骤列个目录，具体详情参见<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/35668237">这里</a>。</p>
+<h3 id="所需环境与步骤"><a href="#所需环境与步骤" class="headerlink" title="所需环境与步骤"></a>所需环境与步骤</h3><blockquote>
+<ul>
+<li>安装Node.js</li>
+<li>安装Git</li>
+<li>注册Github账号</li>
+<li>安装Hexo</li>
+<li>连接Github与本地</li>
+</ul>
+</blockquote>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
+  id="post-git/git commit 规范"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2023/04/17/git/git-commit-gui-fan/"
+    >git commit 规范</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/04/17/git/git-commit-gui-fan/" class="article-date">
+  <time datetime="2023-04-17T02:15:31.000Z" itemprop="datePublished">2023-04-17</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/git/">git</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="commit-message格式"><a href="#commit-message格式" class="headerlink" title="commit message格式"></a>commit message格式</h1><p>&lt;type&gt;(&lt;scope&gt;):&lt;subject&gt;  即：&lt;commit类型&gt;(影响范围)：具体描述</p>
+<p>举例 fix(DOA):fixed invalid user table indexes.</p>
+<p>type:指明git commit的类别， 应该使用下面的类型</p>
+<blockquote>
+<ul>
+<li>【feat】:新增功能</li>
+<li>【fix】:修复bug</li>
+<li>【docs】:仅仅修改了文档， 比如README，CHANGELOG等等</li>
+<li>【test】:增加&#x2F;修改测试用例，包括单元测试、集成测试等</li>
+<li>【style】:修改了空行、缩进格式、引用包排序等等（不改变代码逻辑）</li>
+<li>【perf】:优化相关内容，比如提升性能、体验、算法等</li>
+<li>【refactor】:重构代码，没有新功能或者bug修复</li>
+<li>【chore】:改变构建流程、或者增加依赖库、工具等</li>
+<li>【revert】:回滚到上一个版本</li>
+<li>【merge】:代码合并</li>
+</ul>
+</blockquote>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/git/" rel="tag">git</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
+  id="post-linux/linux chmod 用法"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2023/04/17/linux/linux-chmod-yong-fa/"
+    >linux chmod用法</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/04/17/linux/linux-chmod-yong-fa/" class="article-date">
+  <time datetime="2023-04-17T02:15:31.000Z" itemprop="datePublished">2023-04-17</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/linux/">linux</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="1-查看文件夹权限"><a href="#1-查看文件夹权限" class="headerlink" title="1.查看文件夹权限"></a>1.查看文件夹权限</h1><p>通过命令ll 或者 ls -l 查看当前路径下各个文件或者文件夹权限，如下图所示：<br><img src="/images/linux1.jpg" alt="avatar"><br>其中开头固定10个字符，其字符意义表示如下：</p>
+<blockquote>
+<ul>
+<li>第1个字符：表示该文件的类型，可以是d(目录)、b(块设备)、c(字符设备文件)、“-”(普通文件)、“l”(链接文件)等。</li>
+<li>第2-4个字符：表示该文件的属主用户(user)对该文件的访问权限。</li>
+<li>第5-7个字符：表示该文件的属组内各成员用户对该文件的访问权限。</li>
+<li>第8-10个字符：表示其它任何用户(Other)对该文件的访问权限。</li>
+</ul>
+</blockquote>
+<p>其中r+w+x &#x3D; 4+2+1, r权限表示可以读取文件的内容，w权限表示可以编辑或者修改文件，x(execute)权限表示可以执行文件（只有可执行文件才有x权限)，比如在当前文件夹下mkdir一个新的文件夹或者touch 一个新文件需要x执行权限。</p>
+<h1 id="2-更改权限"><a href="#2-更改权限" class="headerlink" title="2.更改权限"></a>2.更改权限</h1><pre><code>chmod -R 777 uploads: 更改当前路径下的uploads文件夹权限。
+补充：
+ls -ll：查看当前路径下所有文件以及文件夹大小，展示的是字节数。
+ls -lh：查看当前路径下所有文件以及文件夹大小，以KB、MB等为单位进行展示。
+</code></pre>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/" rel="tag">linux</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
+  id="post-git/git 上传本地仓库到远程仓库"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2023/04/13/git/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/"
+    >上传git仓库</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/04/13/git/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/" class="article-date">
+  <time datetime="2023-04-13T03:05:31.000Z" itemprop="datePublished">2023-04-13</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/git/">git</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>上传git仓库：<br>1.首先需要通过 $git init 初始化本地仓库，即需要cd 到需要上传仓库的目录下，使用当前目录作为Git仓库，也可以指定目录作为Git仓库 $git init reponame</p>
+<p>2.在本地仓库中添加内容 git add （可以是文件也可以是文件夹）git add README.md  or git add .   </p>
+<p>3.提交到本地仓库$git commit -m “提交说明”.                                   </p>
+<p>4.完成上述步骤后，即完成了本地仓库的提交，我们需要将其Push到远程仓库。  </p>
+<p>5.首先设置提交代码时的用户信息：</p>
+<blockquote>
+<ul>
+<li>$ git config –global user.name “name”  </li>
+<li>$ git config –global user.email “emai”</li>
+</ul>
+</blockquote>
+<p>6.连接github与本地       </p>
+<blockquote>
+<ul>
+<li>命令行输入：ssh-keygen　　</li>
+<li>得到生成的密钥：cat  ~&#x2F;.ssh&#x2F;id_rsa.pub</li>
+<li>将密钥在github中进行配置：打开github，在头像下边的settings里面找到SSH and GPG keys，新建SSH，随便取个名字，并将上面得到的密钥粘贴进去。</li>
+<li>通过命令查看本地与github是否连接成功：ssh -T <a href="mailto:&#x67;&#x69;&#116;&#x40;&#103;&#105;&#x74;&#104;&#117;&#98;&#x2e;&#99;&#x6f;&#x6d;">&#x67;&#x69;&#116;&#x40;&#103;&#105;&#x74;&#104;&#117;&#98;&#x2e;&#99;&#x6f;&#x6d;</a></li>
+</ul>
+<p>　　　　　　</p>
+</blockquote>
+<p>7.将远程仓库链接</p>
+<blockquote>
+<p>git remote add origin <a target="_blank" rel="noopener" href="https://github.com/">https://github.com/</a>…..  </p>
+</blockquote>
+<p>8.创建分支 </p>
+<blockquote>
+<p>git branch -M main  </p>
+</blockquote>
+<p>9.将本地仓库push到远程仓库 </p>
+<blockquote>
+<p>git push origin main  </p>
+</blockquote>
+<p>当出现推送失败“hint”的时候，可以强制推送上去。例如，更改远程仓库的名字后，本地仓库的内容将无法推送上去，可以通过-f强制推送，如：git push origin main -f </p>
+<p><strong>补充：</strong></p>
+<ul>
+<li>切换分支以及分支映射：<br>   git checkout -b master origin&#x2F;master   将本地分支master与远程分支origin&#x2F;master进行映射<br>   git branch -a  显示本地分支以及远程分支<br>   git branch  仅显示本地分支</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/git/" rel="tag">git</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+  </article>
+  
+
+  
+  <nav class="page-nav">
+    
+    <a class="extend prev" rel="prev" href="/">上一页</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+  </nav>
+  
+</section>
+</div>
+
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2025
+        <i class="ri-heart-fill heart_icon"></i> twlelev的博客
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="twlelev的博客"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>

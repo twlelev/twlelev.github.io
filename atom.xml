@@ -6,10 +6,102 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2025-12-18T02:57:58.383Z</updated>
+  <updated>2025-12-19T07:34:34.875Z</updated>
   <id>http://example.com/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>LCM LORA</title>
+    <link href="http://example.com/2025/12/19/aigc/lcm-lora/"/>
+    <id>http://example.com/2025/12/19/aigc/lcm-lora/</id>
+    <published>2025-12-19T07:04:10.000Z</published>
+    <updated>2025-12-19T07:34:34.875Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;技术深度解析：LCM-LoRA-原理与-Scheduler-源码实现&quot;&gt;&lt;a href=&quot;#技术深度解析：LCM-LoRA-原理与-Scheduler-源码实现&quot; class=&quot;headerlink&quot; title=&quot;技术深度解析：LCM-LoRA 原理与
+        
+      
+    
+    </summary>
+    
+      <category term="AIGC" scheme="http://example.com/categories/AIGC/"/>
+    
+    
+      <category term="AIGC" scheme="http://example.com/tags/AIGC/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>DDIM核心原理</title>
+    <link href="http://example.com/2025/12/18/aigc/ddim/"/>
+    <id>http://example.com/2025/12/18/aigc/ddim/</id>
+    <published>2025-12-18T07:31:01.000Z</published>
+    <updated>2025-12-18T08:13:20.189Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;DDPM与DDIM区别&quot;&gt;&lt;a href=&quot;#DDPM与DDIM区别&quot; class=&quot;headerlink&quot; title=&quot;DDPM与DDIM区别&quot;&gt;&lt;/a&gt;DDPM与DDIM区别&lt;/h2&gt;&lt;p&gt; DDPM
+        
+      
+    
+    </summary>
+    
+      <category term="AIGC" scheme="http://example.com/categories/AIGC/"/>
+    
+    
+      <category term="AIGC" scheme="http://example.com/tags/AIGC/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>AIGC</title>
+    <link href="http://example.com/2025/12/18/aigc/"/>
+    <id>http://example.com/2025/12/18/aigc/</id>
+    <published>2025-12-18T03:23:16.000Z</published>
+    <updated>2025-12-18T03:23:16.320Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>DDPM核心原理与简单工程实现</title>
+    <link href="http://example.com/2025/12/18/aigc/ddpm/"/>
+    <id>http://example.com/2025/12/18/aigc/ddpm/</id>
+    <published>2025-12-18T03:21:20.000Z</published>
+    <updated>2025-12-18T07:23:53.806Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;1-核心思想&quot;&gt;&lt;a href=&quot;#1-核心思想&quot; class=&quot;headerlink&quot; title=&quot;1.核心思想&quot;&gt;&lt;/a&gt;1.核心思想&lt;/h2&gt;&lt;p&gt;Diffusion
+        
+      
+    
+    </summary>
+    
+      <category term="AIGC" scheme="http://example.com/categories/AIGC/"/>
+    
+    
+      <category term="AIGC" scheme="http://example.com/tags/AIGC/"/>
+    
+  </entry>
   
   <entry>
     <title>git常用命令</title>
@@ -91,7 +183,7 @@
     <link href="http://example.com/2023/08/12/muduo-xue-xi/muduo-xue-xi/"/>
     <id>http://example.com/2023/08/12/muduo-xue-xi/muduo-xue-xi/</id>
     <published>2023-08-12T02:15:31.000Z</published>
-    <updated>2025-12-18T02:22:36.029Z</updated>
+    <updated>2025-12-18T03:21:20.381Z</updated>
     
     <summary type="html">
     

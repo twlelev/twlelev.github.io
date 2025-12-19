@@ -13,7 +13,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>git常用命令 |  twlelev的博客</title>
+      <title>DDPM核心原理与简单工程实现 |  twlelev的博客</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -56,7 +56,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-git/git常用命令"
+  id="post-AIGC/DDPM"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -67,7 +67,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  git常用命令
+  DDPM核心原理与简单工程实现
 </h1>
  
 
@@ -75,11 +75,11 @@
     </header>
      
     <div class="article-meta">
-      <a href="/2025/12/18/git/git-chang-yong-ming-ling/" class="article-date">
-  <time datetime="2025-12-18T02:37:52.000Z" itemprop="datePublished">2025-12-18</time>
+      <a href="/2025/12/18/aigc/ddpm/" class="article-date">
+  <time datetime="2025-12-18T03:21:20.000Z" itemprop="datePublished">2025-12-18</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/git/">git</a>
+    <a class="article-category-link" href="/categories/AIGC/">AIGC</a>
   </div>
   
 <div class="word_count">
@@ -87,7 +87,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">719</span>
+            <span class="post-count">1k</span>
         </span>
     </span>
 
@@ -96,7 +96,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">3 分钟</span>
+            <span class="post-count">4 分钟</span>
         </span>
     </span>
 </div>
@@ -111,102 +111,111 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="硬重置到远程分支"><a href="#硬重置到远程分支" class="headerlink" title="硬重置到远程分支"></a>硬重置到远程分支</h1><p>需要重新拉取远程分支，放弃本地更改。</p>
-<pre><code>git fetch origin
-git reset --hard origin/master
-//master代表拉取重新拉取远程master分支
-</code></pre>
-<p><strong>git fetch 与git pull</strong><br>git fetch 仅下载远程更新，本地分支不修改<br>git pull 下载远程分支+自动合并，本地分支修改，自动合并到当前分支</p>
-<pre><code>git fetch origin:
-远程仓库 ──下载──&gt; 远程跟踪分支(origin/master)    本地分支(master)
-                        ↓                              ↓
-                   已更新                           未改变
+  <h2 id="1-核心思想"><a href="#1-核心思想" class="headerlink" title="1.核心思想"></a>1.核心思想</h2><p>Diffusion 模型通过模拟分子的扩散过程，将图像逐步变成纯噪声（前向过程），然后学习一个神经网络来逆转这个过程，从噪声中还原图像（反向过程）。它本质上是一个马尔科夫链。</p>
+<pre class="line-numbers language-Python"><code class="language-Python"># 前向过程：逐步加噪声
+x_0 (原始图像) → x_1 → x_2 → ... → x_T (纯噪声)
 
-git pull origin master:
-远程仓库 ──下载──&gt; 远程跟踪分支(origin/master) ──合并──&gt; 本地分支(master)
-                                                        ↓
-                                                     已更新
-</code></pre>
-<h1 id="合并解决冲突"><a href="#合并解决冲突" class="headerlink" title="合并解决冲突"></a>合并解决冲突</h1><h2 id="git-pull冲突情况"><a href="#git-pull冲突情况" class="headerlink" title="git pull冲突情况"></a>git pull冲突情况</h2><p>当本地有未提交的修改(工作区有改动)，执行git pull时，git 会阻止pull操作</p>
-<pre><code>error: Your local changes to the following files would be overwritten by merge:
-        path/to/file.cs
-Please commit your changes or stash them before you merge.
-Aborting
-</code></pre>
-<p><strong>解决方案：使用stash暂存本地修改</strong></p>
-<pre><code>git stash  # 暂存本地修改
-git pull origin master  # 拉取远程更新
-git pop    # 恢复本地修改
-# 如果有冲突，手动解决
-</code></pre>
-<h2 id="git-push冲突情况"><a href="#git-push冲突情况" class="headerlink" title="git push冲突情况"></a>git push冲突情况</h2><p><strong>git push到远程分支出现冲突</strong></p>
-<pre><code>git pull origin master
-git add [文件]
-git commit -m &quot;&quot;
-git push origin master 
-# 出现冲突
-</code></pre>
-<p><strong>首先运行git status查看工作区状态</strong><br><strong>情况一：本地没有未提交的修改</strong></p>
-<pre><code>$ git status
-On branch master
-Your branch is ahead of &#39;origin/master&#39; by X commits.
-nothing to commit, working tree clean
-</code></pre>
-<p>工作区是干净的(“nothing to commit,working tree clean”)，push失败通常是因为远程有新的提交。拉取分支更新与本地仓库合并后再git push</p>
-<pre><code>git pull origin master
-git push origin master
-</code></pre>
-<p><strong>情况二：本地有未提交的修改</strong></p>
-<pre><code>$ git status
-On branch master
-Changes not staged for commit:
-  modified:   some_file.cs
-  
-Untracked files:
-  new_file.cs
-</code></pre>
-<p>如果本地不需要保留修改:</p>
-<pre><code>git checkout -- .
-git pull origin master
-git push origin master
-</code></pre>
-<p>如果本地需要保留修改:</p>
-<pre><code>git stash 
-git pull origin master
-git push origin master
-git stash pop
-</code></pre>
-<h3 id="情况三-git-pull-出现合并冲突"><a href="#情况三-git-pull-出现合并冲突" class="headerlink" title="情况三:git pull 出现合并冲突"></a>情况三:git pull 出现合并冲突</h3><p>如果本地需要保留修改，git pull origin master可能出现合并冲突。这是因为本地修改和远程提交的修改有冲突，需要手动解决</p>
-<pre><code>$ git pull origin master
-Auto-merging some_file.cs
-CONFLICT (content): Merge conflict in some_file.cs
-Automatic merge failed; fix conflicts and then commit the result.
-</code></pre>
-<p><strong>解决冲突</strong></p>
-<pre><code># 手动编辑冲突文件，解决 &lt;&lt;&lt;&lt;&lt;&lt;&lt; ======= &gt;&gt;&gt;&gt;&gt;&gt;&gt; 标记
+# 反向过程：逐步去噪声  
+x_T (纯噪声) → x_&#123;T-1&#125; → ... → x_1 → x_0 (生成图像)
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="2-前向过程-加噪声"><a href="#2-前向过程-加噪声" class="headerlink" title="2.前向过程(加噪声)"></a>2.前向过程(加噪声)</h2><p>给定初始数据$x_{0}$，每一步添加少量噪声<br>$q(x_t|x_{t-1}) &#x3D; N(x_t; √(1-β_t)·x_{t-1}, β_t·I)$</p>
+<p>不需要一步步加噪，可以直接从 $x_0$ 得到 $x_t$：<br>$$q(x_t|x_0) &#x3D; N(x_t; √(ᾱ_t)·x_0, (1-ᾱ_t)·I)$$<br>$$x_t &#x3D; \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1 - \bar{\alpha}_t} \epsilon, \quad \epsilon \sim \mathcal{N}(0, \mathbf{I})$$</p>
+<p>其中$\beta_{t}$是<strong>噪声调度</strong>(noise schedule)，$ᾱ_t &#x3D; ∏(1-β_i)$是<strong>累积系数</strong></p>
+<h2 id="3-反向过程-去噪声"><a href="#3-反向过程-去噪声" class="headerlink" title="3.反向过程(去噪声)"></a>3.反向过程(去噪声)</h2><p>目标是估计 $p(x_{t-1} | x_t)$。由于真实分布不可知，我们用神经网络 $\theta$ 来近似：<br>$p_θ(x_{t-1}|x_t) &#x3D; N(x_{t-1}; μ_θ(x_t, t), Σ_θ(x_t, t))$</p>
+<p>反向过程为什么也可以用高斯分布建模：<br>贝叶斯定理：$q(x_{t-1}|x_t, x_0) ∝ q(x_t|x_{t-1}) * q(x_{t-1}|x_0)$<br>两个高斯的乘积仍然是高斯</p>
+<h3 id="3-1-均值-mu-theta-的推导"><a href="#3-1-均值-mu-theta-的推导" class="headerlink" title="3.1 均值 $\mu_\theta$ 的推导"></a>3.1 均值 $\mu_\theta$ 的推导</h3><p>通过贝叶斯定理，在给定 $x_0$ 的条件下，后验分布 $q(x_{t-1}|x_t, x_0)$ 的均值 $\tilde{\mu}_t$ 为： $$\tilde{\mu}_t &#x3D; \frac{\sqrt{\alpha_t}(1-\bar{\alpha}*{t-1})}{1-\bar{\alpha}<em>t} x_t + \frac{\sqrt{\bar{\alpha}</em>{t-1}}\beta_t}{1-\bar{\alpha}_t} x_0$$ 代入 $x_0$ 的预测值后(由前向过程$x_0$与$x_t$和$\epsilon$，可以消掉$x_0$)，神经网络实际上只需要预测噪声 $\epsilon_\theta$： $$\mu_\theta(x_t, t) &#x3D; \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{\beta_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta(x_t, t) \right)$$</p>
+<h3 id="3-2-方差-Sigma-theta-的选择"><a href="#3-2-方差-Sigma-theta-的选择" class="headerlink" title="3.2 方差 $\Sigma_\theta$ 的选择"></a>3.2 方差 $\Sigma_\theta$ 的选择</h3><ul>
+<li>__选择 1 (DDPM 原作)__：固定方差 $\sigma_t^2 &#x3D; \beta_t$ 或 $\sigma_t^2 &#x3D; \tilde{\beta}_t$。</li>
+<li>__选择 2 (后验方差)__：$\tilde{\beta}<em>t &#x3D; \frac{1-\bar{\alpha}</em>{t-1}}{1-\bar{\alpha}_t} \cdot \beta_t$（训练更稳定）。</li>
+<li>__选择 3 (可学习方差)__：在 Improved DDPM 中，模型也预测方差，以减少采样步数。</li>
+</ul>
+<p> <strong>均值 $μ_θ$ 和方差 $Σ_θ$的含义</strong><br>$μ_θ(x_t, t)$ - 预测的均值</p>
+<ul>
+<li>这是神经网络预测的”最可能”的 $x_{t-1}$</li>
+<li>代表去噪后图像的中心估计<br>$Σ_θ(x_t, t)$ - 预测的方差</li>
+<li>表示预测的不确定性</li>
+<li>越大表示越不确定</li>
+</ul>
+<h2 id="4-训练与采样算法-Training-amp-Sampling"><a href="#4-训练与采样算法-Training-amp-Sampling" class="headerlink" title="4. 训练与采样算法 (Training &amp; Sampling)"></a>4. 训练与采样算法 (Training &amp; Sampling)</h2><h3 id="训练目标-简化"><a href="#训练目标-简化" class="headerlink" title="训练目标(简化)"></a>训练目标(简化)</h3><p>$L &#x3D; E_{t,x_0,ε}[||ε - ε_θ(x_t, t)||²]$<br>其中 $ε_θ$ 是神经网络预测的噪声</p>
+<h3 id="采样步骤-Langevin-Dynamics"><a href="#采样步骤-Langevin-Dynamics" class="headerlink" title="采样步骤 (Langevin Dynamics)"></a>采样步骤 (Langevin Dynamics)</h3><ol>
+<li>从 $x_T \sim \mathcal{N}(0, \mathbf{I})$ 开始。</li>
+<li>循环 $t &#x3D; T, \dots, 1$：<ul>
+<li>预测 $\epsilon_\theta$。</li>
+<li>根据 $\mu_\theta$ 计算 $x_{t-1}$。</li>
+<li>若 $t &gt; 1$，加入高斯噪声 $z \sim \mathcal{N}(0, \mathbf{I})$ 以维持随机性。</li>
+</ul>
+</li>
+</ol>
+<h2 id="5-DDPM简单工程实现"><a href="#5-DDPM简单工程实现" class="headerlink" title="5.DDPM简单工程实现"></a>5.DDPM简单工程实现</h2><pre class="line-numbers language-Python"><code class="language-Python">class DDPMSampler:
+    def __init__(self, model, betas):
+        self.model = model
+        self.betas = betas
+        self.alphas = 1 - betas
+        self.alphas_bar = torch.cumprod(self.betas, dim=0)
 
-# 解决后
-git add [冲突文件]    # 标记冲突已经解决
-git commit -m &quot;解决合并冲突&quot;
-git push origin master
-</code></pre>
-<pre><code>git status 显示：
+    def sample(self, shape, num_steps=1000):
 
-Unmerged paths:                    ← 冲突的已跟踪文件
-    both modified: xxx.cs          → git checkout --theirs xxx.cs
-    both modified: xxx.asset       → git checkout --theirs xxx.asset
-    deleted by them: yyy.bytes     → git rm yyy.bytes 
+        """完整采样流程，展示所有重参数化的应用"""
+        x_t = torch.randn(shape)
+        for t in reversed(range(num_steps)):
+            # ===== 1. 利用前向重参数化关系 =====
+            # 为了训练网络预测噪声
+            # x_t = √ᾱ_t * x_0 + √(1-ᾱ_t) * ε
 
-Untracked files:                   ← 未跟踪的文件
-    zzz.png                        → git clean -fd 或 rm zzz.png
-    zzz.meta                       → git clean -fd 或 rm zzz.meta
+            predicted_noise = self.model(x_t, t)
+
+            # ===== 2. 均值参数化 =====
+            # 将噪声预测转换为反向过程的分布均值
+            # μ = 1/√α_t * (x_t - β_t/√(1-ᾱ_t) * ε_θ)
+
+            alpha_t = self.alphas[t]
+            alpha_bar_t = self.alphas_bar[t]
+            beta_t = self.betas[t]
+            mean = (1 / torch.sqrt(alpha_t)) * (
+                x_t - (beta_t / torch.sqrt(1 - alpha_bar_t)) * predicted_noise
+            )
+
+            # 方差（DDPM论文中的固定选择）
+            if t > 0:
+                variance = beta_t  # 简化版
+            else:
+                variance = 0      
+                
+            # ===== 3. 采样重参数化 =====
+            # 从 N(mean, variance) 采样
+            if t > 0:
+                noise = torch.randn_like(x_t)
+                 x_t = mean + torch.sqrt(variance) * noise
+            else:
+                 x_t = mean
+            return x_t
 
 
-# 1.接受所有冲突文件的远程版本
-git checkout --theirs .
-# 2. 删除所有 untracked 文件
-git clean -fd
-</code></pre>
+def train_diffusion_model(model, dataloader, num_epochs):
+    """
+    展示前向重参数化在训练中的作用
+    """
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+
+    for epoch in range(num_epochs):
+        for batch_idx, x_0 in enumerate(dataloader):
+            # 清空梯度
+            optimizer.zero_grad()
+            # 随机采样时间步
+            t = torch.randint(0, 1000, (x_0.shape[0],))
+            epsilon = torch.randn_like(x_0)
+
+            # 一步生成 x_t , x_t = √ᾱ_t * x_0 + √(1-ᾱ_t) * ε
+            x_t = (
+                sqrt_alpha_bar[t].view(-1, 1, 1, 1) * x_0 +
+                sqrt_one_minus_alpha_bar[t].view(-1, 1, 1, 1) * epsilon
+            )
+
+            epsilon_pred = model(x_t, t)
+            loss = F.mse_loss(epsilon_pred, epsilon)
+            loss.backward()
+            optimizer.step()
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
  
       <!-- reward -->
       
@@ -277,12 +286,12 @@ git clean -fd
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2025/12/18/git/git-chang-yong-ming-ling/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2025/12/18/aigc/ddpm/" alt="微信分享二维码">
     </div>
 </div>
 
 <div id="share-mask"></div>  
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/git/" rel="tag">git</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AIGC/" rel="tag">AIGC</a></li></ul>
 
     </footer>
   </div>
@@ -290,19 +299,19 @@ git clean -fd
    
   <nav class="article-nav">
     
-      <a href="/2025/12/18/aigc/ddpm/" class="article-nav-link">
+      <a href="/2025/12/18/aigc/" class="article-nav-link">
         <strong class="article-nav-caption">上一篇</strong>
         <div class="article-nav-title">
           
-            DDPM核心原理与简单工程实现
+            AIGC
           
         </div>
       </a>
     
     
-      <a href="/2025/12/18/llm/da-mo-xing-shi-zhan-ying/" class="article-nav-link">
+      <a href="/2025/12/18/git/git-chang-yong-ming-ling/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title"></div>
+        <div class="article-nav-title">git常用命令</div>
       </a>
     
   </nav>
