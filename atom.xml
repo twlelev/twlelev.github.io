@@ -92,7 +92,7 @@
     <link href="http://example.com/2025/12/18/aigc/ddpm/"/>
     <id>http://example.com/2025/12/18/aigc/ddpm/</id>
     <published>2025-12-18T03:21:20.000Z</published>
-    <updated>2025-12-20T06:53:09.174Z</updated>
+    <updated>2025-12-20T07:41:58.633Z</updated>
     
     <summary type="html">
     
@@ -327,6 +327,32 @@
   </entry>
   
   <entry>
+    <title>git commit 规范</title>
+    <link href="http://example.com/2023/04/17/git/git-commit-gui-fan/"/>
+    <id>http://example.com/2023/04/17/git/git-commit-gui-fan/</id>
+    <published>2023-04-17T02:15:31.000Z</published>
+    <updated>2025-12-18T13:59:41.310Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;commit-message格式&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#commit-message格式&quot;&gt;&lt;/a&gt; commit
+        
+      
+    
+    </summary>
+    
+      <category term="git" scheme="http://example.com/categories/git/"/>
+    
+    
+      <category term="git" scheme="http://example.com/tags/git/"/>
+    
+  </entry>
+  
+  <entry>
     <title>linux chmod用法</title>
     <link href="http://example.com/2023/04/17/linux/linux-chmod-yong-fa/"/>
     <id>http://example.com/2023/04/17/linux/linux-chmod-yong-fa/</id>
@@ -351,32 +377,6 @@
     
     
       <category term="linux" scheme="http://example.com/tags/linux/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>git commit 规范</title>
-    <link href="http://example.com/2023/04/17/git/git-commit-gui-fan/"/>
-    <id>http://example.com/2023/04/17/git/git-commit-gui-fan/</id>
-    <published>2023-04-17T02:15:31.000Z</published>
-    <updated>2025-12-18T13:59:41.310Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h1 id=&quot;commit-message格式&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#commit-message格式&quot;&gt;&lt;/a&gt; commit
-        
-      
-    
-    </summary>
-    
-      <category term="git" scheme="http://example.com/categories/git/"/>
-    
-    
-      <category term="git" scheme="http://example.com/tags/git/"/>
     
   </entry>
   
