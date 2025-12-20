@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://example.com/2025/12/18/aigc/ddpm/</loc>
+    <loc>http://example.com/2025/12/19/aigc/lcm-lora/</loc>
     <lastmod>2025-12-20</lastmod>
   </url>
   <url>
-    <loc>http://example.com/2025/12/19/aigc/lcm-lora/</loc>
+    <loc>http://example.com/2025/12/18/aigc/ddim/</loc>
+    <lastmod>2025-12-20</lastmod>
+  </url>
+  <url>
+    <loc>http://example.com/2025/12/18/aigc/ddpm/</loc>
     <lastmod>2025-12-20</lastmod>
   </url>
   <url>
@@ -46,10 +50,6 @@
   </url>
   <url>
     <loc>http://example.com/2025/12/18/git/git-chang-yong-ming-ling/</loc>
-    <lastmod>2025-12-18</lastmod>
-  </url>
-  <url>
-    <loc>http://example.com/2025/12/18/aigc/ddim/</loc>
     <lastmod>2025-12-18</lastmod>
   </url>
   <url>
