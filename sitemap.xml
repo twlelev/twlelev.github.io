@@ -101,7 +101,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/2023/04/17/git/git-commit-gui-fan/</loc>
+    <loc>http://example.com/2023/04/26/cuda/cuda-bian-cheng-jian-jie/</loc>
     
     <lastmod>2025-12-18</lastmod>
     
@@ -110,7 +110,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/2023/04/26/cuda/cuda-bian-cheng-jian-jie/</loc>
+    <loc>http://example.com/2023/04/17/git/git-commit-gui-fan/</loc>
     
     <lastmod>2025-12-18</lastmod>
     
@@ -137,7 +137,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/2025/12/18/llm/da-mo-xing-shi-zhan-ying/</loc>
+    <loc>http://example.com/2023/07/08/ncnn/ncnn/</loc>
     
     <lastmod>2025-12-18</lastmod>
     
@@ -146,7 +146,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/2023/07/08/ncnn/ncnn/</loc>
+    <loc>http://example.com/2025/12/18/llm/da-mo-xing-shi-zhan-ying/</loc>
     
     <lastmod>2025-12-18</lastmod>
     
@@ -201,14 +201,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/git/</loc>
+    <loc>http://example.com/tags/cuda/</loc>
     <lastmod>2025-12-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>http://example.com/tags/cuda/</loc>
+    <loc>http://example.com/tags/git/</loc>
     <lastmod>2025-12-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -266,14 +266,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/categories/git/</loc>
+    <loc>http://example.com/categories/cuda/</loc>
     <lastmod>2025-12-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>http://example.com/categories/cuda/</loc>
+    <loc>http://example.com/categories/git/</loc>
     <lastmod>2025-12-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
