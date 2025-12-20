@@ -248,106 +248,6 @@ prev_sample = c_skip * sample + c_out * pred_original_sample
 
     
     <article
-  id="post-LLM/大模型实战营"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-     
-    <div class="article-meta">
-      <a href="/2025/12/18/llm/da-mo-xing-shi-zhan-ying/" class="article-date">
-  <time datetime="2025-12-18T13:59:41.309Z" itemprop="datePublished">2025-12-18</time>
-</a>    
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h1 id="lmdeploy的量化和部署"><a class="markdownIt-Anchor" href="#lmdeploy的量化和部署"></a> LMDeploy的量化和部署</h1>
-<h2 id="环境配置"><a class="markdownIt-Anchor" href="#环境配置"></a> 环境配置</h2>
-<h2 id="2服务部署"><a class="markdownIt-Anchor" href="#2服务部署"></a> 2服务部署</h2>
-<h3 id="21模型转换"><a class="markdownIt-Anchor" href="#21模型转换"></a> 2.1模型转换</h3>
-<p>使用TurboMind推理模型需要先将模型转换为TurboMind的格式，目前支持在线转换和李离线转换两种形式。在线转换可以直接加载Huggingface模型，离线转换需要先保存模型再加载。<br />
-TurboMind是一款关于LLM推理的高效推理引擎，基于英伟达的FasterTransformer研发而成。它的主要供功能包括：LLaMa结构模型的支持，persistent batch推理模式和可扩展的KV缓存管理器。</p>
-<h4 id="211"><a class="markdownIt-Anchor" href="#211"></a> 2.1.1</h4>
-<ul>
-<li>(<strong>IBAction</strong>)predict:(<strong>id</strong>)sender {</li>
-</ul>
-<p>// load image</p>
-<p>UIImage* image = [UIImage imageNamed:@“test.jpg”];</p>
-<p>// get rgba pixels from image</p>
-<p><strong>int</strong> w = image.size.width;</p>
-<p><strong>int</strong> h = image.size.height;</p>
-<p>fprintf(stderr, “%d x %d\n”, w, h);</p>
-<p><strong>unsigned</strong> <strong>char</strong>* rgba = <strong>new</strong> <strong>unsigned</strong> <strong>char</strong>[w<em>h</em>4];</p>
-<p>{</p>
-<p>CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);</p>
-<p>CGContextRef contextRef = CGBitmapContextCreate(rgba, w, h, 8, w*4,</p>
-<p>colorSpace,</p>
-<p>kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault);</p>
-<p>CGContextDrawImage(contextRef, CGRectMake(0, 0, w, h), image.CGImage);</p>
-<p>CGContextRelease(contextRef);</p>
-<p>}</p>
-<p>NSString *paramPath = [[NSBundle mainBundle] pathForResource:@“squeezenet_v1.1” ofType:@“param”];</p>
-<p>NSString *binPath = [[NSBundle mainBundle] pathForResource:@“squeezenet_v1.1” ofType:@“bin”];</p>
-<p>// init net</p>
-<p>ncnn::Net net;</p>
-<p>{</p>
-<p><strong>int</strong> r0 = net.load_param([paramPath UTF8String]);</p>
-<p><strong>int</strong> r1 = net.load_model([binPath UTF8String]);</p>
-<p>fprintf(stderr, “net load %d %d\n”, r0, r1);</p>
-<p>}</p>
-<p>std::vector<a href="std::string">std::string</a> labels;</p>
-<p>NSString *labelPath = [[NSBundle mainBundle] pathForResource:@“synset_words” ofType:@“txt”];</p>
-<p>load_labels([labelPath UTF8String], labels);</p>
-<p>// run forward</p>
-<p>ncnn::Mat <strong>out</strong>;</p>
-<p>{</p>
-<p>ncnn::Extractor ex = net.create_extractor();</p>
-<p>ex.set_light_mode(<strong>true</strong>);</p>
-<p>ex.set_num_threads(2);</p>
-<p>ncnn::Mat <strong>in</strong> = ncnn::Mat::from_pixels_resize(rgba, ncnn::Mat::PIXEL_RGBA2BGR, w, h, 227, 227);</p>
-<p><strong>const</strong> <strong>float</strong> mean_vals[3] = {104.f, 117.f, 123.f};</p>
-<p><strong>in</strong>.substract_mean_normalize(mean_vals, 0);</p>
-<p>ex.input(“data”, <strong>in</strong>);</p>
-<p>ex.extract(“prob”, <strong>out</strong>);</p>
-<p>}</p>
-<p>// get prob</p>
-<p>std::vector&lt;<strong>float</strong>&gt; cls_scores;</p>
-<p>{</p>
-<p>cls_scores.resize(<strong>out</strong>.c);</p>
-<p><strong>for</strong> (<strong>int</strong> j=0; j&lt;<strong>out</strong>.c; j++)</p>
-<p>{</p>
-<p><strong>const</strong> <strong>float</strong>* prob = <strong>out</strong>.data + <strong>out</strong>.cstep * j;</p>
-<p>cls_scores[j] = prob[0];</p>
-<p>}</p>
-<p>}</p>
-<p>NSString *result = print_topk(cls_scores, 3, labels);</p>
-<p><strong>self</strong>.resultLabel.text = result;</p>
-<p>// clean</p>
-<p><strong>delete</strong>[] rgba;</p>
-<p>}</p>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-    </footer>
-  </div>
-
-   
-   
-  
-</article>
-
-    
-    <article
   id="post-AIGC/DDIM"
   class="article article-type-post"
   itemscope
@@ -920,6 +820,123 @@ git clean -fd
     <footer class="article-footer">
        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/git/" rel="tag">git</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
+  id="post-LLM/大模型实战营"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2024/12/18/llm/da-mo-xing-shi-zhan-ying/"
+    >LMDeploy的量化和部署</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2024/12/18/llm/da-mo-xing-shi-zhan-ying/" class="article-date">
+  <time datetime="2024-12-18T07:31:01.000Z" itemprop="datePublished">2024-12-18</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/LLM/">LLM</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="lmdeploy的量化和部署"><a class="markdownIt-Anchor" href="#lmdeploy的量化和部署"></a> LMDeploy的量化和部署</h1>
+<h2 id="环境配置"><a class="markdownIt-Anchor" href="#环境配置"></a> 环境配置</h2>
+<h2 id="2服务部署"><a class="markdownIt-Anchor" href="#2服务部署"></a> 2服务部署</h2>
+<h3 id="21模型转换"><a class="markdownIt-Anchor" href="#21模型转换"></a> 2.1模型转换</h3>
+<p>使用TurboMind推理模型需要先将模型转换为TurboMind的格式，目前支持在线转换和李离线转换两种形式。在线转换可以直接加载Huggingface模型，离线转换需要先保存模型再加载。<br />
+TurboMind是一款关于LLM推理的高效推理引擎，基于英伟达的FasterTransformer研发而成。它的主要供功能包括：LLaMa结构模型的支持，persistent batch推理模式和可扩展的KV缓存管理器。</p>
+<h4 id="211"><a class="markdownIt-Anchor" href="#211"></a> 2.1.1</h4>
+<ul>
+<li>(<strong>IBAction</strong>)predict:(<strong>id</strong>)sender {</li>
+</ul>
+<p>// load image</p>
+<p>UIImage* image = [UIImage imageNamed:@“test.jpg”];</p>
+<p>// get rgba pixels from image</p>
+<p><strong>int</strong> w = image.size.width;</p>
+<p><strong>int</strong> h = image.size.height;</p>
+<p>fprintf(stderr, “%d x %d\n”, w, h);</p>
+<p><strong>unsigned</strong> <strong>char</strong>* rgba = <strong>new</strong> <strong>unsigned</strong> <strong>char</strong>[w<em>h</em>4];</p>
+<p>{</p>
+<p>CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);</p>
+<p>CGContextRef contextRef = CGBitmapContextCreate(rgba, w, h, 8, w*4,</p>
+<p>colorSpace,</p>
+<p>kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault);</p>
+<p>CGContextDrawImage(contextRef, CGRectMake(0, 0, w, h), image.CGImage);</p>
+<p>CGContextRelease(contextRef);</p>
+<p>}</p>
+<p>NSString *paramPath = [[NSBundle mainBundle] pathForResource:@“squeezenet_v1.1” ofType:@“param”];</p>
+<p>NSString *binPath = [[NSBundle mainBundle] pathForResource:@“squeezenet_v1.1” ofType:@“bin”];</p>
+<p>// init net</p>
+<p>ncnn::Net net;</p>
+<p>{</p>
+<p><strong>int</strong> r0 = net.load_param([paramPath UTF8String]);</p>
+<p><strong>int</strong> r1 = net.load_model([binPath UTF8String]);</p>
+<p>fprintf(stderr, “net load %d %d\n”, r0, r1);</p>
+<p>}</p>
+<p>std::vector<a href="std::string">std::string</a> labels;</p>
+<p>NSString *labelPath = [[NSBundle mainBundle] pathForResource:@“synset_words” ofType:@“txt”];</p>
+<p>load_labels([labelPath UTF8String], labels);</p>
+<p>// run forward</p>
+<p>ncnn::Mat <strong>out</strong>;</p>
+<p>{</p>
+<p>ncnn::Extractor ex = net.create_extractor();</p>
+<p>ex.set_light_mode(<strong>true</strong>);</p>
+<p>ex.set_num_threads(2);</p>
+<p>ncnn::Mat <strong>in</strong> = ncnn::Mat::from_pixels_resize(rgba, ncnn::Mat::PIXEL_RGBA2BGR, w, h, 227, 227);</p>
+<p><strong>const</strong> <strong>float</strong> mean_vals[3] = {104.f, 117.f, 123.f};</p>
+<p><strong>in</strong>.substract_mean_normalize(mean_vals, 0);</p>
+<p>ex.input(“data”, <strong>in</strong>);</p>
+<p>ex.extract(“prob”, <strong>out</strong>);</p>
+<p>}</p>
+<p>// get prob</p>
+<p>std::vector&lt;<strong>float</strong>&gt; cls_scores;</p>
+<p>{</p>
+<p>cls_scores.resize(<strong>out</strong>.c);</p>
+<p><strong>for</strong> (<strong>int</strong> j=0; j&lt;<strong>out</strong>.c; j++)</p>
+<p>{</p>
+<p><strong>const</strong> <strong>float</strong>* prob = <strong>out</strong>.data + <strong>out</strong>.cstep * j;</p>
+<p>cls_scores[j] = prob[0];</p>
+<p>}</p>
+<p>}</p>
+<p>NSString *result = print_topk(cls_scores, 3, labels);</p>
+<p><strong>self</strong>.resultLabel.text = result;</p>
+<p>// clean</p>
+<p><strong>delete</strong>[] rgba;</p>
+<p>}</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LLM/" rel="tag">LLM</a></li></ul>
 
     </footer>
   </div>
@@ -1564,7 +1581,7 @@ int main()
 
     
     <article
-  id="post-git/git commit 规范"
+  id="post-linux/linux chmod 用法"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -1575,8 +1592,8 @@ int main()
     <header class="article-header">
        
 <h2 itemprop="name">
-  <a class="article-title" href="/2023/04/17/git/git-commit-gui-fan/"
-    >git commit 规范</a> 
+  <a class="article-title" href="/2023/04/17/linux/linux-chmod-yong-fa/"
+    >linux chmod用法</a> 
 </h2>
  
 
@@ -1584,35 +1601,36 @@ int main()
     </header>
      
     <div class="article-meta">
-      <a href="/2023/04/17/git/git-commit-gui-fan/" class="article-date">
+      <a href="/2023/04/17/linux/linux-chmod-yong-fa/" class="article-date">
   <time datetime="2023-04-17T02:15:31.000Z" itemprop="datePublished">2023-04-17</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/git/">git</a>
+    <a class="article-category-link" href="/categories/linux/">linux</a>
   </div>
    
     </div>
       
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="commit-message格式"><a class="markdownIt-Anchor" href="#commit-message格式"></a> commit message格式</h1>
-<p>&lt;type&gt;(&lt;scope&gt;):&lt;subject&gt;  即：&lt;commit类型&gt;(影响范围)：具体描述</p>
-<p>举例 fix(DOA):fixed invalid user table indexes.</p>
-<p>type:指明git commit的类别， 应该使用下面的类型</p>
+  <h1 id="1查看文件夹权限"><a class="markdownIt-Anchor" href="#1查看文件夹权限"></a> 1.查看文件夹权限</h1>
+<p>通过命令ll 或者 ls -l 查看当前路径下各个文件或者文件夹权限，如下图所示：<br />
+<img src="/images/linux1.jpg" alt="avatar" /><br />
+其中开头固定10个字符，其字符意义表示如下：</p>
 <blockquote>
 <ul>
-<li>【feat】:新增功能</li>
-<li>【fix】:修复bug</li>
-<li>【docs】:仅仅修改了文档， 比如README，CHANGELOG等等</li>
-<li>【test】:增加/修改测试用例，包括单元测试、集成测试等</li>
-<li>【style】:修改了空行、缩进格式、引用包排序等等（不改变代码逻辑）</li>
-<li>【perf】:优化相关内容，比如提升性能、体验、算法等</li>
-<li>【refactor】:重构代码，没有新功能或者bug修复</li>
-<li>【chore】:改变构建流程、或者增加依赖库、工具等</li>
-<li>【revert】:回滚到上一个版本</li>
-<li>【merge】:代码合并</li>
+<li>第1个字符：表示该文件的类型，可以是d(目录)、b(块设备)、c(字符设备文件)、“-”(普通文件)、“l”(链接文件)等。</li>
+<li>第2-4个字符：表示该文件的属主用户(user)对该文件的访问权限。</li>
+<li>第5-7个字符：表示该文件的属组内各成员用户对该文件的访问权限。</li>
+<li>第8-10个字符：表示其它任何用户(Other)对该文件的访问权限。</li>
 </ul>
 </blockquote>
+<p>其中r+w+x = 4+2+1, r权限表示可以读取文件的内容，w权限表示可以编辑或者修改文件，x(execute)权限表示可以执行文件（只有可执行文件才有x权限)，比如在当前文件夹下mkdir一个新的文件夹或者touch 一个新文件需要x执行权限。</p>
+<h1 id="2更改权限"><a class="markdownIt-Anchor" href="#2更改权限"></a> 2.更改权限</h1>
+<pre><code>chmod -R 777 uploads: 更改当前路径下的uploads文件夹权限。
+补充：
+ls -ll：查看当前路径下所有文件以及文件夹大小，展示的是字节数。
+ls -lh：查看当前路径下所有文件以及文件夹大小，以KB、MB等为单位进行展示。
+</code></pre>
  
       <!-- reward -->
       
@@ -1623,7 +1641,7 @@ int main()
     
     <footer class="article-footer">
        
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/git/" rel="tag">git</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/" rel="tag">linux</a></li></ul>
 
     </footer>
   </div>

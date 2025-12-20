@@ -38,29 +38,6 @@
   </entry>
   
   <entry>
-    <title></title>
-    <link href="http://example.com/2025/12/18/llm/da-mo-xing-shi-zhan-ying/"/>
-    <id>http://example.com/2025/12/18/llm/da-mo-xing-shi-zhan-ying/</id>
-    <published>2025-12-18T13:59:41.309Z</published>
-    <updated>2025-12-18T13:59:41.309Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h1 id=&quot;lmdeploy的量化和部署&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#lmdeploy的量化和部署&quot;&gt;&lt;/a&gt; LMDeploy的量化和部署&lt;/h1&gt;
-&lt;h2 id=&quot;环境配置&quot;&gt;&lt;a
-        
-      
-    
-    </summary>
-    
-    
-  </entry>
-  
-  <entry>
     <title>DDIM核心原理</title>
     <link href="http://example.com/2025/12/18/aigc/ddim/"/>
     <id>http://example.com/2025/12/18/aigc/ddim/</id>
@@ -139,6 +116,33 @@
     
     
       <category term="git" scheme="http://example.com/tags/git/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>LMDeploy的量化和部署</title>
+    <link href="http://example.com/2024/12/18/llm/da-mo-xing-shi-zhan-ying/"/>
+    <id>http://example.com/2024/12/18/llm/da-mo-xing-shi-zhan-ying/</id>
+    <published>2024-12-18T07:31:01.000Z</published>
+    <updated>2025-12-20T07:50:41.360Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;lmdeploy的量化和部署&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#lmdeploy的量化和部署&quot;&gt;&lt;/a&gt; LMDeploy的量化和部署&lt;/h1&gt;
+&lt;h2 id=&quot;环境配置&quot;&gt;&lt;a
+        
+      
+    
+    </summary>
+    
+      <category term="LLM" scheme="http://example.com/categories/LLM/"/>
+    
+    
+      <category term="LLM" scheme="http://example.com/tags/LLM/"/>
     
   </entry>
   
@@ -300,32 +304,6 @@
   </entry>
   
   <entry>
-    <title>git commit 规范</title>
-    <link href="http://example.com/2023/04/17/git/git-commit-gui-fan/"/>
-    <id>http://example.com/2023/04/17/git/git-commit-gui-fan/</id>
-    <published>2023-04-17T02:15:31.000Z</published>
-    <updated>2025-12-18T13:59:41.310Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h1 id=&quot;commit-message格式&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#commit-message格式&quot;&gt;&lt;/a&gt; commit
-        
-      
-    
-    </summary>
-    
-      <category term="git" scheme="http://example.com/categories/git/"/>
-    
-    
-      <category term="git" scheme="http://example.com/tags/git/"/>
-    
-  </entry>
-  
-  <entry>
     <title>linux chmod用法</title>
     <link href="http://example.com/2023/04/17/linux/linux-chmod-yong-fa/"/>
     <id>http://example.com/2023/04/17/linux/linux-chmod-yong-fa/</id>
@@ -350,6 +328,32 @@
     
     
       <category term="linux" scheme="http://example.com/tags/linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>git commit 规范</title>
+    <link href="http://example.com/2023/04/17/git/git-commit-gui-fan/"/>
+    <id>http://example.com/2023/04/17/git/git-commit-gui-fan/</id>
+    <published>2023-04-17T02:15:31.000Z</published>
+    <updated>2025-12-18T13:59:41.310Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;commit-message格式&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#commit-message格式&quot;&gt;&lt;/a&gt; commit
+        
+      
+    
+    </summary>
+    
+      <category term="git" scheme="http://example.com/categories/git/"/>
+    
+    
+      <category term="git" scheme="http://example.com/tags/git/"/>
     
   </entry>
   
