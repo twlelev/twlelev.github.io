@@ -6,10 +6,37 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2025-12-20T07:48:20.359Z</updated>
+  <updated>2025-12-21T01:18:34.331Z</updated>
   <id>http://example.com/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>AIGC-FaceSwap生图相关技术总结</title>
+    <link href="http://example.com/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/"/>
+    <id>http://example.com/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/</id>
+    <published>2025-12-21T00:49:43.000Z</published>
+    <updated>2025-12-21T01:18:34.331Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;ipadapter&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#ipadapter&quot;&gt;&lt;/a&gt; IPAdapter&lt;/h2&gt;
+&lt;p&gt;解决了将文本提示和图像提示整合到预训练的文生图模型中。&lt;br
+        
+      
+    
+    </summary>
+    
+      <category term="AIGC" scheme="http://example.com/categories/AIGC/"/>
+    
+    
+      <category term="AIGC" scheme="http://example.com/tags/AIGC/"/>
+    
+  </entry>
   
   <entry>
     <title>LCM LORA</title>
@@ -42,7 +69,7 @@
     <link href="http://example.com/2025/12/18/aigc/ddim/"/>
     <id>http://example.com/2025/12/18/aigc/ddim/</id>
     <published>2025-12-18T07:31:01.000Z</published>
-    <updated>2025-12-20T07:45:28.278Z</updated>
+    <updated>2025-12-21T00:50:01.849Z</updated>
     
     <summary type="html">
     
@@ -177,7 +204,7 @@
     <link href="http://example.com/2023/07/17/shi-pin-bian-ma/shi-pin-bian-ma-ji-chu/"/>
     <id>http://example.com/2023/07/17/shi-pin-bian-ma/shi-pin-bian-ma-ji-chu/</id>
     <published>2023-07-17T12:15:00.000Z</published>
-    <updated>2025-12-20T08:09:23.572Z</updated>
+    <updated>2025-12-20T08:18:21.475Z</updated>
     
     <summary type="html">
     
