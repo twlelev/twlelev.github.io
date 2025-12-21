@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2025-12-21T01:22:44.933Z</updated>
+  <updated>2025-12-21T09:19:22.508Z</updated>
   <id>http://example.com/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
@@ -16,7 +16,7 @@
     <link href="http://example.com/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/"/>
     <id>http://example.com/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/</id>
     <published>2025-12-21T00:49:43.000Z</published>
-    <updated>2025-12-21T01:22:44.933Z</updated>
+    <updated>2025-12-21T09:19:22.508Z</updated>
     
     <summary type="html">
     
@@ -24,8 +24,8 @@
       
         
         
-          &lt;h2 id=&quot;ipadapter&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#ipadapter&quot;&gt;&lt;/a&gt; IPAdapter&lt;/h2&gt;
-&lt;p&gt;解决了将文本提示和图像提示整合到预训练的文生图模型中。&lt;br
+          &lt;h1 id=&quot;相关paper核心详解&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#相关paper核心详解&quot;&gt;&lt;/a&gt; 相关Paper核心详解&lt;/h1&gt;
+&lt;h2 id=&quot;ipadapter&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot;
         
       
     
@@ -331,6 +331,32 @@
   </entry>
   
   <entry>
+    <title>git commit 规范</title>
+    <link href="http://example.com/2023/04/17/git/git-commit-gui-fan/"/>
+    <id>http://example.com/2023/04/17/git/git-commit-gui-fan/</id>
+    <published>2023-04-17T02:15:31.000Z</published>
+    <updated>2025-12-18T13:59:41.310Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;commit-message格式&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#commit-message格式&quot;&gt;&lt;/a&gt; commit
+        
+      
+    
+    </summary>
+    
+      <category term="git" scheme="http://example.com/categories/git/"/>
+    
+    
+      <category term="git" scheme="http://example.com/tags/git/"/>
+    
+  </entry>
+  
+  <entry>
     <title>linux chmod用法</title>
     <link href="http://example.com/2023/04/17/linux/linux-chmod-yong-fa/"/>
     <id>http://example.com/2023/04/17/linux/linux-chmod-yong-fa/</id>
@@ -355,32 +381,6 @@
     
     
       <category term="linux" scheme="http://example.com/tags/linux/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>git commit 规范</title>
-    <link href="http://example.com/2023/04/17/git/git-commit-gui-fan/"/>
-    <id>http://example.com/2023/04/17/git/git-commit-gui-fan/</id>
-    <published>2023-04-17T02:15:31.000Z</published>
-    <updated>2025-12-18T13:59:41.310Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h1 id=&quot;commit-message格式&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#commit-message格式&quot;&gt;&lt;/a&gt; commit
-        
-      
-    
-    </summary>
-    
-      <category term="git" scheme="http://example.com/categories/git/"/>
-    
-    
-      <category term="git" scheme="http://example.com/tags/git/"/>
     
   </entry>
   
