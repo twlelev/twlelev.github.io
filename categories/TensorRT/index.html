@@ -13,7 +13,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title> twlelev的博客</title>
+      <title>TensorRT |  twlelev的博客</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -55,218 +55,58 @@
       
     <main class="content on">
       <section class="outer">
-  <article
-  id="post-LLM/大模型实战营"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-     
-    <div class="article-meta">
-      <a href="/2025/12/18/llm/da-mo-xing-shi-zhan-ying/" class="article-date">
-  <time datetime="2025-12-18T02:22:36.013Z" itemprop="datePublished">2025-12-18</time>
-</a>   
-<div class="word_count">
-    <span class="post-time">
-        <span class="post-meta-item-icon">
-            <i class="ri-quill-pen-line"></i>
-            <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">404</span>
-        </span>
-    </span>
-
-    <span class="post-time">
-        &nbsp; | &nbsp;
-        <span class="post-meta-item-icon">
-            <i class="ri-book-open-line"></i>
-            <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">2 分钟</span>
-        </span>
-    </span>
-</div>
- 
-    </div>
-      
-    <div class="tocbot"></div>
-
-
-
-
   
-    <div class="article-entry" itemprop="articleBody">
+  
+  <article class="articles">
+    
+    
+    <h1 class="page-type-title">TensorRT</h1>
+    
+    
+  
+  
+  
+  
+  
+  
+  <div class="archives-wrap">
+    <div class="archive-year-wrap">
+      <a href="/archives/2025" class="archive-year">2025</a>
+    </div>
+    <div class="archives">
+      
+      <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      <a href="/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/" class="archive-article-date">
+  <time datetime="2025-06-26T07:52:26.000Z" itemprop="datePublished">06/26</time>
+</a>
        
-  <h1 id="LMDeploy的量化和部署"><a href="#LMDeploy的量化和部署" class="headerlink" title="LMDeploy的量化和部署"></a>LMDeploy的量化和部署</h1><h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><h2 id="2服务部署"><a href="#2服务部署" class="headerlink" title="2服务部署"></a>2服务部署</h2><h3 id="2-1模型转换"><a href="#2-1模型转换" class="headerlink" title="2.1模型转换"></a>2.1模型转换</h3><p>使用TurboMind推理模型需要先将模型转换为TurboMind的格式，目前支持在线转换和李离线转换两种形式。在线转换可以直接加载Huggingface模型，离线转换需要先保存模型再加载。<br>TurboMind是一款关于LLM推理的高效推理引擎，基于英伟达的FasterTransformer研发而成。它的主要供功能包括：LLaMa结构模型的支持，persistent batch推理模式和可扩展的KV缓存管理器。</p>
-<h4 id="2-1-1"><a href="#2-1-1" class="headerlink" title="2.1.1"></a>2.1.1</h4><ul>
-<li>(<strong>IBAction</strong>)predict:(<strong>id</strong>)sender {</li>
-</ul>
-<p>    &#x2F;&#x2F; load image</p>
-<p>    UIImage* image &#x3D; [UIImage imageNamed:@”test.jpg”];</p>
-<p>    &#x2F;&#x2F; get rgba pixels from image</p>
-<p>    <strong>int</strong> w &#x3D; image.size.width;</p>
-<p>    <strong>int</strong> h &#x3D; image.size.height;</p>
-<p>    fprintf(stderr, “%d x %d\n”, w, h);</p>
-<p>    <strong>unsigned</strong> <strong>char</strong>* rgba &#x3D; <strong>new</strong> <strong>unsigned</strong> <strong>char</strong>[w<em>h</em>4];</p>
-<p>    {</p>
-<p>        CGColorSpaceRef colorSpace &#x3D; CGImageGetColorSpace(image.CGImage);</p>
-<p>        CGContextRef contextRef &#x3D; CGBitmapContextCreate(rgba, w, h, 8, w*4,</p>
-<p>                                                        colorSpace,</p>
-<p>                                                        kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault);</p>
-<p>        CGContextDrawImage(contextRef, CGRectMake(0, 0, w, h), image.CGImage);</p>
-<p>        CGContextRelease(contextRef);</p>
-<p>    }</p>
-<p>    NSString *paramPath &#x3D; [[NSBundle mainBundle] pathForResource:@”squeezenet_v1.1” ofType:@”param”];</p>
-<p>    NSString *binPath &#x3D; [[NSBundle mainBundle] pathForResource:@”squeezenet_v1.1” ofType:@”bin”];</p>
-<p>    &#x2F;&#x2F; init net</p>
-<p>    ncnn::Net net;</p>
-<p>    {</p>
-<p>        <strong>int</strong> r0 &#x3D; net.load_param([paramPath UTF8String]);</p>
-<p>        <strong>int</strong> r1 &#x3D; net.load_model([binPath UTF8String]);</p>
-<p>        fprintf(stderr, “net load %d %d\n”, r0, r1);</p>
-<p>    }</p>
-<p>    std::vector<a href="std::string">std::string</a> labels;</p>
-<p>    NSString *labelPath &#x3D; [[NSBundle mainBundle] pathForResource:@”synset_words” ofType:@”txt”];</p>
-<p>    load_labels([labelPath UTF8String], labels);</p>
-<p>    &#x2F;&#x2F; run forward</p>
-<p>    ncnn::Mat <strong>out</strong>;</p>
-<p>    {</p>
-<p>        ncnn::Extractor ex &#x3D; net.create_extractor();</p>
-<p>        ex.set_light_mode(<strong>true</strong>);</p>
-<p>        ex.set_num_threads(2);</p>
-<p>        ncnn::Mat <strong>in</strong> &#x3D; ncnn::Mat::from_pixels_resize(rgba, ncnn::Mat::PIXEL_RGBA2BGR, w, h, 227, 227);</p>
-<p>        <strong>const</strong> <strong>float</strong> mean_vals[3] &#x3D; {104.f, 117.f, 123.f};</p>
-<p>        <strong>in</strong>.substract_mean_normalize(mean_vals, 0);</p>
-<p>        ex.input(“data”, <strong>in</strong>);</p>
-<p>        ex.extract(“prob”, <strong>out</strong>);</p>
-<p>    }</p>
-<p>    &#x2F;&#x2F; get prob</p>
-<p>    std::vector&lt;**float**&gt; cls_scores;</p>
-<p>    {</p>
-<p>        cls_scores.resize(<strong>out</strong>.c);</p>
-<p>        <strong>for</strong> (<strong>int</strong> j&#x3D;0; j&lt;<strong>out</strong>.c; j++)</p>
-<p>        {</p>
-<p>            <strong>const</strong> <strong>float</strong>* prob &#x3D; <strong>out</strong>.data + <strong>out</strong>.cstep * j;</p>
-<p>            cls_scores[j] &#x3D; prob[0];</p>
-<p>        }</p>
-<p>    }</p>
-<p>    NSString *result &#x3D; print_topk(cls_scores, 3, labels);</p>
-<p>    <strong>self</strong>.resultLabel.text &#x3D; result;</p>
-<p>    &#x2F;&#x2F; clean</p>
-<p>    <strong>delete</strong>[] rgba;</p>
-<p>}</p>
+<h2 itemprop="name">
+  <a class="archive-article-title" href="/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/"
+    >TensorRT动态尺寸推理技术</a> 
+</h2>
  
-      <!-- reward -->
+
+    </header>
+    
       
-      <div id="reword-out">
-        <div id="reward-btn">
-          打赏
-        </div>
-      </div>
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <div class="declare">
-      <ul class="post-copyright">
-        <li>
-          <i class="ri-copyright-line"></i>
-          <strong>版权声明： </strong>
-          
-          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
-          
-        </li>
-      </ul>
-    </div>
-    
-    <footer class="article-footer">
-       
-<div class="share-btn">
-      <span class="share-sns share-outer">
-        <i class="ri-share-forward-line"></i>
-        分享
-      </span>
-      <div class="share-wrap">
-        <i class="arrow"></i>
-        <div class="share-icons">
-          
-          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
-            <i class="ri-weibo-fill"></i>
-          </a>
-          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
-            <i class="ri-wechat-fill"></i>
-          </a>
-          <a class="qq share-sns" href="javascript:;" data-type="qq">
-            <i class="ri-qq-fill"></i>
-          </a>
-          <a class="douban share-sns" href="javascript:;" data-type="douban">
-            <i class="ri-douban-line"></i>
-          </a>
-          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
-            <i class="icon icon-qzone"></i>
-          </a> -->
-          
-          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
-            <i class="ri-facebook-circle-fill"></i>
-          </a>
-          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
-            <i class="ri-twitter-fill"></i>
-          </a>
-          <a class="google share-sns" href="javascript:;" data-type="google">
-            <i class="ri-google-fill"></i>
-          </a>
-        </div>
-      </div>
-</div>
-
-<div class="wx-share-modal">
-    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2025/12/18/llm/da-mo-xing-shi-zhan-ying/" alt="微信分享二维码">
-    </div>
-</div>
-
-<div id="share-mask"></div>  
-    </footer>
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/TensorRT/">TensorRT</a>
   </div>
 
-   
-  <nav class="article-nav">
-    
-      <a href="/2025/12/18/git/git-chang-yong-ming-ling/" class="article-nav-link">
-        <strong class="article-nav-caption">上一篇</strong>
-        <div class="article-nav-title">
-          
-            git常用命令
-          
-        </div>
-      </a>
     
     
-      <a href="/2024/06/12/qiang-hua-xue-xi/ppo-trick/" class="article-nav-link">
-        <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">强化学习</div>
-      </a>
-    
-  </nav>
-
-  
-   
-  
-   
-    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
-    <div id="twikoo" class="twikoo"></div>
-    <script>
-        twikoo.init({
-            envId: ""
-        })
-    </script>
- 
+  </div>
 </article>
+      
+      
+    </div>
+  </div>
+  
+  
 
+  
 </section>
       <footer class="footer">
   <div class="outer">
@@ -390,22 +230,6 @@
 <script src="/js/lazyload.min.js"></script>
 
 <!-- Tocbot -->
- 
-<script src="/js/tocbot.min.js"></script>
-
-<script>
-  tocbot.init({
-    tocSelector: ".tocbot",
-    contentSelector: ".article-entry",
-    headingSelector: "h1, h2, h3, h4, h5, h6",
-    hasInnerContainers: true,
-    scrollSmooth: true,
-    scrollContainer: "main",
-    positionFixedSelector: ".tocbot",
-    positionFixedClass: "is-position-fixed",
-    fixedSidebarOffset: "auto",
-  });
-</script>
 
 <script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
 <link
@@ -526,7 +350,14 @@
 <!-- MathJax -->
 
 <!-- Katex -->
-
+ 
+    
+        <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.css">
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.js"></script>
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/contrib/auto-render.min.js"></script>
+        
+    
+ 
 <!-- busuanzi  -->
 
 <!-- ClickLove -->

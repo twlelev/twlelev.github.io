@@ -87,7 +87,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">367</span>
+            <span class="post-count">368</span>
         </span>
     </span>
 
@@ -111,7 +111,8 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="CUDA编程模型"><a href="#CUDA编程模型" class="headerlink" title="CUDA编程模型"></a>CUDA编程模型</h1><p>CUDA编程模型假设系统是由一个主机(CPU)和一个设备(GPU)组成的，而各自拥有独立的内存。因此，在CUDA编程中我们需要编写在设备(GPU)上运行的代码，也被称为核函数(Kernel)，其并行地运行在GPU的多个处理器上，这极大的提高了计算速度。</p>
+  <h1 id="cuda编程模型"><a class="markdownIt-Anchor" href="#cuda编程模型"></a> CUDA编程模型</h1>
+<p>CUDA编程模型假设系统是由一个主机(CPU)和一个设备(GPU)组成的，而各自拥有独立的内存。因此，在CUDA编程中我们需要编写在设备(GPU)上运行的代码，也被称为核函数(Kernel)，其并行地运行在GPU的多个处理器上，这极大的提高了计算速度。</p>
 <p>典型的CUDA程序执行步骤：</p>
 <blockquote>
 <ul>
@@ -120,14 +121,15 @@
 <li>将数据从GPU内存传回CPU内存。</li>
 </ul>
 </blockquote>
-<p>CUDA编程模型的两个特点：<br>1.通过层次结构来组织线程</p>
+<p>CUDA编程模型的两个特点：<br />
+1.通过层次结构来组织线程</p>
 <blockquote>
 <ul>
 <li>一般CPU一个核只支持一到两个硬件线程，而GPU在硬件层面就支持成百上千个并发线程。在CUDA编程中，线程是通过线程网格(Grid)、线程块(Block)、线程束(Warp)、线程(Thread)这几个层次管理。</li>
 <li>由一个内核启动所产生的所有线程统称为一个网格(Grid),同一网格中的所有线程共享相同的全局内存空间。向下一级，一个网格由多个线程块(Block)构成。再下一级，一个线程块由一组线程(Thread)构成</li>
 </ul>
 </blockquote>
-<p> 2.内存的使用</p>
+<p>2.内存的使用</p>
 <blockquote>
 <ul>
 <li>GPU中的各级缓存以及各种内存是可以软件控制的，这些内存包括寄存器、共享内存、常量内存、全局内存等。</li>
@@ -506,7 +508,14 @@
 <!-- MathJax -->
 
 <!-- Katex -->
-
+ 
+    
+        <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.css">
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.js"></script>
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/contrib/auto-render.min.js"></script>
+        
+    
+ 
 <!-- busuanzi  -->
 
 <!-- ClickLove -->

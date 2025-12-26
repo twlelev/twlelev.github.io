@@ -6,17 +6,17 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2025-12-19T07:34:34.875Z</updated>
+  <updated>2025-12-24T02:49:09.706Z</updated>
   <id>http://example.com/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>LCM LORA</title>
-    <link href="http://example.com/2025/12/19/aigc/lcm-lora/"/>
-    <id>http://example.com/2025/12/19/aigc/lcm-lora/</id>
-    <published>2025-12-19T07:04:10.000Z</published>
-    <updated>2025-12-19T07:34:34.875Z</updated>
+    <title>python环境</title>
+    <link href="http://example.com/2025/12/24/python-huan-jing/python-huan-jing/"/>
+    <id>http://example.com/2025/12/24/python-huan-jing/python-huan-jing/</id>
+    <published>2025-12-24T02:39:49.000Z</published>
+    <updated>2025-12-24T02:49:09.706Z</updated>
     
     <summary type="html">
     
@@ -24,7 +24,87 @@
       
         
         
-          &lt;h1 id=&quot;技术深度解析：LCM-LoRA-原理与-Scheduler-源码实现&quot;&gt;&lt;a href=&quot;#技术深度解析：LCM-LoRA-原理与-Scheduler-源码实现&quot; class=&quot;headerlink&quot; title=&quot;技术深度解析：LCM-LoRA 原理与
+          &lt;p&gt;python中一些库与torch cuda以及python版本绑定，其对应关系如下：&lt;/p&gt;
+&lt;p&gt;&lt;a
+        
+      
+    
+    </summary>
+    
+      <category term="Python环境" scheme="http://example.com/categories/Python%E7%8E%AF%E5%A2%83/"/>
+    
+    
+      <category term="Python环境" scheme="http://example.com/tags/Python%E7%8E%AF%E5%A2%83/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>FlashAttention</title>
+    <link href="http://example.com/2025/12/23/aigc/flashattention/"/>
+    <id>http://example.com/2025/12/23/aigc/flashattention/</id>
+    <published>2025-12-23T02:58:30.000Z</published>
+    <updated>2025-12-23T03:11:14.174Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;1-标准注意力机制的问题&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#1-标准注意力机制的问题&quot;&gt;&lt;/a&gt; 1.
+        
+      
+    
+    </summary>
+    
+      <category term="AIGC_Infer" scheme="http://example.com/categories/AIGC-Infer/"/>
+    
+    
+      <category term="AIGC_Infer" scheme="http://example.com/tags/AIGC-Infer/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>AIGC-FaceSwap生图相关技术总结</title>
+    <link href="http://example.com/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/"/>
+    <id>http://example.com/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/</id>
+    <published>2025-12-21T00:49:43.000Z</published>
+    <updated>2025-12-21T09:58:45.256Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;相关paper核心详解&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#相关paper核心详解&quot;&gt;&lt;/a&gt; 相关Paper核心详解&lt;/h1&gt;
+&lt;h2 id=&quot;ipadapter&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot;
+        
+      
+    
+    </summary>
+    
+      <category term="AIGC" scheme="http://example.com/categories/AIGC/"/>
+    
+    
+      <category term="AIGC" scheme="http://example.com/tags/AIGC/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>LCM LORA</title>
+    <link href="http://example.com/2025/12/19/aigc/lcm-lora/"/>
+    <id>http://example.com/2025/12/19/aigc/lcm-lora/</id>
+    <published>2025-12-19T07:04:10.000Z</published>
+    <updated>2025-12-23T02:12:59.183Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;技术深度解析lcm-lora-原理与-scheduler-源码实现&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#技术深度解析lcm-lora-原理与-scheduler-源码实现&quot;&gt;&lt;/a&gt; 技术深度解析：LCM-LoRA 原理与
         
       
     
@@ -42,7 +122,7 @@
     <link href="http://example.com/2025/12/18/aigc/ddim/"/>
     <id>http://example.com/2025/12/18/aigc/ddim/</id>
     <published>2025-12-18T07:31:01.000Z</published>
-    <updated>2025-12-18T08:13:20.189Z</updated>
+    <updated>2025-12-23T02:12:59.182Z</updated>
     
     <summary type="html">
     
@@ -50,7 +130,8 @@
       
         
         
-          &lt;h2 id=&quot;DDPM与DDIM区别&quot;&gt;&lt;a href=&quot;#DDPM与DDIM区别&quot; class=&quot;headerlink&quot; title=&quot;DDPM与DDIM区别&quot;&gt;&lt;/a&gt;DDPM与DDIM区别&lt;/h2&gt;&lt;p&gt; DDPM
+          &lt;h2 id=&quot;ddpm与ddim区别&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#ddpm与ddim区别&quot;&gt;&lt;/a&gt; DDPM与DDIM区别&lt;/h2&gt;
+&lt;p&gt;DDPM 假设反向过程是一个马尔科夫链，反向采样必须一步步迭代，&lt;span
         
       
     
@@ -64,25 +145,11 @@
   </entry>
   
   <entry>
-    <title>AIGC</title>
-    <link href="http://example.com/2025/12/18/aigc/"/>
-    <id>http://example.com/2025/12/18/aigc/</id>
-    <published>2025-12-18T03:23:16.000Z</published>
-    <updated>2025-12-18T03:23:16.320Z</updated>
-    
-    <summary type="html">
-    
-    </summary>
-    
-    
-  </entry>
-  
-  <entry>
     <title>DDPM核心原理与简单工程实现</title>
     <link href="http://example.com/2025/12/18/aigc/ddpm/"/>
     <id>http://example.com/2025/12/18/aigc/ddpm/</id>
     <published>2025-12-18T03:21:20.000Z</published>
-    <updated>2025-12-18T07:23:53.806Z</updated>
+    <updated>2025-12-23T02:12:59.183Z</updated>
     
     <summary type="html">
     
@@ -90,7 +157,8 @@
       
         
         
-          &lt;h2 id=&quot;1-核心思想&quot;&gt;&lt;a href=&quot;#1-核心思想&quot; class=&quot;headerlink&quot; title=&quot;1.核心思想&quot;&gt;&lt;/a&gt;1.核心思想&lt;/h2&gt;&lt;p&gt;Diffusion
+          &lt;h2 id=&quot;1核心思想&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#1核心思想&quot;&gt;&lt;/a&gt; 1.核心思想&lt;/h2&gt;
+&lt;p&gt;Diffusion
         
       
     
@@ -116,8 +184,9 @@
       
         
         
-          &lt;h1 id=&quot;硬重置到远程分支&quot;&gt;&lt;a href=&quot;#硬重置到远程分支&quot; class=&quot;headerlink&quot; title=&quot;硬重置到远程分支&quot;&gt;&lt;/a&gt;硬重置到远程分支&lt;/h1&gt;&lt;p&gt;需要重新拉取远程分支，放弃本地更改。&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;git fetch
+          &lt;h1 id=&quot;硬重置到远程分支&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#硬重置到远程分支&quot;&gt;&lt;/a&gt; 硬重置到远程分支&lt;/h1&gt;
+&lt;p&gt;需要重新拉取远程分支，放弃本地更改。&lt;/p&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code
         
       
     
@@ -131,11 +200,11 @@
   </entry>
   
   <entry>
-    <title></title>
-    <link href="http://example.com/2025/12/18/llm/da-mo-xing-shi-zhan-ying/"/>
-    <id>http://example.com/2025/12/18/llm/da-mo-xing-shi-zhan-ying/</id>
-    <published>2025-12-18T02:22:36.013Z</published>
-    <updated>2025-12-18T02:22:36.013Z</updated>
+    <title>TensorRT动态尺寸推理技术</title>
+    <link href="http://example.com/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/"/>
+    <id>http://example.com/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/</id>
+    <published>2025-06-26T07:52:26.000Z</published>
+    <updated>2025-12-26T07:53:59.433Z</updated>
     
     <summary type="html">
     
@@ -143,21 +212,26 @@
       
         
         
-          &lt;h1 id=&quot;LMDeploy的量化和部署&quot;&gt;&lt;a href=&quot;#LMDeploy的量化和部署&quot; class=&quot;headerlink&quot; title=&quot;LMDeploy的量化和部署&quot;&gt;&lt;/a&gt;LMDeploy的量化和部署&lt;/h1&gt;&lt;h2 id=&quot;环境配置&quot;&gt;&lt;a
+          &lt;h1 id=&quot;tensorrt-动态尺寸推理技术方案深度解析&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#tensorrt-动态尺寸推理技术方案深度解析&quot;&gt;&lt;/a&gt; TensorRT 动态尺寸推理技术方案深度解析&lt;/h1&gt;
+&lt;p&gt;在 Stable
         
       
     
     </summary>
     
+      <category term="TensorRT" scheme="http://example.com/categories/TensorRT/"/>
+    
+    
+      <category term="TensorRT" scheme="http://example.com/tags/TensorRT/"/>
     
   </entry>
   
   <entry>
-    <title>强化学习</title>
-    <link href="http://example.com/2024/06/12/qiang-hua-xue-xi/ppo-trick/"/>
-    <id>http://example.com/2024/06/12/qiang-hua-xue-xi/ppo-trick/</id>
-    <published>2024-06-12T12:15:00.000Z</published>
-    <updated>2025-12-18T02:22:36.044Z</updated>
+    <title>LMDeploy的量化和部署</title>
+    <link href="http://example.com/2024/12/18/llm/da-mo-xing-shi-zhan-ying/"/>
+    <id>http://example.com/2024/12/18/llm/da-mo-xing-shi-zhan-ying/</id>
+    <published>2024-12-18T07:31:01.000Z</published>
+    <updated>2025-12-20T07:50:41.360Z</updated>
     
     <summary type="html">
     
@@ -165,16 +239,17 @@
       
         
         
-          &lt;h1 id=&quot;1-H-264&quot;&gt;&lt;a href=&quot;#1-H-264&quot; class=&quot;headerlink&quot; title=&quot;1.H.264&quot;&gt;&lt;/a&gt;1.H.264&lt;/h1&gt;&lt;h2 id=&quot;A-ffmpeg入门&quot;&gt;&lt;a href=&quot;#A-ffmpeg入门&quot;
+          &lt;h1 id=&quot;lmdeploy的量化和部署&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#lmdeploy的量化和部署&quot;&gt;&lt;/a&gt; LMDeploy的量化和部署&lt;/h1&gt;
+&lt;h2 id=&quot;环境配置&quot;&gt;&lt;a
         
       
     
     </summary>
     
-      <category term="DRL" scheme="http://example.com/categories/DRL/"/>
+      <category term="LLM" scheme="http://example.com/categories/LLM/"/>
     
     
-      <category term="DRL" scheme="http://example.com/tags/DRL/"/>
+      <category term="LLM" scheme="http://example.com/tags/LLM/"/>
     
   </entry>
   
@@ -191,7 +266,7 @@
       
         
         
-          &lt;h1 id=&quot;线程安全的对象生命期管理&quot;&gt;&lt;a href=&quot;#线程安全的对象生命期管理&quot; class=&quot;headerlink&quot;
+          &lt;h1 id=&quot;线程安全的对象生命期管理&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#线程安全的对象生命期管理&quot;&gt;&lt;/a&gt;
         
       
     
@@ -209,7 +284,7 @@
     <link href="http://example.com/2023/07/17/shi-pin-bian-ma/shi-pin-bian-ma-ji-chu/"/>
     <id>http://example.com/2023/07/17/shi-pin-bian-ma/shi-pin-bian-ma-ji-chu/</id>
     <published>2023-07-17T12:15:00.000Z</published>
-    <updated>2025-12-18T02:22:36.046Z</updated>
+    <updated>2025-12-23T02:12:59.183Z</updated>
     
     <summary type="html">
     
@@ -217,7 +292,8 @@
       
         
         
-          &lt;h1 id=&quot;1-H-264&quot;&gt;&lt;a href=&quot;#1-H-264&quot; class=&quot;headerlink&quot; title=&quot;1.H.264&quot;&gt;&lt;/a&gt;1.H.264&lt;/h1&gt;&lt;p&gt;&lt;a
+          &lt;h1 id=&quot;1h264&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#1h264&quot;&gt;&lt;/a&gt; 1.H.264&lt;/h1&gt;
+&lt;p&gt;&lt;a
         
       
     
@@ -235,7 +311,7 @@
     <link href="http://example.com/2023/07/08/ncnn/ncnn/"/>
     <id>http://example.com/2023/07/08/ncnn/ncnn/</id>
     <published>2023-07-08T06:54:31.000Z</published>
-    <updated>2025-12-18T02:22:36.013Z</updated>
+    <updated>2025-12-26T05:59:38.807Z</updated>
     
     <summary type="html">
     
@@ -243,7 +319,7 @@
       
         
         
-          &lt;h1 id=&quot;1-NCNN简介&quot;&gt;&lt;a href=&quot;#1-NCNN简介&quot; class=&quot;headerlink&quot;
+          &lt;h1 id=&quot;1ncnn简介&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#1ncnn简介&quot;&gt;&lt;/a&gt;
         
       
     
@@ -261,7 +337,7 @@
     <link href="http://example.com/2023/04/27/c/c-ji-chu/"/>
     <id>http://example.com/2023/04/27/c/c-ji-chu/</id>
     <published>2023-04-27T02:15:31.000Z</published>
-    <updated>2025-12-18T02:22:36.014Z</updated>
+    <updated>2025-12-18T13:59:41.310Z</updated>
     
     <summary type="html">
     
@@ -269,7 +345,7 @@
       
         
         
-          &lt;h1 id=&quot;1-static-inline&quot;&gt;&lt;a href=&quot;#1-static-inline&quot; class=&quot;headerlink&quot; title=&quot;1.static inline&quot;&gt;&lt;/a&gt;1.static
+          &lt;h1 id=&quot;1static-inline&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#1static-inline&quot;&gt;&lt;/a&gt; 1.static
         
       
     
@@ -287,7 +363,7 @@
     <link href="http://example.com/2023/04/26/cuda/cuda-bian-cheng-jian-jie/"/>
     <id>http://example.com/2023/04/26/cuda/cuda-bian-cheng-jian-jie/</id>
     <published>2023-04-25T16:00:00.000Z</published>
-    <updated>2025-12-18T02:22:36.014Z</updated>
+    <updated>2025-12-18T13:59:41.310Z</updated>
     
     <summary type="html">
     
@@ -295,7 +371,7 @@
       
         
         
-          &lt;h1 id=&quot;CUDA编程模型&quot;&gt;&lt;a href=&quot;#CUDA编程模型&quot; class=&quot;headerlink&quot;
+          &lt;h1 id=&quot;cuda编程模型&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#cuda编程模型&quot;&gt;&lt;/a&gt;
         
       
     
@@ -321,7 +397,7 @@
       
         
         
-          &lt;h1 id=&quot;1-什么是Hexo&quot;&gt;&lt;a href=&quot;#1-什么是Hexo&quot; class=&quot;headerlink&quot;
+          &lt;h1 id=&quot;1什么是hexo&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#1什么是hexo&quot;&gt;&lt;/a&gt;
         
       
     
@@ -347,7 +423,7 @@
       
         
         
-          &lt;h1 id=&quot;commit-message格式&quot;&gt;&lt;a href=&quot;#commit-message格式&quot; class=&quot;headerlink&quot; title=&quot;commit message格式&quot;&gt;&lt;/a&gt;commit
+          &lt;h1 id=&quot;commit-message格式&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#commit-message格式&quot;&gt;&lt;/a&gt; commit
         
       
     
@@ -365,7 +441,7 @@
     <link href="http://example.com/2023/04/17/linux/linux-chmod-yong-fa/"/>
     <id>http://example.com/2023/04/17/linux/linux-chmod-yong-fa/</id>
     <published>2023-04-17T02:15:31.000Z</published>
-    <updated>2025-12-18T02:22:36.029Z</updated>
+    <updated>2025-12-18T13:59:41.321Z</updated>
     
     <summary type="html">
     
@@ -373,7 +449,9 @@
       
         
         
-          &lt;h1 id=&quot;1-查看文件夹权限&quot;&gt;&lt;a href=&quot;#1-查看文件夹权限&quot; class=&quot;headerlink&quot; title=&quot;1.查看文件夹权限&quot;&gt;&lt;/a&gt;1.查看文件夹权限&lt;/h1&gt;&lt;p&gt;通过命令ll 或者 ls -l
+          &lt;h1 id=&quot;1查看文件夹权限&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#1查看文件夹权限&quot;&gt;&lt;/a&gt; 1.查看文件夹权限&lt;/h1&gt;
+&lt;p&gt;通过命令ll 或者 ls -l 查看当前路径下各个文件或者文件夹权限，如下图所示：&lt;br /&gt;
+&lt;img
         
       
     
@@ -399,7 +477,8 @@
       
         
         
-          &lt;p&gt;上传git仓库：&lt;br&gt;1.首先需要通过 $git init 初始化本地仓库，即需要cd 到需要上传仓库的目录下，使用当前目录作为Git仓库，也可以指定目录作为Git仓库 $git init reponame&lt;/p&gt;
+          &lt;p&gt;上传git仓库：&lt;br /&gt;
+1.首先需要通过 $git init 初始化本地仓库，即需要cd 到需要上传仓库的目录下，使用当前目录作为Git仓库，也可以指定目录作为Git仓库 $git init reponame&lt;/p&gt;
 &lt;p&gt;2.在本地仓库中添加内容 git add
         
       

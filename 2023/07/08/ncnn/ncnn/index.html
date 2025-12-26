@@ -87,7 +87,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">309</span>
+            <span class="post-count">308</span>
         </span>
     </span>
 
@@ -111,25 +111,27 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="1-NCNN简介"><a href="#1-NCNN简介" class="headerlink" title="1.NCNN简介"></a>1.NCNN简介</h1><p>ncnn是一个为手机端极致优化的高性能神经网络前向计算框架。ncnn从设计之初深刻考虑手机端的部署和应用。无第三方依赖，跨平台，手机端cpu的速度快于快于目前所有已知的开源框架。基于ncnn，开发者能够将深度学习算法轻松移植到手机端高效执行，开发出人工智能APP。</p>
-<h1 id="2-怎么使用？"><a href="#2-怎么使用？" class="headerlink" title="2.怎么使用？"></a>2.怎么使用？</h1><ul>
+  <h1 id="1ncnn简介"><a class="markdownIt-Anchor" href="#1ncnn简介"></a> 1.NCNN简介</h1>
+<p>ncnn是一个为手机端极致优化的高性能神经网络前向计算框架。ncnn从设计之初深刻考虑手机端的部署和应用。无第三方依赖，跨平台，手机端cpu的速度快于快于目前所有已知的开源框架。基于ncnn，开发者能够将深度学习算法轻松移植到手机端高效执行，开发出人工智能APP。</p>
+<h1 id="2怎么使用"><a class="markdownIt-Anchor" href="#2怎么使用"></a> 2.怎么使用？</h1>
+<ul>
 <li>git clone ncnn仓库(若需要gpu推理需要submodule)</li>
 </ul>
-<pre><code>git clone https://github.com/Tencent/ncnn.git
+<pre class="highlight"><code class="">git clone https://github.com/Tencent/ncnn.git
 cd ncnn
 git submodule update --init
 </code></pre>
 <ul>
 <li>(option) 下载vulkan_sdk(gpu推理配置)</li>
 </ul>
-<pre><code>wget https://sdk.lunarg.com/sdk/download/1.2.189.0/linux/vulkansdk-linux-x86_64-1.2.189.0.tar.gz?Human=true -O vulkansdk-linux-x86_64-1.2.189.0.tar.gz
+<pre class="highlight"><code class="">wget https://sdk.lunarg.com/sdk/download/1.2.189.0/linux/vulkansdk-linux-x86_64-1.2.189.0.tar.gz?Human=true -O vulkansdk-linux-x86_64-1.2.189.0.tar.gz
 tar -xf vulkansdk-linux-x86_64-1.2.189.0.tar.gz
 export VULKAN_SDK=$(pwd)/1.2.189.0/x86_64
 </code></pre>
 <ul>
 <li>编译ncnn库</li>
 </ul>
-<pre><code>## gpu推理
+<pre class="highlight"><code class="">## gpu推理
 cd ncnn
 mkdir -p build
 cd build
@@ -144,7 +146,8 @@ cmake .. &amp;&amp; make -j4
 make install #可以生成头文件和链接库
 </code></pre>
 <ul>
-<li>onnx转ncnn<br>在编译好的build的情况下，.&#x2F;build&#x2F;tools&#x2F;onnx里面的脚本文件onnx2ncnn即为转ncnn推理模型的脚本，将model.onnx转为model.param和model.bin.</li>
+<li>onnx转ncnn<br />
+在编译好的build的情况下，./build/tools/onnx里面的脚本文件onnx2ncnn即为转ncnn推理模型的脚本，将model.onnx转为model.param和model.bin.</li>
 </ul>
  
       <!-- reward -->
@@ -519,7 +522,14 @@ make install #可以生成头文件和链接库
 <!-- MathJax -->
 
 <!-- Katex -->
-
+ 
+    
+        <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.css">
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.js"></script>
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/contrib/auto-render.min.js"></script>
+        
+    
+ 
 <!-- busuanzi  -->
 
 <!-- ClickLove -->

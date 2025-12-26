@@ -111,9 +111,13 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="1-static-inline"><a href="#1-static-inline" class="headerlink" title="1.static inline"></a>1.static inline</h1><p>对于普通函数而言，在a.h中声明然后在a.cpp中定义，再经过编译链接后我们在test1.cpp、test2.cpp中就可以通过#include”a.h”来调用函数。但是对于内联函数而言，我们无法在test1.cpp、test2.cpp中同时通过#include”a.h”来调用内联函数，也就是说一个.h中的内联函数被两个不同的文件包含，则会出现重名，链接失效。但如果使用static inline可以解决<br>这个问题，使用static修饰符，函数仅在文件内部可见。可以理解为一个inline在不同的.C里面生成了不同的实例，而且名字是完全相同的。</p>
-<h1 id="2-static"><a href="#2-static" class="headerlink" title="2.static"></a>2.static</h1><p><strong>static可以修饰哪些变量:</strong></p>
-<p>全局静态变量、局部静态变量、函数，除此之外，还可以修饰类中的静态成员变量以及静态成员函数。<br>&#96;&#96;</p>
+  <h1 id="1static-inline"><a class="markdownIt-Anchor" href="#1static-inline"></a> 1.static inline</h1>
+<p>对于普通函数而言，在a.h中声明然后在a.cpp中定义，再经过编译链接后我们在test1.cpp、test2.cpp中就可以通过#include&quot;a.h&quot;来调用函数。但是对于内联函数而言，我们无法在test1.cpp、test2.cpp中同时通过#include&quot;a.h&quot;来调用内联函数，也就是说一个.h中的内联函数被两个不同的文件包含，则会出现重名，链接失效。但如果使用static inline可以解决<br />
+这个问题，使用static修饰符，函数仅在文件内部可见。可以理解为一个inline在不同的.C里面生成了不同的实例，而且名字是完全相同的。</p>
+<h1 id="2static"><a class="markdownIt-Anchor" href="#2static"></a> 2.static</h1>
+<p><strong>static可以修饰哪些变量:</strong></p>
+<p>全局静态变量、局部静态变量、函数，除此之外，还可以修饰类中的静态成员变量以及静态成员函数。<br />
+``</p>
 <blockquote>
 <ul>
 <li>全局静态变量和局部静态变量都存储在静态存储区。存储在静态存储区的变量在编译期完成初始化，static定义的局部变量也是在编译时期分配的，而且生存期是永久的，直到生存期结束。</li>
@@ -124,16 +128,16 @@
 </ul>
 </blockquote>
 <p><strong>举个static相关例子如下</strong>：</p>
-<pre><code>class StaticA
+<pre class="highlight"><code class="">class StaticA
 &#123;
 public:
-    StaticA()&#123;&#125;;
-    ~ StaticA()&#123;&#125;;
-    static int a; //静态成员变量只能在类外初始化
-    static int teststatic()
-    &#123;
-        std::cout&lt;&lt;&quot;a:&quot;&lt;&lt;a&lt;&lt;std::endl;
-    &#125;
+	StaticA()&#123;&#125;;
+	~ StaticA()&#123;&#125;;
+	static int a; //静态成员变量只能在类外初始化
+	static int teststatic()
+	&#123;
+		std::cout&lt;&lt;&quot;a:&quot;&lt;&lt;a&lt;&lt;std::endl;
+	&#125;
 &#125;;
 int StaticA::a=1;
 
@@ -144,7 +148,10 @@ A-&gt;teststatic(); // 输出 a:1
 return 0;
 &#125;
 </code></pre>
-<h1 id="3-vitual虚函数"><a href="#3-vitual虚函数" class="headerlink" title="3.vitual虚函数"></a>3.vitual虚函数</h1><h2 id="构造函数、析构函数之虚函数"><a href="#构造函数、析构函数之虚函数" class="headerlink" title="构造函数、析构函数之虚函数"></a>构造函数、析构函数之虚函数</h2><p><strong>构造函数不可以是虚函数，而析构函数常常是虚函数。</strong><br>构造函数不可以是虚函数，原因如下：</p>
+<h1 id="3vitual虚函数"><a class="markdownIt-Anchor" href="#3vitual虚函数"></a> 3.vitual虚函数</h1>
+<h2 id="构造函数-析构函数之虚函数"><a class="markdownIt-Anchor" href="#构造函数-析构函数之虚函数"></a> 构造函数、析构函数之虚函数</h2>
+<p><strong>构造函数不可以是虚函数，而析构函数常常是虚函数。</strong><br />
+构造函数不可以是虚函数，原因如下：</p>
 <blockquote>
 <p>虚函数的调用是通过虚函数表来调用的。而虚函数表是由实例化的vptr指针来指向的，该实例化指针存放在对象的内部空间中且占8字节，需要调用构造函数完成初始化。因此，虚函数的调用需要发生在构造函数之后。</p>
 </blockquote>
@@ -152,51 +159,58 @@ return 0;
 <blockquote>
 <p>在实现多态性时，通过基类去指向派生类对象，只有申明为虚函数才能实现。如果定义的派生类对象是基类类型时，若没有声明基类虚析构函数，派生类在调用析构函数时，则会调用基类的虚构函数，会存在内存泄漏的风险。</p>
 </blockquote>
-<h2 id="类成员函数之虚函数"><a href="#类成员函数之虚函数" class="headerlink" title="类成员函数之虚函数"></a>类成员函数之虚函数</h2><p>派生类需要重写基类中的同名函数，则需要在基类中声明virtual虚函数，否则是不允许的。</p>
-<h3 id="补充：重载与重写区别："><a href="#补充：重载与重写区别：" class="headerlink" title="补充：重载与重写区别："></a>补充：重载与重写区别：</h3><p>C++中的重载（Overloading）和重写（Overriding）是两个不同的概念，它们之间有以下几个不同点：</p>
+<h2 id="类成员函数之虚函数"><a class="markdownIt-Anchor" href="#类成员函数之虚函数"></a> 类成员函数之虚函数</h2>
+<p>派生类需要重写基类中的同名函数，则需要在基类中声明virtual虚函数，否则是不允许的。</p>
+<h3 id="补充重载与重写区别"><a class="markdownIt-Anchor" href="#补充重载与重写区别"></a> 补充：重载与重写区别：</h3>
+<p>C++中的重载（Overloading）和重写（Overriding）是两个不同的概念，它们之间有以下几个不同点：</p>
 <blockquote>
 <ul>
-<li><strong>定义位置不同</strong>:<br>重载是在同一个类中定义多个具有相同名称但参数列表不同的函数，重载函数可以包括不同类型、不同数量、不同顺序的参数。而重写是在派生类中重新定义一个从基类中继承的已有函数，函数名称、参数列表和返回值类型在基类和派生类中必须完全相同。</li>
-<li><strong>对象的处理不同</strong>:<br>重载函数是编译期多态，由编译器根据传入的参数类型和数量来决定调用哪个函数。而重写函数是运行期多态，由运行时的实际对象类型来决定调用哪个函数。</li>
-<li><strong>可访问性不同</strong>:<br>如果一个成员函数用<code>virtual</code>关键字声明为虚函数，则它可以在派生类中被重写。如果在派生类中重写基类中非虚函数的函数，这是不允许的。由于访问非虚函数是通过编译时分辨多态来实现的，所以在编译时通过基类指针或引用调用派生类的函数会调用基类函数，而不会调用派生类中的同名函数。</li>
-<li><strong>参数匹配和返回值类型</strong>:<br>重载函数和重写函数的参数匹配和返回值类型在调用时有着不同的表现。在重载函数中，函数调用的正确匹配由编译器通过参数类型和数量决定。在重写函数中，参数列表和返回值类型必须与基类中的函数完全匹配，否则会导致编译错误。</li>
+<li><strong>定义位置不同</strong>:<br />
+重载是在同一个类中定义多个具有相同名称但参数列表不同的函数，重载函数可以包括不同类型、不同数量、不同顺序的参数。而重写是在派生类中重新定义一个从基类中继承的已有函数，函数名称、参数列表和返回值类型在基类和派生类中必须完全相同。</li>
+<li><strong>对象的处理不同</strong>:<br />
+重载函数是编译期多态，由编译器根据传入的参数类型和数量来决定调用哪个函数。而重写函数是运行期多态，由运行时的实际对象类型来决定调用哪个函数。</li>
+<li><strong>可访问性不同</strong>:<br />
+如果一个成员函数用<code>virtual</code>关键字声明为虚函数，则它可以在派生类中被重写。如果在派生类中重写基类中非虚函数的函数，这是不允许的。由于访问非虚函数是通过编译时分辨多态来实现的，所以在编译时通过基类指针或引用调用派生类的函数会调用基类函数，而不会调用派生类中的同名函数。</li>
+<li><strong>参数匹配和返回值类型</strong>:<br />
+重载函数和重写函数的参数匹配和返回值类型在调用时有着不同的表现。在重载函数中，函数调用的正确匹配由编译器通过参数类型和数量决定。在重写函数中，参数列表和返回值类型必须与基类中的函数完全匹配，否则会导致编译错误。</li>
 </ul>
 </blockquote>
-<h1 id="4-RAII"><a href="#4-RAII" class="headerlink" title="4.RAII"></a>4.RAII</h1><p>RAII是C++中一种非常重要的编程思想，全称为Resource Acquisition Is Initialization，中文为“资源获取即初始化”。它主要是利用C++的构造函数在对象初始化时自动获取资源，并在对象析构时自动释放资源的特性进行对象封装，以方便管理和避免资源泄露。</p>
-<pre><code>class MemoryBlock
+<h1 id="4raii"><a class="markdownIt-Anchor" href="#4raii"></a> 4.RAII</h1>
+<p>RAII是C<ins>中一种非常重要的编程思想，全称为Resource Acquisition Is Initialization，中文为“资源获取即初始化”。它主要是利用C</ins>的构造函数在对象初始化时自动获取资源，并在对象析构时自动释放资源的特性进行对象封装，以方便管理和避免资源泄露。</p>
+<pre class="highlight"><code class="">class MemoryBlock
 &#123;
 public:
 MemoryBlock():_length(0),_data(nullptr)&#123;&#125;
 
 MemoryBlock(size_t length):_length(length),_data(new char[length])
 &#123;
-    std::cout &lt;&lt; &quot;constructed!&quot; &lt;&lt;std::endl;
+	std::cout &lt;&lt; &quot;constructed!&quot; &lt;&lt;std::endl;
 &#125;
 
 ~MemoryBlock()
 &#123;
-    delete[] _data ;
-    std::cout &lt;&lt; &quot;destructed!&quot; &lt;&lt; std::endl;
+	delete[] _data ;
+	std::cout &lt;&lt; &quot;destructed!&quot; &lt;&lt; std::endl;
 &#125;
 
 // 拷贝构造函数，实现深度拷贝
 MemoryBlock(const MemoryBlock&amp; other):_length(other._length),_data(new char[other._length])
 &#123;
-    std::copy(other._data, other._data+_length, _data);
-    std::cout&lt;&lt; &quot;deep copy constructed!&quot; &lt;&lt;std::endl;
+	std::copy(other._data, other._data+_length, _data);
+	std::cout&lt;&lt; &quot;deep copy constructed!&quot; &lt;&lt;std::endl;
 &#125;
 
 // 赋值运算符实现深度赋值
 MemoryBlock&amp; operator=(const MemoryBlock&amp; other)
 &#123;
-    if(this != &amp;other)
-    &#123;
-        if(_data!= nullptr) delete[] _data;
-        _length = other._length;
-        _data = new char[_length];
-        std::copy(other._data, other._data+_length, _data);
-    &#125;
-    return *this;
+	if(this != &amp;other)
+	&#123;
+		if(_data!= nullptr) delete[] _data;
+		_length = other._length;
+		_data = new char[_length];
+		std::copy(other._data, other._data+_length, _data);
+	&#125;
+	return *this;
 &#125;
 
 size_t length()
@@ -217,26 +231,32 @@ char *_data;
 int main()
 &#123;
 
-    MemoryBlock memoryblock1(20);
-    
-    std::strcpy(memoryblock1.data(), &quot;Hello World!&quot;);
-    
-    std::cout &lt;&lt; &quot;memoryblock1: &quot; &lt;&lt; memoryblock1.data() &lt;&lt; std::endl;
-        
-    // 拷贝构造函数生成类对象
-    
-    MemoryBlock memoryblock2(memoryblock1);
-    
-    std::cout &lt;&lt; &quot;memoryblock2: &quot; &lt;&lt; memoryblock2.data() &lt;&lt; std::endl;
-    
-    // 赋值生成对象
-    MemoryBlock memoryblock3;
-    memoryblock3 = memoryblock1;
-    std::cout &lt;&lt; &quot;memoryblock3: &quot; &lt;&lt; memoryblock3.data() &lt;&lt; std::endl;
+	MemoryBlock memoryblock1(20);
+	
+	std::strcpy(memoryblock1.data(), &quot;Hello World!&quot;);
+	
+	std::cout &lt;&lt; &quot;memoryblock1: &quot; &lt;&lt; memoryblock1.data() &lt;&lt; std::endl;
+		
+	// 拷贝构造函数生成类对象
+	
+	MemoryBlock memoryblock2(memoryblock1);
+	
+	std::cout &lt;&lt; &quot;memoryblock2: &quot; &lt;&lt; memoryblock2.data() &lt;&lt; std::endl;
+	
+	// 赋值生成对象
+	MemoryBlock memoryblock3;
+	memoryblock3 = memoryblock1;
+	std::cout &lt;&lt; &quot;memoryblock3: &quot; &lt;&lt; memoryblock3.data() &lt;&lt; std::endl;
 &#125;
 </code></pre>
-<h1 id="5-override"><a href="#5-override" class="headerlink" title="5.override"></a>5.override</h1><p><code>override</code>是一个关键字，用于指示派生类中的虚函数将覆盖基类中的虚函数。它可以用于明确地指示编译器该函数是用于覆盖基类中的虚函数，如果不匹配则会导致编译错误。<br><strong>作用</strong>：<br>在于提高程序的可读性以及健壮性，在派生类中重写基类函数需要声明基类函数为虚函数，声明关键字<code>override</code> 可以告诉读者重写了基类中的虚函数。<br>就程序运行而言，<code>override</code>声明与否不会对程序运行有任何影响。</p>
-<h1 id="6-堆与栈"><a href="#6-堆与栈" class="headerlink" title="6.堆与栈"></a>6.堆与栈</h1><p>栈区内存由操作系统自动分配和释放，堆区内存由程序员手动分配和释放。<br>两者的主要区别：</p>
+<h1 id="5override"><a class="markdownIt-Anchor" href="#5override"></a> 5.override</h1>
+<p><code>override</code>是一个关键字，用于指示派生类中的虚函数将覆盖基类中的虚函数。它可以用于明确地指示编译器该函数是用于覆盖基类中的虚函数，如果不匹配则会导致编译错误。<br />
+<strong>作用</strong>：<br />
+在于提高程序的可读性以及健壮性，在派生类中重写基类函数需要声明基类函数为虚函数，声明关键字<code>override</code> 可以告诉读者重写了基类中的虚函数。<br />
+就程序运行而言，<code>override</code>声明与否不会对程序运行有任何影响。</p>
+<h1 id="6堆与栈"><a class="markdownIt-Anchor" href="#6堆与栈"></a> 6.堆与栈</h1>
+<p>栈区内存由操作系统自动分配和释放，堆区内存由程序员手动分配和释放。<br />
+两者的主要区别：</p>
 <ul>
 <li>内存管理方式：栈区内存由操作系统自动分配和释放，而堆区内存则是手动分配和释放。</li>
 <li>内存大小：栈区内存一般较小，通常为MB级别，而堆区内存相对较大，可以达到GB级别。</li>
@@ -617,7 +637,14 @@ int main()
 <!-- MathJax -->
 
 <!-- Katex -->
-
+ 
+    
+        <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.css">
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.js"></script>
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/contrib/auto-render.min.js"></script>
+        
+    
+ 
 <!-- busuanzi  -->
 
 <!-- ClickLove -->

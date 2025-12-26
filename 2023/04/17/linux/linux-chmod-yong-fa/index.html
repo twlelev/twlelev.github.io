@@ -87,7 +87,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">354</span>
+            <span class="post-count">353</span>
         </span>
     </span>
 
@@ -111,7 +111,10 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="1-查看文件夹权限"><a href="#1-查看文件夹权限" class="headerlink" title="1.查看文件夹权限"></a>1.查看文件夹权限</h1><p>通过命令ll 或者 ls -l 查看当前路径下各个文件或者文件夹权限，如下图所示：<br><img src="/images/linux1.jpg" alt="avatar"><br>其中开头固定10个字符，其字符意义表示如下：</p>
+  <h1 id="1查看文件夹权限"><a class="markdownIt-Anchor" href="#1查看文件夹权限"></a> 1.查看文件夹权限</h1>
+<p>通过命令ll 或者 ls -l 查看当前路径下各个文件或者文件夹权限，如下图所示：<br />
+<img src="/images/linux1.jpg" alt="avatar" /><br />
+其中开头固定10个字符，其字符意义表示如下：</p>
 <blockquote>
 <ul>
 <li>第1个字符：表示该文件的类型，可以是d(目录)、b(块设备)、c(字符设备文件)、“-”(普通文件)、“l”(链接文件)等。</li>
@@ -120,8 +123,9 @@
 <li>第8-10个字符：表示其它任何用户(Other)对该文件的访问权限。</li>
 </ul>
 </blockquote>
-<p>其中r+w+x &#x3D; 4+2+1, r权限表示可以读取文件的内容，w权限表示可以编辑或者修改文件，x(execute)权限表示可以执行文件（只有可执行文件才有x权限)，比如在当前文件夹下mkdir一个新的文件夹或者touch 一个新文件需要x执行权限。</p>
-<h1 id="2-更改权限"><a href="#2-更改权限" class="headerlink" title="2.更改权限"></a>2.更改权限</h1><pre><code>chmod -R 777 uploads: 更改当前路径下的uploads文件夹权限。
+<p>其中r+w+x = 4+2+1, r权限表示可以读取文件的内容，w权限表示可以编辑或者修改文件，x(execute)权限表示可以执行文件（只有可执行文件才有x权限)，比如在当前文件夹下mkdir一个新的文件夹或者touch 一个新文件需要x执行权限。</p>
+<h1 id="2更改权限"><a class="markdownIt-Anchor" href="#2更改权限"></a> 2.更改权限</h1>
+<pre><code>chmod -R 777 uploads: 更改当前路径下的uploads文件夹权限。
 补充：
 ls -ll：查看当前路径下所有文件以及文件夹大小，展示的是字节数。
 ls -lh：查看当前路径下所有文件以及文件夹大小，以KB、MB等为单位进行展示。
@@ -499,7 +503,14 @@ ls -lh：查看当前路径下所有文件以及文件夹大小，以KB、MB等�
 <!-- MathJax -->
 
 <!-- Katex -->
-
+ 
+    
+        <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.css">
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.js"></script>
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/contrib/auto-render.min.js"></script>
+        
+    
+ 
 <!-- busuanzi  -->
 
 <!-- ClickLove -->

@@ -59,7 +59,7 @@
     
   <div class="cover-frame">
     <div class="bg-box">
-      <img src="/images/cat.jpg" alt="image frame" />
+      <img src="/images/cover1.jpg" alt="image frame" />
     </div>
     <div class="cover-inner text-center text-white">
       <h1><a href="/">twlelev的博客</a></h1>
@@ -152,6 +152,289 @@
     
     
     <article
+  id="post-c++/c++ 基础"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2023/04/27/c/c-ji-chu/"
+    >c++基础</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/04/27/c/c-ji-chu/" class="article-date">
+  <time datetime="2023-04-27T02:15:31.000Z" itemprop="datePublished">2023-04-27</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/c/">c++</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="1static-inline"><a class="markdownIt-Anchor" href="#1static-inline"></a> 1.static inline</h1>
+<p>对于普通函数而言，在a.h中声明然后在a.cpp中定义，再经过编译链接后我们在test1.cpp、test2.cpp中就可以通过#include&quot;a.h&quot;来调用函数。但是对于内联函数而言，我们无法在test1.cpp、test2.cpp中同时通过#include&quot;a.h&quot;来调用内联函数，也就是说一个.h中的内联函数被两个不同的文件包含，则会出现重名，链接失效。但如果使用static inline可以解决<br />
+这个问题，使用static修饰符，函数仅在文件内部可见。可以理解为一个inline在不同的.C里面生成了不同的实例，而且名字是完全相同的。</p>
+<h1 id="2static"><a class="markdownIt-Anchor" href="#2static"></a> 2.static</h1>
+<p><strong>static可以修饰哪些变量:</strong></p>
+<p>全局静态变量、局部静态变量、函数，除此之外，还可以修饰类中的静态成员变量以及静态成员函数。<br />
+``</p>
+<blockquote>
+<ul>
+<li>全局静态变量和局部静态变量都存储在静态存储区。存储在静态存储区的变量在编译期完成初始化，static定义的局部变量也是在编译时期分配的，而且生存期是永久的，直到生存期结束。</li>
+<li>静态成员函数不能访问普通成员变量，静态函数在编译期完成了初始化，而此时类还未初始化，此时访问了不存在的变量。</li>
+<li>全局静态变量相对于全局变量而言，全局变量具有外部链接性，通过声明extern关键字可以进行变量的赋值。而全局静态变量不具有外部链接性。</li>
+<li>类中对象之间的成员变量是相互独立的 ，想要共用数据需要使用静态成员或者静态方法。由前面所知，在类中定义的静态成员函数以及静态成员变量在编译期完成初始化，因此，即使不定义对象，静态成员变量存储在静态存储区，其已经分配了内存空间，其不随对象的创建而创建，也不随对象的消亡而消亡。</li>
+<li>静态成员函数只能访问静态成员变量。</li>
+</ul>
+</blockquote>
+<p><strong>举个static相关例子如下</strong>：</p>
+<pre class="highlight"><code class="">class StaticA
+&#123;
+public:
+	StaticA()&#123;&#125;;
+	~ StaticA()&#123;&#125;;
+	static int a; //静态成员变量只能在类外初始化
+	static int teststatic()
+	&#123;
+		std::cout&lt;&lt;&quot;a:&quot;&lt;&lt;a&lt;&lt;std::endl;
+	&#125;
+&#125;;
+int StaticA::a=1;
+
+int main()
+&#123;
+StaticA *A=nullptr;
+A-&gt;teststatic(); // 输出 a:1
+return 0;
+&#125;
+</code></pre>
+<h1 id="3vitual虚函数"><a class="markdownIt-Anchor" href="#3vitual虚函数"></a> 3.vitual虚函数</h1>
+<h2 id="构造函数-析构函数之虚函数"><a class="markdownIt-Anchor" href="#构造函数-析构函数之虚函数"></a> 构造函数、析构函数之虚函数</h2>
+<p><strong>构造函数不可以是虚函数，而析构函数常常是虚函数。</strong><br />
+构造函数不可以是虚函数，原因如下：</p>
+<blockquote>
+<p>虚函数的调用是通过虚函数表来调用的。而虚函数表是由实例化的vptr指针来指向的，该实例化指针存放在对象的内部空间中且占8字节，需要调用构造函数完成初始化。因此，虚函数的调用需要发生在构造函数之后。</p>
+</blockquote>
+<p>析构函数可以常常是虚函数，原因如下：</p>
+<blockquote>
+<p>在实现多态性时，通过基类去指向派生类对象，只有申明为虚函数才能实现。如果定义的派生类对象是基类类型时，若没有声明基类虚析构函数，派生类在调用析构函数时，则会调用基类的虚构函数，会存在内存泄漏的风险。</p>
+</blockquote>
+<h2 id="类成员函数之虚函数"><a class="markdownIt-Anchor" href="#类成员函数之虚函数"></a> 类成员函数之虚函数</h2>
+<p>派生类需要重写基类中的同名函数，则需要在基类中声明virtual虚函数，否则是不允许的。</p>
+<h3 id="补充重载与重写区别"><a class="markdownIt-Anchor" href="#补充重载与重写区别"></a> 补充：重载与重写区别：</h3>
+<p>C++中的重载（Overloading）和重写（Overriding）是两个不同的概念，它们之间有以下几个不同点：</p>
+<blockquote>
+<ul>
+<li><strong>定义位置不同</strong>:<br />
+重载是在同一个类中定义多个具有相同名称但参数列表不同的函数，重载函数可以包括不同类型、不同数量、不同顺序的参数。而重写是在派生类中重新定义一个从基类中继承的已有函数，函数名称、参数列表和返回值类型在基类和派生类中必须完全相同。</li>
+<li><strong>对象的处理不同</strong>:<br />
+重载函数是编译期多态，由编译器根据传入的参数类型和数量来决定调用哪个函数。而重写函数是运行期多态，由运行时的实际对象类型来决定调用哪个函数。</li>
+<li><strong>可访问性不同</strong>:<br />
+如果一个成员函数用<code>virtual</code>关键字声明为虚函数，则它可以在派生类中被重写。如果在派生类中重写基类中非虚函数的函数，这是不允许的。由于访问非虚函数是通过编译时分辨多态来实现的，所以在编译时通过基类指针或引用调用派生类的函数会调用基类函数，而不会调用派生类中的同名函数。</li>
+<li><strong>参数匹配和返回值类型</strong>:<br />
+重载函数和重写函数的参数匹配和返回值类型在调用时有着不同的表现。在重载函数中，函数调用的正确匹配由编译器通过参数类型和数量决定。在重写函数中，参数列表和返回值类型必须与基类中的函数完全匹配，否则会导致编译错误。</li>
+</ul>
+</blockquote>
+<h1 id="4raii"><a class="markdownIt-Anchor" href="#4raii"></a> 4.RAII</h1>
+<p>RAII是C<ins>中一种非常重要的编程思想，全称为Resource Acquisition Is Initialization，中文为“资源获取即初始化”。它主要是利用C</ins>的构造函数在对象初始化时自动获取资源，并在对象析构时自动释放资源的特性进行对象封装，以方便管理和避免资源泄露。</p>
+<pre class="highlight"><code class="">class MemoryBlock
+&#123;
+public:
+MemoryBlock():_length(0),_data(nullptr)&#123;&#125;
+
+MemoryBlock(size_t length):_length(length),_data(new char[length])
+&#123;
+	std::cout &lt;&lt; &quot;constructed!&quot; &lt;&lt;std::endl;
+&#125;
+
+~MemoryBlock()
+&#123;
+	delete[] _data ;
+	std::cout &lt;&lt; &quot;destructed!&quot; &lt;&lt; std::endl;
+&#125;
+
+// 拷贝构造函数，实现深度拷贝
+MemoryBlock(const MemoryBlock&amp; other):_length(other._length),_data(new char[other._length])
+&#123;
+	std::copy(other._data, other._data+_length, _data);
+	std::cout&lt;&lt; &quot;deep copy constructed!&quot; &lt;&lt;std::endl;
+&#125;
+
+// 赋值运算符实现深度赋值
+MemoryBlock&amp; operator=(const MemoryBlock&amp; other)
+&#123;
+	if(this != &amp;other)
+	&#123;
+		if(_data!= nullptr) delete[] _data;
+		_length = other._length;
+		_data = new char[_length];
+		std::copy(other._data, other._data+_length, _data);
+	&#125;
+	return *this;
+&#125;
+
+size_t length()
+&#123;
+return _length;
+&#125;
+
+char* data()
+&#123;
+return _data;
+&#125;
+
+private:
+size_t _length;
+char *_data;
+&#125;;
+
+int main()
+&#123;
+
+	MemoryBlock memoryblock1(20);
+	
+	std::strcpy(memoryblock1.data(), &quot;Hello World!&quot;);
+	
+	std::cout &lt;&lt; &quot;memoryblock1: &quot; &lt;&lt; memoryblock1.data() &lt;&lt; std::endl;
+		
+	// 拷贝构造函数生成类对象
+	
+	MemoryBlock memoryblock2(memoryblock1);
+	
+	std::cout &lt;&lt; &quot;memoryblock2: &quot; &lt;&lt; memoryblock2.data() &lt;&lt; std::endl;
+	
+	// 赋值生成对象
+	MemoryBlock memoryblock3;
+	memoryblock3 = memoryblock1;
+	std::cout &lt;&lt; &quot;memoryblock3: &quot; &lt;&lt; memoryblock3.data() &lt;&lt; std::endl;
+&#125;
+</code></pre>
+<h1 id="5override"><a class="markdownIt-Anchor" href="#5override"></a> 5.override</h1>
+<p><code>override</code>是一个关键字，用于指示派生类中的虚函数将覆盖基类中的虚函数。它可以用于明确地指示编译器该函数是用于覆盖基类中的虚函数，如果不匹配则会导致编译错误。<br />
+<strong>作用</strong>：<br />
+在于提高程序的可读性以及健壮性，在派生类中重写基类函数需要声明基类函数为虚函数，声明关键字<code>override</code> 可以告诉读者重写了基类中的虚函数。<br />
+就程序运行而言，<code>override</code>声明与否不会对程序运行有任何影响。</p>
+<h1 id="6堆与栈"><a class="markdownIt-Anchor" href="#6堆与栈"></a> 6.堆与栈</h1>
+<p>栈区内存由操作系统自动分配和释放，堆区内存由程序员手动分配和释放。<br />
+两者的主要区别：</p>
+<ul>
+<li>内存管理方式：栈区内存由操作系统自动分配和释放，而堆区内存则是手动分配和释放。</li>
+<li>内存大小：栈区内存一般较小，通常为MB级别，而堆区内存相对较大，可以达到GB级别。</li>
+<li>内存访问方式：栈区内存访问速度很快，因为它的内存分配方式是连续的，可以直接通过指针访问。堆区内存的访问速度较慢，因为它的内存分配方式是不连续的，需要通过指针间接访问。</li>
+<li>内存分配效率：栈区内存的分配效率很高，因为它的内存分配方式是栈式的，只需移动指针即可。堆区的内存分配效率较低，它需要维护一张内存空闲表来记录哪些内存块已经分配，哪些内存块未被分配。</li>
+<li>内存分配方式：栈区内存的分配方式是先进后出，堆区的内存分配方式是按照程序员的指令随时分配和释放，没有顺序限制。</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c/" rel="tag">c++</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
+  id="post-cuda/CUDA 编程简介"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2023/04/26/cuda/cuda-bian-cheng-jian-jie/"
+    >cuda编程 简介</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/04/26/cuda/cuda-bian-cheng-jian-jie/" class="article-date">
+  <time datetime="2023-04-25T16:00:00.000Z" itemprop="datePublished">2023-04-26</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/cuda/">cuda</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="cuda编程模型"><a class="markdownIt-Anchor" href="#cuda编程模型"></a> CUDA编程模型</h1>
+<p>CUDA编程模型假设系统是由一个主机(CPU)和一个设备(GPU)组成的，而各自拥有独立的内存。因此，在CUDA编程中我们需要编写在设备(GPU)上运行的代码，也被称为核函数(Kernel)，其并行地运行在GPU的多个处理器上，这极大的提高了计算速度。</p>
+<p>典型的CUDA程序执行步骤：</p>
+<blockquote>
+<ul>
+<li>把数据从CPU内存拷贝到GPU内存。</li>
+<li>调用核函数对存储在GPU内存中的数据进行操作。</li>
+<li>将数据从GPU内存传回CPU内存。</li>
+</ul>
+</blockquote>
+<p>CUDA编程模型的两个特点：<br />
+1.通过层次结构来组织线程</p>
+<blockquote>
+<ul>
+<li>一般CPU一个核只支持一到两个硬件线程，而GPU在硬件层面就支持成百上千个并发线程。在CUDA编程中，线程是通过线程网格(Grid)、线程块(Block)、线程束(Warp)、线程(Thread)这几个层次管理。</li>
+<li>由一个内核启动所产生的所有线程统称为一个网格(Grid),同一网格中的所有线程共享相同的全局内存空间。向下一级，一个网格由多个线程块(Block)构成。再下一级，一个线程块由一组线程(Thread)构成</li>
+</ul>
+</blockquote>
+<p>2.内存的使用</p>
+<blockquote>
+<ul>
+<li>GPU中的各级缓存以及各种内存是可以软件控制的，这些内存包括寄存器、共享内存、常量内存、全局内存等。</li>
+</ul>
+</blockquote>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cuda/" rel="tag">cuda</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
   id="post-hexo 简介"
   class="article article-type-post"
   itemscope
@@ -183,8 +466,10 @@
       
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="1-什么是Hexo"><a href="#1-什么是Hexo" class="headerlink" title="1.什么是Hexo?"></a>1.什么是Hexo?</h1><p>Hexo是一个快速、简洁且高效的静态博客框架，使用Node.js编写，支持Markdown语法和EJS模板引擎。</p>
-<h1 id="2-Hexo常用命令"><a href="#2-Hexo常用命令" class="headerlink" title="2.Hexo常用命令"></a>2.Hexo常用命令</h1><blockquote>
+  <h1 id="1什么是hexo"><a class="markdownIt-Anchor" href="#1什么是hexo"></a> 1.什么是Hexo?</h1>
+<p>Hexo是一个快速、简洁且高效的静态博客框架，使用Node.js编写，支持Markdown语法和EJS模板引擎。</p>
+<h1 id="2hexo常用命令"><a class="markdownIt-Anchor" href="#2hexo常用命令"></a> 2.Hexo常用命令</h1>
+<blockquote>
 <ul>
 <li>hexo clean：清除缓存文件</li>
 <li>hexo g: 生成静态文件，即将Markdown文件生成为HTML文件。</li>
@@ -195,8 +480,10 @@
 <li>hexo init：新建博客，相当于初始化一个Hexo博客demo，需要空文件夹下执行该命令。</li>
 </ul>
 </blockquote>
-<h1 id="3-简述Hexo构建流程"><a href="#3-简述Hexo构建流程" class="headerlink" title="3.简述Hexo构建流程"></a>3.简述Hexo构建流程</h1><p>该部分只对hexo搭建个人博客所需环境以及步骤列个目录，具体详情参见<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/35668237">这里</a>。</p>
-<h3 id="所需环境与步骤"><a href="#所需环境与步骤" class="headerlink" title="所需环境与步骤"></a>所需环境与步骤</h3><blockquote>
+<h1 id="3简述hexo构建流程"><a class="markdownIt-Anchor" href="#3简述hexo构建流程"></a> 3.简述Hexo构建流程</h1>
+<p>该部分只对hexo搭建个人博客所需环境以及步骤列个目录，具体详情参见<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/35668237">这里</a>。</p>
+<h3 id="所需环境与步骤"><a class="markdownIt-Anchor" href="#所需环境与步骤"></a> 所需环境与步骤</h3>
+<blockquote>
 <ul>
 <li>安装Node.js</li>
 <li>安装Git</li>
@@ -258,7 +545,8 @@
       
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="commit-message格式"><a href="#commit-message格式" class="headerlink" title="commit message格式"></a>commit message格式</h1><p>&lt;type&gt;(&lt;scope&gt;):&lt;subject&gt;  即：&lt;commit类型&gt;(影响范围)：具体描述</p>
+  <h1 id="commit-message格式"><a class="markdownIt-Anchor" href="#commit-message格式"></a> commit message格式</h1>
+<p>&lt;type&gt;(&lt;scope&gt;):&lt;subject&gt;  即：&lt;commit类型&gt;(影响范围)：具体描述</p>
 <p>举例 fix(DOA):fixed invalid user table indexes.</p>
 <p>type:指明git commit的类别， 应该使用下面的类型</p>
 <blockquote>
@@ -266,7 +554,7 @@
 <li>【feat】:新增功能</li>
 <li>【fix】:修复bug</li>
 <li>【docs】:仅仅修改了文档， 比如README，CHANGELOG等等</li>
-<li>【test】:增加&#x2F;修改测试用例，包括单元测试、集成测试等</li>
+<li>【test】:增加/修改测试用例，包括单元测试、集成测试等</li>
 <li>【style】:修改了空行、缩进格式、引用包排序等等（不改变代码逻辑）</li>
 <li>【perf】:优化相关内容，比如提升性能、体验、算法等</li>
 <li>【refactor】:重构代码，没有新功能或者bug修复</li>
@@ -328,7 +616,10 @@
       
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="1-查看文件夹权限"><a href="#1-查看文件夹权限" class="headerlink" title="1.查看文件夹权限"></a>1.查看文件夹权限</h1><p>通过命令ll 或者 ls -l 查看当前路径下各个文件或者文件夹权限，如下图所示：<br><img src="/images/linux1.jpg" alt="avatar"><br>其中开头固定10个字符，其字符意义表示如下：</p>
+  <h1 id="1查看文件夹权限"><a class="markdownIt-Anchor" href="#1查看文件夹权限"></a> 1.查看文件夹权限</h1>
+<p>通过命令ll 或者 ls -l 查看当前路径下各个文件或者文件夹权限，如下图所示：<br />
+<img src="/images/linux1.jpg" alt="avatar" /><br />
+其中开头固定10个字符，其字符意义表示如下：</p>
 <blockquote>
 <ul>
 <li>第1个字符：表示该文件的类型，可以是d(目录)、b(块设备)、c(字符设备文件)、“-”(普通文件)、“l”(链接文件)等。</li>
@@ -337,8 +628,9 @@
 <li>第8-10个字符：表示其它任何用户(Other)对该文件的访问权限。</li>
 </ul>
 </blockquote>
-<p>其中r+w+x &#x3D; 4+2+1, r权限表示可以读取文件的内容，w权限表示可以编辑或者修改文件，x(execute)权限表示可以执行文件（只有可执行文件才有x权限)，比如在当前文件夹下mkdir一个新的文件夹或者touch 一个新文件需要x执行权限。</p>
-<h1 id="2-更改权限"><a href="#2-更改权限" class="headerlink" title="2.更改权限"></a>2.更改权限</h1><pre><code>chmod -R 777 uploads: 更改当前路径下的uploads文件夹权限。
+<p>其中r+w+x = 4+2+1, r权限表示可以读取文件的内容，w权限表示可以编辑或者修改文件，x(execute)权限表示可以执行文件（只有可执行文件才有x权限)，比如在当前文件夹下mkdir一个新的文件夹或者touch 一个新文件需要x执行权限。</p>
+<h1 id="2更改权限"><a class="markdownIt-Anchor" href="#2更改权限"></a> 2.更改权限</h1>
+<pre><code>chmod -R 777 uploads: 更改当前路径下的uploads文件夹权限。
 补充：
 ls -ll：查看当前路径下所有文件以及文件夹大小，展示的是字节数。
 ls -lh：查看当前路径下所有文件以及文件夹大小，以KB、MB等为单位进行展示。
@@ -396,43 +688,46 @@ ls -lh：查看当前路径下所有文件以及文件夹大小，以KB、MB等�
       
     <div class="article-entry" itemprop="articleBody">
        
-  <p>上传git仓库：<br>1.首先需要通过 $git init 初始化本地仓库，即需要cd 到需要上传仓库的目录下，使用当前目录作为Git仓库，也可以指定目录作为Git仓库 $git init reponame</p>
-<p>2.在本地仓库中添加内容 git add （可以是文件也可以是文件夹）git add README.md  or git add .   </p>
-<p>3.提交到本地仓库$git commit -m “提交说明”.                                   </p>
-<p>4.完成上述步骤后，即完成了本地仓库的提交，我们需要将其Push到远程仓库。  </p>
+  <p>上传git仓库：<br />
+1.首先需要通过 $git init 初始化本地仓库，即需要cd 到需要上传仓库的目录下，使用当前目录作为Git仓库，也可以指定目录作为Git仓库 $git init reponame</p>
+<p>2.在本地仓库中添加内容 git add （可以是文件也可以是文件夹）git add <a target="_blank" rel="noopener" href="http://README.md">README.md</a>  or git add .</p>
+<p>3.提交到本地仓库$git commit -m “提交说明”.</p>
+<p>4.完成上述步骤后，即完成了本地仓库的提交，我们需要将其Push到远程仓库。</p>
 <p>5.首先设置提交代码时的用户信息：</p>
 <blockquote>
 <ul>
-<li>$ git config –global user.name “name”  </li>
-<li>$ git config –global user.email “emai”</li>
+<li>$ git config --global <a target="_blank" rel="noopener" href="http://user.name">user.name</a> “name”</li>
+<li>$ git config --global user.email “emai”</li>
 </ul>
 </blockquote>
-<p>6.连接github与本地       </p>
+<p>6.连接github与本地</p>
 <blockquote>
 <ul>
-<li>命令行输入：ssh-keygen　　</li>
-<li>得到生成的密钥：cat  ~&#x2F;.ssh&#x2F;id_rsa.pub</li>
+<li>命令行输入：ssh-keygen</li>
+<li>得到生成的密钥：cat  ~/.ssh/id_rsa.pub</li>
 <li>将密钥在github中进行配置：打开github，在头像下边的settings里面找到SSH and GPG keys，新建SSH，随便取个名字，并将上面得到的密钥粘贴进去。</li>
-<li>通过命令查看本地与github是否连接成功：ssh -T <a href="mailto:&#x67;&#x69;&#116;&#x40;&#103;&#105;&#x74;&#104;&#117;&#98;&#x2e;&#99;&#x6f;&#x6d;">&#x67;&#x69;&#116;&#x40;&#103;&#105;&#x74;&#104;&#117;&#98;&#x2e;&#99;&#x6f;&#x6d;</a></li>
+<li>通过命令查看本地与github是否连接成功：ssh -T <a href="mailto:git@github.com">git@github.com</a></li>
 </ul>
-<p>　　　　　　</p>
 </blockquote>
 <p>7.将远程仓库链接</p>
 <blockquote>
-<p>git remote add origin <a target="_blank" rel="noopener" href="https://github.com/">https://github.com/</a>…..  </p>
+<p>git remote add origin <a target="_blank" rel="noopener" href="https://github.com/">https://github.com/</a>…</p>
 </blockquote>
-<p>8.创建分支 </p>
+<p>8.创建分支</p>
 <blockquote>
-<p>git branch -M main  </p>
+<p>git branch -M main</p>
 </blockquote>
-<p>9.将本地仓库push到远程仓库 </p>
+<p>9.将本地仓库push到远程仓库</p>
 <blockquote>
-<p>git push origin main  </p>
+<p>git push origin main</p>
 </blockquote>
-<p>当出现推送失败“hint”的时候，可以强制推送上去。例如，更改远程仓库的名字后，本地仓库的内容将无法推送上去，可以通过-f强制推送，如：git push origin main -f </p>
+<p>当出现推送失败“hint”的时候，可以强制推送上去。例如，更改远程仓库的名字后，本地仓库的内容将无法推送上去，可以通过-f强制推送，如：git push origin main -f</p>
 <p><strong>补充：</strong></p>
 <ul>
-<li>切换分支以及分支映射：<br>   git checkout -b master origin&#x2F;master   将本地分支master与远程分支origin&#x2F;master进行映射<br>   git branch -a  显示本地分支以及远程分支<br>   git branch  仅显示本地分支</li>
+<li>切换分支以及分支映射：<br />
+git checkout -b master origin/master   将本地分支master与远程分支origin/master进行映射<br />
+git branch -a  显示本地分支以及远程分支<br />
+git branch  仅显示本地分支</li>
 </ul>
  
       <!-- reward -->
@@ -709,7 +1004,14 @@ ls -lh：查看当前路径下所有文件以及文件夹大小，以KB、MB等�
 <!-- MathJax -->
 
 <!-- Katex -->
-
+ 
+    
+        <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.css">
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.js"></script>
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/contrib/auto-render.min.js"></script>
+        
+    
+ 
 <!-- busuanzi  -->
 
 <!-- ClickLove -->

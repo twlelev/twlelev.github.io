@@ -111,13 +111,17 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="硬重置到远程分支"><a href="#硬重置到远程分支" class="headerlink" title="硬重置到远程分支"></a>硬重置到远程分支</h1><p>需要重新拉取远程分支，放弃本地更改。</p>
-<pre><code>git fetch origin
+  <h1 id="硬重置到远程分支"><a class="markdownIt-Anchor" href="#硬重置到远程分支"></a> 硬重置到远程分支</h1>
+<p>需要重新拉取远程分支，放弃本地更改。</p>
+<pre class="highlight"><code class="">git fetch origin
 git reset --hard origin/master
 //master代表拉取重新拉取远程master分支
+
 </code></pre>
-<p><strong>git fetch 与git pull</strong><br>git fetch 仅下载远程更新，本地分支不修改<br>git pull 下载远程分支+自动合并，本地分支修改，自动合并到当前分支</p>
-<pre><code>git fetch origin:
+<p><strong>git fetch 与git pull</strong><br />
+git fetch 仅下载远程更新，本地分支不修改<br />
+git pull 下载远程分支+自动合并，本地分支修改，自动合并到当前分支</p>
+<pre class="highlight"><code class="">git fetch origin:
 远程仓库 ──下载──&gt; 远程跟踪分支(origin/master)    本地分支(master)
                         ↓                              ↓
                    已更新                           未改变
@@ -127,70 +131,77 @@ git pull origin master:
                                                         ↓
                                                      已更新
 </code></pre>
-<h1 id="合并解决冲突"><a href="#合并解决冲突" class="headerlink" title="合并解决冲突"></a>合并解决冲突</h1><h2 id="git-pull冲突情况"><a href="#git-pull冲突情况" class="headerlink" title="git pull冲突情况"></a>git pull冲突情况</h2><p>当本地有未提交的修改(工作区有改动)，执行git pull时，git 会阻止pull操作</p>
-<pre><code>error: Your local changes to the following files would be overwritten by merge:
+<h1 id="合并解决冲突"><a class="markdownIt-Anchor" href="#合并解决冲突"></a> 合并解决冲突</h1>
+<h2 id="git-pull冲突情况"><a class="markdownIt-Anchor" href="#git-pull冲突情况"></a> git pull冲突情况</h2>
+<p>当本地有未提交的修改(工作区有改动)，执行git pull时，git 会阻止pull操作</p>
+<pre class="highlight"><code class="">error: Your local changes to the following files would be overwritten by merge:
         path/to/file.cs
 Please commit your changes or stash them before you merge.
 Aborting
 </code></pre>
 <p><strong>解决方案：使用stash暂存本地修改</strong></p>
-<pre><code>git stash  # 暂存本地修改
+<pre class="highlight"><code class="">git stash  # 暂存本地修改
 git pull origin master  # 拉取远程更新
 git pop    # 恢复本地修改
 # 如果有冲突，手动解决
 </code></pre>
-<h2 id="git-push冲突情况"><a href="#git-push冲突情况" class="headerlink" title="git push冲突情况"></a>git push冲突情况</h2><p><strong>git push到远程分支出现冲突</strong></p>
-<pre><code>git pull origin master
+<h2 id="git-push冲突情况"><a class="markdownIt-Anchor" href="#git-push冲突情况"></a> git push冲突情况</h2>
+<p><strong>git push到远程分支出现冲突</strong></p>
+<pre class="highlight"><code class="">git pull origin master
 git add [文件]
 git commit -m &quot;&quot;
 git push origin master 
 # 出现冲突
 </code></pre>
-<p><strong>首先运行git status查看工作区状态</strong><br><strong>情况一：本地没有未提交的修改</strong></p>
-<pre><code>$ git status
+<p><strong>首先运行git status查看工作区状态</strong><br />
+<strong>情况一：本地没有未提交的修改</strong></p>
+<pre class="highlight"><code class="">$ git status
 On branch master
-Your branch is ahead of &#39;origin/master&#39; by X commits.
+Your branch is ahead of 'origin/master' by X commits.
 nothing to commit, working tree clean
 </code></pre>
 <p>工作区是干净的(“nothing to commit,working tree clean”)，push失败通常是因为远程有新的提交。拉取分支更新与本地仓库合并后再git push</p>
-<pre><code>git pull origin master
+<pre class="highlight"><code class="">git pull origin master
 git push origin master
 </code></pre>
 <p><strong>情况二：本地有未提交的修改</strong></p>
-<pre><code>$ git status
+<pre class="highlight"><code class="">$ git status
 On branch master
 Changes not staged for commit:
   modified:   some_file.cs
   
 Untracked files:
   new_file.cs
+
 </code></pre>
 <p>如果本地不需要保留修改:</p>
-<pre><code>git checkout -- .
+<pre class="highlight"><code class="">git checkout -- .
 git pull origin master
 git push origin master
 </code></pre>
 <p>如果本地需要保留修改:</p>
-<pre><code>git stash 
+<pre class="highlight"><code class="">git stash 
 git pull origin master
 git push origin master
 git stash pop
 </code></pre>
-<h3 id="情况三-git-pull-出现合并冲突"><a href="#情况三-git-pull-出现合并冲突" class="headerlink" title="情况三:git pull 出现合并冲突"></a>情况三:git pull 出现合并冲突</h3><p>如果本地需要保留修改，git pull origin master可能出现合并冲突。这是因为本地修改和远程提交的修改有冲突，需要手动解决</p>
-<pre><code>$ git pull origin master
+<h3 id="情况三git-pull-出现合并冲突"><a class="markdownIt-Anchor" href="#情况三git-pull-出现合并冲突"></a> 情况三:git pull 出现合并冲突</h3>
+<p>如果本地需要保留修改，git pull origin master可能出现合并冲突。这是因为本地修改和远程提交的修改有冲突，需要手动解决</p>
+<pre class="highlight"><code class="">$ git pull origin master
 Auto-merging some_file.cs
 CONFLICT (content): Merge conflict in some_file.cs
 Automatic merge failed; fix conflicts and then commit the result.
 </code></pre>
 <p><strong>解决冲突</strong></p>
-<pre><code># 手动编辑冲突文件，解决 &lt;&lt;&lt;&lt;&lt;&lt;&lt; ======= &gt;&gt;&gt;&gt;&gt;&gt;&gt; 标记
+<pre class="highlight"><code class=""># 手动编辑冲突文件，解决 &lt;&lt;&lt;&lt;&lt;&lt;&lt; ======= &gt;&gt;&gt;&gt;&gt;&gt;&gt; 标记
 
 # 解决后
 git add [冲突文件]    # 标记冲突已经解决
 git commit -m &quot;解决合并冲突&quot;
 git push origin master
+
 </code></pre>
-<pre><code>git status 显示：
+<pre class="highlight"><code class="">git status 显示：
 
 Unmerged paths:                    ← 冲突的已跟踪文件
     both modified: xxx.cs          → git checkout --theirs xxx.cs
@@ -300,9 +311,9 @@ git clean -fd
       </a>
     
     
-      <a href="/2025/12/18/llm/da-mo-xing-shi-zhan-ying/" class="article-nav-link">
+      <a href="/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title"></div>
+        <div class="article-nav-title">TensorRT动态尺寸推理技术</div>
       </a>
     
   </nav>
@@ -580,7 +591,14 @@ git clean -fd
 <!-- MathJax -->
 
 <!-- Katex -->
-
+ 
+    
+        <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.css">
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.js"></script>
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/contrib/auto-render.min.js"></script>
+        
+    
+ 
 <!-- busuanzi  -->
 
 <!-- ClickLove -->
