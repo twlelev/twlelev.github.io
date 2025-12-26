@@ -152,6 +152,97 @@
     
     
     <article
+  id="post-NCNN/ncnn"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2023/07/08/ncnn/ncnn/"
+    >ncnn基础</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/07/08/ncnn/ncnn/" class="article-date">
+  <time datetime="2023-07-08T06:54:31.000Z" itemprop="datePublished">2023-07-08</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/ncnn/">ncnn</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="1ncnn简介"><a class="markdownIt-Anchor" href="#1ncnn简介"></a> 1.NCNN简介</h1>
+<p>ncnn是一个为手机端极致优化的高性能神经网络前向计算框架。ncnn从设计之初深刻考虑手机端的部署和应用。无第三方依赖，跨平台，手机端cpu的速度快于快于目前所有已知的开源框架。基于ncnn，开发者能够将深度学习算法轻松移植到手机端高效执行，开发出人工智能APP。</p>
+<h1 id="2怎么使用"><a class="markdownIt-Anchor" href="#2怎么使用"></a> 2.怎么使用？</h1>
+<ul>
+<li>git clone ncnn仓库(若需要gpu推理需要submodule)</li>
+</ul>
+<pre class="highlight"><code class="">git clone https://github.com/Tencent/ncnn.git
+cd ncnn
+git submodule update --init
+</code></pre>
+<ul>
+<li>(option) 下载vulkan_sdk(gpu推理配置)</li>
+</ul>
+<pre class="highlight"><code class="">wget https://sdk.lunarg.com/sdk/download/1.2.189.0/linux/vulkansdk-linux-x86_64-1.2.189.0.tar.gz?Human=true -O vulkansdk-linux-x86_64-1.2.189.0.tar.gz
+tar -xf vulkansdk-linux-x86_64-1.2.189.0.tar.gz
+export VULKAN_SDK=$(pwd)/1.2.189.0/x86_64
+</code></pre>
+<ul>
+<li>编译ncnn库</li>
+</ul>
+<pre class="highlight"><code class="">## gpu推理
+cd ncnn
+mkdir -p build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../toolchains/jetson.toolchain.cmake -DNCNN_VULKAN=ON -DNCNN_BUILD_EXAMPLES=ON ..
+make -j$(nproc)
+
+## 若不需要gpu推理
+cd ncnn
+mkdir build
+cd build
+cmake .. &amp;&amp; make -j4
+make install #可以生成头文件和链接库
+</code></pre>
+<ul>
+<li>onnx转ncnn<br />
+在编译好的build的情况下，./build/tools/onnx里面的脚本文件onnx2ncnn即为转ncnn推理模型的脚本，将model.onnx转为model.param和model.bin.</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ncnn/" rel="tag">ncnn</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
   id="post-c++/c++ 基础"
   class="article article-type-post"
   itemscope
@@ -514,6 +605,77 @@ int main()
 
     
     <article
+  id="post-git/git commit 规范"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2023/04/17/git/git-commit-gui-fan/"
+    >git commit 规范</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/04/17/git/git-commit-gui-fan/" class="article-date">
+  <time datetime="2023-04-17T02:15:31.000Z" itemprop="datePublished">2023-04-17</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/git/">git</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="commit-message格式"><a class="markdownIt-Anchor" href="#commit-message格式"></a> commit message格式</h1>
+<p>&lt;type&gt;(&lt;scope&gt;):&lt;subject&gt;  即：&lt;commit类型&gt;(影响范围)：具体描述</p>
+<p>举例 fix(DOA):fixed invalid user table indexes.</p>
+<p>type:指明git commit的类别， 应该使用下面的类型</p>
+<blockquote>
+<ul>
+<li>【feat】:新增功能</li>
+<li>【fix】:修复bug</li>
+<li>【docs】:仅仅修改了文档， 比如README，CHANGELOG等等</li>
+<li>【test】:增加/修改测试用例，包括单元测试、集成测试等</li>
+<li>【style】:修改了空行、缩进格式、引用包排序等等（不改变代码逻辑）</li>
+<li>【perf】:优化相关内容，比如提升性能、体验、算法等</li>
+<li>【refactor】:重构代码，没有新功能或者bug修复</li>
+<li>【chore】:改变构建流程、或者增加依赖库、工具等</li>
+<li>【revert】:回滚到上一个版本</li>
+<li>【merge】:代码合并</li>
+</ul>
+</blockquote>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/git/" rel="tag">git</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
   id="post-linux/linux chmod 用法"
   class="article article-type-post"
   itemscope
@@ -575,77 +737,6 @@ ls -lh：查看当前路径下所有文件以及文件夹大小，以KB、MB等�
     <footer class="article-footer">
        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/" rel="tag">linux</a></li></ul>
-
-    </footer>
-  </div>
-
-   
-   
-  
-</article>
-
-    
-    <article
-  id="post-git/git commit 规范"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2023/04/17/git/git-commit-gui-fan/"
-    >git commit 规范</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2023/04/17/git/git-commit-gui-fan/" class="article-date">
-  <time datetime="2023-04-17T02:15:31.000Z" itemprop="datePublished">2023-04-17</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/git/">git</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h1 id="commit-message格式"><a class="markdownIt-Anchor" href="#commit-message格式"></a> commit message格式</h1>
-<p>&lt;type&gt;(&lt;scope&gt;):&lt;subject&gt;  即：&lt;commit类型&gt;(影响范围)：具体描述</p>
-<p>举例 fix(DOA):fixed invalid user table indexes.</p>
-<p>type:指明git commit的类别， 应该使用下面的类型</p>
-<blockquote>
-<ul>
-<li>【feat】:新增功能</li>
-<li>【fix】:修复bug</li>
-<li>【docs】:仅仅修改了文档， 比如README，CHANGELOG等等</li>
-<li>【test】:增加/修改测试用例，包括单元测试、集成测试等</li>
-<li>【style】:修改了空行、缩进格式、引用包排序等等（不改变代码逻辑）</li>
-<li>【perf】:优化相关内容，比如提升性能、体验、算法等</li>
-<li>【refactor】:重构代码，没有新功能或者bug修复</li>
-<li>【chore】:改变构建流程、或者增加依赖库、工具等</li>
-<li>【revert】:回滚到上一个版本</li>
-<li>【merge】:代码合并</li>
-</ul>
-</blockquote>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/git/" rel="tag">git</a></li></ul>
 
     </footer>
   </div>

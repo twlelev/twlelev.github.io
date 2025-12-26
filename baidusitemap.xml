@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://example.com/2025/12/26/aigc/z-image-xiang-guan-ji-zhu-jie-xi/</loc>
+    <lastmod>2025-12-26</lastmod>
+  </url>
+  <url>
+    <loc>http://example.com/2025/12/18/aigc/ddim/</loc>
+    <lastmod>2025-12-26</lastmod>
+  </url>
+  <url>
+    <loc>http://example.com/2025/12/18/aigc/ddpm/</loc>
+    <lastmod>2025-12-26</lastmod>
+  </url>
+  <url>
+    <loc>http://example.com/2025/12/19/aigc/lcm-lora/</loc>
+    <lastmod>2025-12-26</lastmod>
+  </url>
+  <url>
     <loc>http://example.com/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/</loc>
     <lastmod>2025-12-26</lastmod>
   </url>
@@ -25,19 +41,7 @@
     <lastmod>2025-12-23</lastmod>
   </url>
   <url>
-    <loc>http://example.com/2025/12/18/aigc/ddpm/</loc>
-    <lastmod>2025-12-23</lastmod>
-  </url>
-  <url>
-    <loc>http://example.com/2025/12/19/aigc/lcm-lora/</loc>
-    <lastmod>2025-12-23</lastmod>
-  </url>
-  <url>
     <loc>http://example.com/2023/07/17/shi-pin-bian-ma/shi-pin-bian-ma-ji-chu/</loc>
-    <lastmod>2025-12-23</lastmod>
-  </url>
-  <url>
-    <loc>http://example.com/2025/12/18/aigc/ddim/</loc>
     <lastmod>2025-12-23</lastmod>
   </url>
   <url>
