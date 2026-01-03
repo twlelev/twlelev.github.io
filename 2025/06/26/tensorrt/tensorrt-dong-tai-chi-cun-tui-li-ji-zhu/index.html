@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="用于记录学习笔记的个人网站" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>TensorRT动态尺寸推理技术 |  twlelev的博客</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-TensorRT/TensorRT动态尺寸推理技术"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  TensorRT动态尺寸推理技术
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/" class="article-date">
+  <time datetime="2025-06-26T07:52:26.000Z" itemprop="datePublished">2025-06-26</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/TensorRT/">TensorRT</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.4k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">5 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="tensorrt-动态尺寸推理技术方案解析"><a class="markdownIt-Anchor" href="#tensorrt-动态尺寸推理技术方案解析"></a> TensorRT 动态尺寸推理技术方案解析</h1>
+<p>在 Stable Diffusion XL (SDXL) 和 InstantID 等生成式 AI 项目中，提升推理效率的同时支持多种分辨率输入是核心需求。本文将结合代码，详细介绍两种主流的 TensorRT 动态尺寸推理方案。</p>
+<hr />
+<h2 id="方案一full-dynamic完全动态"><a class="markdownIt-Anchor" href="#方案一full-dynamic完全动态"></a> 方案一：Full Dynamic（完全动态）</h2>
+<h3 id="1-技术原理"><a class="markdownIt-Anchor" href="#1-技术原理"></a> 1. 技术原理</h3>
+<p>完全动态方案利用 TensorRT 的 <code>IExecutionContext::setInputShape</code> API。引擎在构建阶段通过 Profile 指定一个连续的可选范围。推理时，根据实际输入形状动态调整算子策略。</p>
+<p><strong>关键流程：</strong></p>
+<ol>
+<li>
+<p><strong>形状感知</strong>：检测输入 Tensor 的 <code>shape</code> 是否发生变化。</p>
+</li>
+<li>
+<p><strong>上下文更新</strong>：调用 <code>context.set_input_shape</code> 重新计算各层输入输出张量大小。</p>
+</li>
+<li>
+<p><strong>内存重新分配</strong>：由于输出尺寸变化，释放并重新申请 PyTorch 显存。</p>
+</li>
+<li>
+<p><strong>地址重绑定</strong>：通过 <code>set_tensor_address</code> 将新的显存指针告知 TensorRT。</p>
+</li>
+</ol>
+<h3 id="2-代码实现分析"><a class="markdownIt-Anchor" href="#2-代码实现分析"></a> 2. 代码实现分析</h3>
+<pre class="highlight"><code class="python">
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">infer</span>(<span class="hljs-params">self, feed_dict, stream, device, use_cuda_graph=<span class="hljs-literal">False</span></span>):
+
+    <span class="hljs-comment"># 1. 生成形状唯一键，检测是否变化</span>
+
+    shape_key = <span class="hljs-string">&quot;_&quot;</span>.join([<span class="hljs-string">f&quot;<span class="hljs-subst">&#123;name&#125;</span>_<span class="hljs-subst">&#123;<span class="hljs-built_in">tuple</span>(buf.shape)&#125;</span>&quot;</span> <span class="hljs-keyword">for</span> name, buf <span class="hljs-keyword">in</span> feed_dict.items()])
+
+    shape_changed = <span class="hljs-keyword">not</span> <span class="hljs-built_in">hasattr</span>(self, <span class="hljs-string">&#x27;last_shape_key&#x27;</span>) <span class="hljs-keyword">or</span> self.last_shape_key != shape_key
+
+    <span class="hljs-keyword">if</span> shape_changed:
+
+        <span class="hljs-comment"># 2. 释放旧张量，创建新张量 (保持显存紧凑)</span>
+
+        <span class="hljs-keyword">for</span> name, buf <span class="hljs-keyword">in</span> feed_dict.items():
+
+            <span class="hljs-keyword">if</span> name <span class="hljs-keyword">in</span> self.tensors:
+
+                <span class="hljs-keyword">del</span> self.tensors[name]
+
+            <span class="hljs-comment"># 重新分配输入/输出 Tensor</span>
+
+            self.tensors[name] = torch.empty(buf.shape, dtype=dtype, device=device)
+
+            <span class="hljs-comment"># 3. 核心步骤：更新 TRT 内部输入形状</span>
+
+            <span class="hljs-keyword">if</span> self.engine.get_tensor_mode(name) == trt.TensorIOMode.INPUT:
+
+                self.context.set_input_shape(name, buf.shape)
+
+  
+
+    <span class="hljs-comment"># 4. 每次推理必须重新绑定地址，因为 data_ptr 改变了</span>
+
+    <span class="hljs-keyword">for</span> name, tensor <span class="hljs-keyword">in</span> self.tensors.items():
+
+        self.context.set_tensor_address(name, tensor.data_ptr())
+
+  
+
+    <span class="hljs-comment"># 5. 执行：如果尺寸改变，必须销毁图并同步执行</span>
+
+    <span class="hljs-keyword">if</span> shape_changed:
+
+        self._cleanup_cuda_graph()
+
+        self.context.execute_async_v3(stream)
+
+    <span class="hljs-keyword">else</span>:
+
+        <span class="hljs-comment"># 如果尺寸没变，则使用缓存的单个 cuda_graph</span>
+
+        cudart.cudaGraphLaunch(self.cuda_graph_instance, stream)
+
+</code></pre>
+<h3 id="3-优缺点"><a class="markdownIt-Anchor" href="#3-优缺点"></a> 3. 优缺点</h3>
+<ul>
+<li>
+<p><strong>优点</strong>：显存利用率极高；支持 [min, max] 间任意分辨率；无需 Padding。</p>
+</li>
+<li>
+<p><strong>缺点</strong>：在改变分辨率的那一帧（Switching Frame），由于要重新分配内存和计算算子，会有明显的瞬时延迟（Jitter）。</p>
+</li>
+</ul>
+<hr />
+<h2 id="方案二预分配-图缓存-bucketingmulti-graph"><a class="markdownIt-Anchor" href="#方案二预分配-图缓存-bucketingmulti-graph"></a> 方案二：预分配 + 图缓存 (Bucketing/Multi-Graph)</h2>
+<h3 id="1-技术原理-2"><a class="markdownIt-Anchor" href="#1-技术原理-2"></a> 1. 技术原理</h3>
+<p>该方案预设几个常用的分辨率档位（Buckets）。对于非标准输入，通过 Padding 或 Resize 归一化到最接近的档位。其核心是<strong>为每个档位各录制并保存一个 CUDA Graph</strong>。</p>
+<p><strong>关键流程：</strong></p>
+<ol>
+<li>
+<p><strong>分桶映射</strong>：将输入形状 <code>(W, H)</code> 映射到最近的大尺寸桶 <code>(W_bucket, H_bucket)</code>。</p>
+</li>
+<li>
+<p><strong>输入对齐</strong>：对输入进行 Padding 补边。</p>
+</li>
+<li>
+<p><strong>多图字典</strong>：推理时查找 <code>cuda_graph_instances[bucket_key]</code>。</p>
+</li>
+<li>
+<p><strong>显存复用</strong>：预先申请最大桶的显存，所有桶共享同一块物理地址或使用 Slice。</p>
+</li>
+</ol>
+<h3 id="2-代码实现"><a class="markdownIt-Anchor" href="#2-代码实现"></a> 2. 代码实现</h3>
+<pre class="highlight"><code class="python">
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">BucketingEngine</span>(<span class="hljs-title class_ inherited__">Engine</span>):
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, engine_path</span>):
+
+        <span class="hljs-built_in">super</span>().__init__(engine_path)
+
+        <span class="hljs-comment"># 用字典存储多个 CUDA Graph 实例</span>
+        self.cuda_graph_instances = &#123;&#125;
+
+        <span class="hljs-comment"># 预设桶：例如 [(512,512), (768,768), (1024,1024)]</span>
+        self.buckets = self._define_buckets()
+
+  
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">infer_bucketing</span>(<span class="hljs-params">self, feed_dict, stream, device</span>):
+
+        <span class="hljs-comment"># 1. 找到最适配的桶</span>
+        raw_shape = feed_dict[<span class="hljs-string">&#x27;input&#x27;</span>].shape
+        bucket_shape = self._map_to_bucket(raw_shape)
+        bucket_key = <span class="hljs-string">f&quot;b_<span class="hljs-subst">&#123;bucket_shape[<span class="hljs-number">2</span>]&#125;</span>x<span class="hljs-subst">&#123;bucket_shape[<span class="hljs-number">3</span>]&#125;</span>&quot;</span>
+
+        <span class="hljs-comment"># 2. 如果该桶图没录制，在此处录制并缓存</span>
+        <span class="hljs-keyword">if</span> bucket_key <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.cuda_graph_instances:
+            self._prepare_bucket_resources(bucket_shape) <span class="hljs-comment"># 预分配/Resize Tensors</span>
+            self._record_bucket_graph(bucket_key, stream)
+
+        <span class="hljs-comment"># 3. 快速启动：直接发射对应的 CUDA Graph，无任何逻辑延迟</span>
+        cudart.cudaGraphLaunch(self.cuda_graph_instances[bucket_key], stream)
+
+        <span class="hljs-comment"># 4. (可选) 裁剪输出：根据 raw_shape 裁掉 Padding 部分</span>
+        <span class="hljs-keyword">return</span> self._crop_output(self.tensors[<span class="hljs-string">&#x27;output&#x27;</span>], raw_shape)
+
+</code></pre>
+<h3 id="3-优缺点-2"><a class="markdownIt-Anchor" href="#3-优缺点-2"></a> 3. 优缺点</h3>
+<ul>
+<li><strong>优点</strong>：切换分辨率瞬间<strong>零卡顿</strong>；推理性能达到了静态形状的高度。</li>
+<li><strong>缺点</strong>：显存空间换速度（需要维护更多状态）；如果桶太多会消耗大量显存；需要额外的补边逻辑。</li>
+</ul>
+<hr />
+<h2 id="常见问题解析resize-与-padding-对推理结果的影响"><a class="markdownIt-Anchor" href="#常见问题解析resize-与-padding-对推理结果的影响"></a> 常见问题解析：Resize 与 Padding 对推理结果的影响</h2>
+<p>在分桶方案中，强制将输入适配到桶尺寸会对结果产生影响，具体取决于处理手段：</p>
+<h3 id="1-强制-resize-的影响-风险较高"><a class="markdownIt-Anchor" href="#1-强制-resize-的影响-风险较高"></a> 1. 强制 Resize 的影响 (风险较高)</h3>
+<ul>
+<li><strong>畸变问题</strong>：如果输入比例（如 4:3）与桶比例（如 1:1）不一致，非等比缩放会导致画面拉伸。对于人脸交换（FaceSwap）任务，这会导致特征提取器（如 InstantID 中的识别模型）提取到错误的脸型特征，造成身份不匹配（Identity Mismatch）。</li>
+<li><strong>分辨率敏感性</strong>：Diffusion 模型在训练时通常锁定在特定分辨率。大幅度的 Resize 会改变像素密度，可能导致生成的纹理模糊或出现不自然伪影。</li>
+</ul>
+<h3 id="2-zero-padding-的影响-业界主流推荐"><a class="markdownIt-Anchor" href="#2-zero-padding-的影响-业界主流推荐"></a> 2. Zero Padding 的影响 (业界主流推荐)</h3>
+<ul>
+<li><strong>原理</strong>：保持原始比例缩放，并将图像放入桶的左上角，其余部分补零（Black Padding）。推理结束后再将对应的有效区域截取出来。</li>
+<li><strong>identity 保持</strong>：由于像素比例是 1:1 维持的，人脸的几何特征不会受损，结果最稳定。</li>
+<li><strong>注意力干扰</strong>：在 Self-Attention 层中，模型会关注到全黑区域。虽然这在深层网络中可能带来极轻微的全局偏移，但通常通过“将 Padding 填充为图像均值”或“使用简单的截断逻辑”可以忽略不计。</li>
+</ul>
+<hr />
+<h2 id="总结与建议"><a class="markdownIt-Anchor" href="#总结与建议"></a> 总结与建议</h2>
+<p>| 特性 | 完全动态方案 (Full Dynamic) | 图缓存分桶方案 (Bucketing) |</p>
+<p>| <strong>支持形状</strong> | 任意 [min, max] | 仅限预设桶 (Padding) |</p>
+<p>| <strong>CUDA Graph</strong> | 单实例，改变尺寸需销毁 | 多实例，常驻字典缓存 |</p>
+<p>| <strong>切换瞬间延迟</strong> | 高 (重新分配 + 重绘) | 零 (直接发射 Graph) |</p>
+<p>| <strong>显存占用</strong> | 低 (按需) | 高 (多图多缓存) |</p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TensorRT/" rel="tag">TensorRT</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2025/12/18/git/git-chang-yong-ming-ling/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            git常用命令
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2024/12/18/llm/da-mo-xing-shi-zhan-ying/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">LMDeploy的量化和部署</div>
+      </a>
+    
+  </nav>
+
+  
+   
+  
+   
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2026
+        <i class="ri-heart-fill heart_icon"></i> twlelev的博客
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="twlelev的博客"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+ 
+    
+        <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.css">
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.js"></script>
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/contrib/auto-render.min.js"></script>
+        
+    
+ 
+<!-- busuanzi  -->
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>

@@ -152,6 +152,129 @@
     
     
     <article
+  id="post-python环境/python环境"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2025/12/24/python-huan-jing/python-huan-jing/"
+    >python环境</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2025/12/24/python-huan-jing/python-huan-jing/" class="article-date">
+  <time datetime="2025-12-24T02:39:49.000Z" itemprop="datePublished">2025-12-24</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Python%E7%8E%AF%E5%A2%83/">Python环境</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>python中一些库与torch cuda以及python版本绑定，其对应关系如下：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Dao-AILab/flash-attention/releases">flash-attention配置</a></p>
+<p><a target="_blank" rel="noopener" href="https://anaconda.org/channels/pytorch3d/packages/pytorch3d/files">pytorch3d配置</a></p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Python%E7%8E%AF%E5%A2%83/" rel="tag">Python环境</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
+  id="post-AIGC/FlashAttention"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2025/12/23/aigc/flashattention/"
+    >FlashAttention</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2025/12/23/aigc/flashattention/" class="article-date">
+  <time datetime="2025-12-23T02:58:30.000Z" itemprop="datePublished">2025-12-23</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/AIGC-Infer/">AIGC_Infer</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="1-标准注意力机制的问题"><a class="markdownIt-Anchor" href="#1-标准注意力机制的问题"></a> 1. 标准注意力机制的问题：</h2>
+<p>标准机制需要“频繁读写”，它在GPU上的计算逻辑如下：</p>
+<ul>
+<li>任务 A (MatMul)：从 HBM 读 Q, K <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 算出 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 写回 HBM（因为 SRAM 放不下整个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>×</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">N \times N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span>）。</li>
+<li>任务 B (Softmax)： 从 HBM 读回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 处理 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 写回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span></span></span></span> 到 HBM。</li>
+<li>任务 C (MatMul)：从 HBM 读回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo separator="true">,</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">P, V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 算出 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi></mrow><annotation encoding="application/x-tex">O</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 写回 HBM。</li>
+</ul>
+<h2 id="2flashattention解决思路"><a class="markdownIt-Anchor" href="#2flashattention解决思路"></a> 2.FlashAttention解决思路</h2>
+<p>SRAM (片上高性能内存）较小，gpu kernel计算从SRAM 中读取数据，SRAM 相比较于HBM没有IO瓶颈(IO读写速度高一个数量级)，但是内存小。因此flashattention利用这一点，利用tiling计算将所有中间结果都留在SRAM，既降低了显存又减少了SRAM与HBM之间的IO,当得到最终结果再放回HBM。</p>
+<p>FlashAttention 的核心思想是 <strong>“计算换 IO”</strong>。它主要通过以下两个核心技术实现：</p>
+<ul>
+<li><strong>分块 (Tiling)：</strong> 它将输入的查询（Query）、键（Key）和值（Value）切分成小块，加载到 SRAM（速度极快但容量小）中。在 SRAM 里完成局部的注意力计算（包括 Softmax 的部分求和）。</li>
+<li><strong>重计算/在线 Softmax (Recomputation / Online Softmax)：</strong> 标准的 Softmax 需要全局信息。FlashAttention 使用了一种数学技巧（Online Softmax），允许它在不存储完整得分矩阵的情况下，通过不断更新局部最大值和求和项，最终计算出精确的注意力输出。在反向传播（训练时）中，它也不存储中间矩阵，而是通过存储的统计量在需要时重新计算。</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AIGC-Infer/" rel="tag">AIGC_Infer</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
   id="post-AIGC/AIGC-FaceSwap生图相关技术总结"
   class="article article-type-post"
   itemscope
@@ -961,6 +1084,224 @@ git clean -fd
 
     
     <article
+  id="post-TensorRT/TensorRT动态尺寸推理技术"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/"
+    >TensorRT动态尺寸推理技术</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/" class="article-date">
+  <time datetime="2025-06-26T07:52:26.000Z" itemprop="datePublished">2025-06-26</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/TensorRT/">TensorRT</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="tensorrt-动态尺寸推理技术方案解析"><a class="markdownIt-Anchor" href="#tensorrt-动态尺寸推理技术方案解析"></a> TensorRT 动态尺寸推理技术方案解析</h1>
+<p>在 Stable Diffusion XL (SDXL) 和 InstantID 等生成式 AI 项目中，提升推理效率的同时支持多种分辨率输入是核心需求。本文将结合代码，详细介绍两种主流的 TensorRT 动态尺寸推理方案。</p>
+<hr />
+<h2 id="方案一full-dynamic完全动态"><a class="markdownIt-Anchor" href="#方案一full-dynamic完全动态"></a> 方案一：Full Dynamic（完全动态）</h2>
+<h3 id="1-技术原理"><a class="markdownIt-Anchor" href="#1-技术原理"></a> 1. 技术原理</h3>
+<p>完全动态方案利用 TensorRT 的 <code>IExecutionContext::setInputShape</code> API。引擎在构建阶段通过 Profile 指定一个连续的可选范围。推理时，根据实际输入形状动态调整算子策略。</p>
+<p><strong>关键流程：</strong></p>
+<ol>
+<li>
+<p><strong>形状感知</strong>：检测输入 Tensor 的 <code>shape</code> 是否发生变化。</p>
+</li>
+<li>
+<p><strong>上下文更新</strong>：调用 <code>context.set_input_shape</code> 重新计算各层输入输出张量大小。</p>
+</li>
+<li>
+<p><strong>内存重新分配</strong>：由于输出尺寸变化，释放并重新申请 PyTorch 显存。</p>
+</li>
+<li>
+<p><strong>地址重绑定</strong>：通过 <code>set_tensor_address</code> 将新的显存指针告知 TensorRT。</p>
+</li>
+</ol>
+<h3 id="2-代码实现分析"><a class="markdownIt-Anchor" href="#2-代码实现分析"></a> 2. 代码实现分析</h3>
+<pre class="highlight"><code class="python">
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">infer</span>(<span class="hljs-params">self, feed_dict, stream, device, use_cuda_graph=<span class="hljs-literal">False</span></span>):
+
+    <span class="hljs-comment"># 1. 生成形状唯一键，检测是否变化</span>
+
+    shape_key = <span class="hljs-string">&quot;_&quot;</span>.join([<span class="hljs-string">f&quot;<span class="hljs-subst">&#123;name&#125;</span>_<span class="hljs-subst">&#123;<span class="hljs-built_in">tuple</span>(buf.shape)&#125;</span>&quot;</span> <span class="hljs-keyword">for</span> name, buf <span class="hljs-keyword">in</span> feed_dict.items()])
+
+    shape_changed = <span class="hljs-keyword">not</span> <span class="hljs-built_in">hasattr</span>(self, <span class="hljs-string">&#x27;last_shape_key&#x27;</span>) <span class="hljs-keyword">or</span> self.last_shape_key != shape_key
+
+    <span class="hljs-keyword">if</span> shape_changed:
+
+        <span class="hljs-comment"># 2. 释放旧张量，创建新张量 (保持显存紧凑)</span>
+
+        <span class="hljs-keyword">for</span> name, buf <span class="hljs-keyword">in</span> feed_dict.items():
+
+            <span class="hljs-keyword">if</span> name <span class="hljs-keyword">in</span> self.tensors:
+
+                <span class="hljs-keyword">del</span> self.tensors[name]
+
+            <span class="hljs-comment"># 重新分配输入/输出 Tensor</span>
+
+            self.tensors[name] = torch.empty(buf.shape, dtype=dtype, device=device)
+
+            <span class="hljs-comment"># 3. 核心步骤：更新 TRT 内部输入形状</span>
+
+            <span class="hljs-keyword">if</span> self.engine.get_tensor_mode(name) == trt.TensorIOMode.INPUT:
+
+                self.context.set_input_shape(name, buf.shape)
+
+  
+
+    <span class="hljs-comment"># 4. 每次推理必须重新绑定地址，因为 data_ptr 改变了</span>
+
+    <span class="hljs-keyword">for</span> name, tensor <span class="hljs-keyword">in</span> self.tensors.items():
+
+        self.context.set_tensor_address(name, tensor.data_ptr())
+
+  
+
+    <span class="hljs-comment"># 5. 执行：如果尺寸改变，必须销毁图并同步执行</span>
+
+    <span class="hljs-keyword">if</span> shape_changed:
+
+        self._cleanup_cuda_graph()
+
+        self.context.execute_async_v3(stream)
+
+    <span class="hljs-keyword">else</span>:
+
+        <span class="hljs-comment"># 如果尺寸没变，则使用缓存的单个 cuda_graph</span>
+
+        cudart.cudaGraphLaunch(self.cuda_graph_instance, stream)
+
+</code></pre>
+<h3 id="3-优缺点"><a class="markdownIt-Anchor" href="#3-优缺点"></a> 3. 优缺点</h3>
+<ul>
+<li>
+<p><strong>优点</strong>：显存利用率极高；支持 [min, max] 间任意分辨率；无需 Padding。</p>
+</li>
+<li>
+<p><strong>缺点</strong>：在改变分辨率的那一帧（Switching Frame），由于要重新分配内存和计算算子，会有明显的瞬时延迟（Jitter）。</p>
+</li>
+</ul>
+<hr />
+<h2 id="方案二预分配-图缓存-bucketingmulti-graph"><a class="markdownIt-Anchor" href="#方案二预分配-图缓存-bucketingmulti-graph"></a> 方案二：预分配 + 图缓存 (Bucketing/Multi-Graph)</h2>
+<h3 id="1-技术原理-2"><a class="markdownIt-Anchor" href="#1-技术原理-2"></a> 1. 技术原理</h3>
+<p>该方案预设几个常用的分辨率档位（Buckets）。对于非标准输入，通过 Padding 或 Resize 归一化到最接近的档位。其核心是<strong>为每个档位各录制并保存一个 CUDA Graph</strong>。</p>
+<p><strong>关键流程：</strong></p>
+<ol>
+<li>
+<p><strong>分桶映射</strong>：将输入形状 <code>(W, H)</code> 映射到最近的大尺寸桶 <code>(W_bucket, H_bucket)</code>。</p>
+</li>
+<li>
+<p><strong>输入对齐</strong>：对输入进行 Padding 补边。</p>
+</li>
+<li>
+<p><strong>多图字典</strong>：推理时查找 <code>cuda_graph_instances[bucket_key]</code>。</p>
+</li>
+<li>
+<p><strong>显存复用</strong>：预先申请最大桶的显存，所有桶共享同一块物理地址或使用 Slice。</p>
+</li>
+</ol>
+<h3 id="2-代码实现"><a class="markdownIt-Anchor" href="#2-代码实现"></a> 2. 代码实现</h3>
+<pre class="highlight"><code class="python">
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">BucketingEngine</span>(<span class="hljs-title class_ inherited__">Engine</span>):
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, engine_path</span>):
+
+        <span class="hljs-built_in">super</span>().__init__(engine_path)
+
+        <span class="hljs-comment"># 用字典存储多个 CUDA Graph 实例</span>
+        self.cuda_graph_instances = &#123;&#125;
+
+        <span class="hljs-comment"># 预设桶：例如 [(512,512), (768,768), (1024,1024)]</span>
+        self.buckets = self._define_buckets()
+
+  
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">infer_bucketing</span>(<span class="hljs-params">self, feed_dict, stream, device</span>):
+
+        <span class="hljs-comment"># 1. 找到最适配的桶</span>
+        raw_shape = feed_dict[<span class="hljs-string">&#x27;input&#x27;</span>].shape
+        bucket_shape = self._map_to_bucket(raw_shape)
+        bucket_key = <span class="hljs-string">f&quot;b_<span class="hljs-subst">&#123;bucket_shape[<span class="hljs-number">2</span>]&#125;</span>x<span class="hljs-subst">&#123;bucket_shape[<span class="hljs-number">3</span>]&#125;</span>&quot;</span>
+
+        <span class="hljs-comment"># 2. 如果该桶图没录制，在此处录制并缓存</span>
+        <span class="hljs-keyword">if</span> bucket_key <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.cuda_graph_instances:
+            self._prepare_bucket_resources(bucket_shape) <span class="hljs-comment"># 预分配/Resize Tensors</span>
+            self._record_bucket_graph(bucket_key, stream)
+
+        <span class="hljs-comment"># 3. 快速启动：直接发射对应的 CUDA Graph，无任何逻辑延迟</span>
+        cudart.cudaGraphLaunch(self.cuda_graph_instances[bucket_key], stream)
+
+        <span class="hljs-comment"># 4. (可选) 裁剪输出：根据 raw_shape 裁掉 Padding 部分</span>
+        <span class="hljs-keyword">return</span> self._crop_output(self.tensors[<span class="hljs-string">&#x27;output&#x27;</span>], raw_shape)
+
+</code></pre>
+<h3 id="3-优缺点-2"><a class="markdownIt-Anchor" href="#3-优缺点-2"></a> 3. 优缺点</h3>
+<ul>
+<li><strong>优点</strong>：切换分辨率瞬间<strong>零卡顿</strong>；推理性能达到了静态形状的高度。</li>
+<li><strong>缺点</strong>：显存空间换速度（需要维护更多状态）；如果桶太多会消耗大量显存；需要额外的补边逻辑。</li>
+</ul>
+<hr />
+<h2 id="常见问题解析resize-与-padding-对推理结果的影响"><a class="markdownIt-Anchor" href="#常见问题解析resize-与-padding-对推理结果的影响"></a> 常见问题解析：Resize 与 Padding 对推理结果的影响</h2>
+<p>在分桶方案中，强制将输入适配到桶尺寸会对结果产生影响，具体取决于处理手段：</p>
+<h3 id="1-强制-resize-的影响-风险较高"><a class="markdownIt-Anchor" href="#1-强制-resize-的影响-风险较高"></a> 1. 强制 Resize 的影响 (风险较高)</h3>
+<ul>
+<li><strong>畸变问题</strong>：如果输入比例（如 4:3）与桶比例（如 1:1）不一致，非等比缩放会导致画面拉伸。对于人脸交换（FaceSwap）任务，这会导致特征提取器（如 InstantID 中的识别模型）提取到错误的脸型特征，造成身份不匹配（Identity Mismatch）。</li>
+<li><strong>分辨率敏感性</strong>：Diffusion 模型在训练时通常锁定在特定分辨率。大幅度的 Resize 会改变像素密度，可能导致生成的纹理模糊或出现不自然伪影。</li>
+</ul>
+<h3 id="2-zero-padding-的影响-业界主流推荐"><a class="markdownIt-Anchor" href="#2-zero-padding-的影响-业界主流推荐"></a> 2. Zero Padding 的影响 (业界主流推荐)</h3>
+<ul>
+<li><strong>原理</strong>：保持原始比例缩放，并将图像放入桶的左上角，其余部分补零（Black Padding）。推理结束后再将对应的有效区域截取出来。</li>
+<li><strong>identity 保持</strong>：由于像素比例是 1:1 维持的，人脸的几何特征不会受损，结果最稳定。</li>
+<li><strong>注意力干扰</strong>：在 Self-Attention 层中，模型会关注到全黑区域。虽然这在深层网络中可能带来极轻微的全局偏移，但通常通过“将 Padding 填充为图像均值”或“使用简单的截断逻辑”可以忽略不计。</li>
+</ul>
+<hr />
+<h2 id="总结与建议"><a class="markdownIt-Anchor" href="#总结与建议"></a> 总结与建议</h2>
+<p>| 特性 | 完全动态方案 (Full Dynamic) | 图缓存分桶方案 (Bucketing) |</p>
+<p>| <strong>支持形状</strong> | 任意 [min, max] | 仅限预设桶 (Padding) |</p>
+<p>| <strong>CUDA Graph</strong> | 单实例，改变尺寸需销毁 | 多实例，常驻字典缓存 |</p>
+<p>| <strong>切换瞬间延迟</strong> | 高 (重新分配 + 重绘) | 零 (直接发射 Graph) |</p>
+<p>| <strong>显存占用</strong> | 低 (按需) | 高 (多图多缓存) |</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TensorRT/" rel="tag">TensorRT</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
   id="post-LLM/大模型实战营"
   class="article article-type-post"
   itemscope
@@ -1348,368 +1689,6 @@ make install #可以生成头文件和链接库
 </article>
 
     
-    <article
-  id="post-c++/c++ 基础"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2023/04/27/c/c-ji-chu/"
-    >c++基础</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2023/04/27/c/c-ji-chu/" class="article-date">
-  <time datetime="2023-04-27T02:15:31.000Z" itemprop="datePublished">2023-04-27</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/c/">c++</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h1 id="1static-inline"><a class="markdownIt-Anchor" href="#1static-inline"></a> 1.static inline</h1>
-<p>对于普通函数而言，在a.h中声明然后在a.cpp中定义，再经过编译链接后我们在test1.cpp、test2.cpp中就可以通过#include&quot;a.h&quot;来调用函数。但是对于内联函数而言，我们无法在test1.cpp、test2.cpp中同时通过#include&quot;a.h&quot;来调用内联函数，也就是说一个.h中的内联函数被两个不同的文件包含，则会出现重名，链接失效。但如果使用static inline可以解决<br />
-这个问题，使用static修饰符，函数仅在文件内部可见。可以理解为一个inline在不同的.C里面生成了不同的实例，而且名字是完全相同的。</p>
-<h1 id="2static"><a class="markdownIt-Anchor" href="#2static"></a> 2.static</h1>
-<p><strong>static可以修饰哪些变量:</strong></p>
-<p>全局静态变量、局部静态变量、函数，除此之外，还可以修饰类中的静态成员变量以及静态成员函数。<br />
-``</p>
-<blockquote>
-<ul>
-<li>全局静态变量和局部静态变量都存储在静态存储区。存储在静态存储区的变量在编译期完成初始化，static定义的局部变量也是在编译时期分配的，而且生存期是永久的，直到生存期结束。</li>
-<li>静态成员函数不能访问普通成员变量，静态函数在编译期完成了初始化，而此时类还未初始化，此时访问了不存在的变量。</li>
-<li>全局静态变量相对于全局变量而言，全局变量具有外部链接性，通过声明extern关键字可以进行变量的赋值。而全局静态变量不具有外部链接性。</li>
-<li>类中对象之间的成员变量是相互独立的 ，想要共用数据需要使用静态成员或者静态方法。由前面所知，在类中定义的静态成员函数以及静态成员变量在编译期完成初始化，因此，即使不定义对象，静态成员变量存储在静态存储区，其已经分配了内存空间，其不随对象的创建而创建，也不随对象的消亡而消亡。</li>
-<li>静态成员函数只能访问静态成员变量。</li>
-</ul>
-</blockquote>
-<p><strong>举个static相关例子如下</strong>：</p>
-<pre class="highlight"><code class="">class StaticA
-&#123;
-public:
-	StaticA()&#123;&#125;;
-	~ StaticA()&#123;&#125;;
-	static int a; //静态成员变量只能在类外初始化
-	static int teststatic()
-	&#123;
-		std::cout&lt;&lt;&quot;a:&quot;&lt;&lt;a&lt;&lt;std::endl;
-	&#125;
-&#125;;
-int StaticA::a=1;
-
-int main()
-&#123;
-StaticA *A=nullptr;
-A-&gt;teststatic(); // 输出 a:1
-return 0;
-&#125;
-</code></pre>
-<h1 id="3vitual虚函数"><a class="markdownIt-Anchor" href="#3vitual虚函数"></a> 3.vitual虚函数</h1>
-<h2 id="构造函数-析构函数之虚函数"><a class="markdownIt-Anchor" href="#构造函数-析构函数之虚函数"></a> 构造函数、析构函数之虚函数</h2>
-<p><strong>构造函数不可以是虚函数，而析构函数常常是虚函数。</strong><br />
-构造函数不可以是虚函数，原因如下：</p>
-<blockquote>
-<p>虚函数的调用是通过虚函数表来调用的。而虚函数表是由实例化的vptr指针来指向的，该实例化指针存放在对象的内部空间中且占8字节，需要调用构造函数完成初始化。因此，虚函数的调用需要发生在构造函数之后。</p>
-</blockquote>
-<p>析构函数可以常常是虚函数，原因如下：</p>
-<blockquote>
-<p>在实现多态性时，通过基类去指向派生类对象，只有申明为虚函数才能实现。如果定义的派生类对象是基类类型时，若没有声明基类虚析构函数，派生类在调用析构函数时，则会调用基类的虚构函数，会存在内存泄漏的风险。</p>
-</blockquote>
-<h2 id="类成员函数之虚函数"><a class="markdownIt-Anchor" href="#类成员函数之虚函数"></a> 类成员函数之虚函数</h2>
-<p>派生类需要重写基类中的同名函数，则需要在基类中声明virtual虚函数，否则是不允许的。</p>
-<h3 id="补充重载与重写区别"><a class="markdownIt-Anchor" href="#补充重载与重写区别"></a> 补充：重载与重写区别：</h3>
-<p>C++中的重载（Overloading）和重写（Overriding）是两个不同的概念，它们之间有以下几个不同点：</p>
-<blockquote>
-<ul>
-<li><strong>定义位置不同</strong>:<br />
-重载是在同一个类中定义多个具有相同名称但参数列表不同的函数，重载函数可以包括不同类型、不同数量、不同顺序的参数。而重写是在派生类中重新定义一个从基类中继承的已有函数，函数名称、参数列表和返回值类型在基类和派生类中必须完全相同。</li>
-<li><strong>对象的处理不同</strong>:<br />
-重载函数是编译期多态，由编译器根据传入的参数类型和数量来决定调用哪个函数。而重写函数是运行期多态，由运行时的实际对象类型来决定调用哪个函数。</li>
-<li><strong>可访问性不同</strong>:<br />
-如果一个成员函数用<code>virtual</code>关键字声明为虚函数，则它可以在派生类中被重写。如果在派生类中重写基类中非虚函数的函数，这是不允许的。由于访问非虚函数是通过编译时分辨多态来实现的，所以在编译时通过基类指针或引用调用派生类的函数会调用基类函数，而不会调用派生类中的同名函数。</li>
-<li><strong>参数匹配和返回值类型</strong>:<br />
-重载函数和重写函数的参数匹配和返回值类型在调用时有着不同的表现。在重载函数中，函数调用的正确匹配由编译器通过参数类型和数量决定。在重写函数中，参数列表和返回值类型必须与基类中的函数完全匹配，否则会导致编译错误。</li>
-</ul>
-</blockquote>
-<h1 id="4raii"><a class="markdownIt-Anchor" href="#4raii"></a> 4.RAII</h1>
-<p>RAII是C<ins>中一种非常重要的编程思想，全称为Resource Acquisition Is Initialization，中文为“资源获取即初始化”。它主要是利用C</ins>的构造函数在对象初始化时自动获取资源，并在对象析构时自动释放资源的特性进行对象封装，以方便管理和避免资源泄露。</p>
-<pre class="highlight"><code class="">class MemoryBlock
-&#123;
-public:
-MemoryBlock():_length(0),_data(nullptr)&#123;&#125;
-
-MemoryBlock(size_t length):_length(length),_data(new char[length])
-&#123;
-	std::cout &lt;&lt; &quot;constructed!&quot; &lt;&lt;std::endl;
-&#125;
-
-~MemoryBlock()
-&#123;
-	delete[] _data ;
-	std::cout &lt;&lt; &quot;destructed!&quot; &lt;&lt; std::endl;
-&#125;
-
-// 拷贝构造函数，实现深度拷贝
-MemoryBlock(const MemoryBlock&amp; other):_length(other._length),_data(new char[other._length])
-&#123;
-	std::copy(other._data, other._data+_length, _data);
-	std::cout&lt;&lt; &quot;deep copy constructed!&quot; &lt;&lt;std::endl;
-&#125;
-
-// 赋值运算符实现深度赋值
-MemoryBlock&amp; operator=(const MemoryBlock&amp; other)
-&#123;
-	if(this != &amp;other)
-	&#123;
-		if(_data!= nullptr) delete[] _data;
-		_length = other._length;
-		_data = new char[_length];
-		std::copy(other._data, other._data+_length, _data);
-	&#125;
-	return *this;
-&#125;
-
-size_t length()
-&#123;
-return _length;
-&#125;
-
-char* data()
-&#123;
-return _data;
-&#125;
-
-private:
-size_t _length;
-char *_data;
-&#125;;
-
-int main()
-&#123;
-
-	MemoryBlock memoryblock1(20);
-	
-	std::strcpy(memoryblock1.data(), &quot;Hello World!&quot;);
-	
-	std::cout &lt;&lt; &quot;memoryblock1: &quot; &lt;&lt; memoryblock1.data() &lt;&lt; std::endl;
-		
-	// 拷贝构造函数生成类对象
-	
-	MemoryBlock memoryblock2(memoryblock1);
-	
-	std::cout &lt;&lt; &quot;memoryblock2: &quot; &lt;&lt; memoryblock2.data() &lt;&lt; std::endl;
-	
-	// 赋值生成对象
-	MemoryBlock memoryblock3;
-	memoryblock3 = memoryblock1;
-	std::cout &lt;&lt; &quot;memoryblock3: &quot; &lt;&lt; memoryblock3.data() &lt;&lt; std::endl;
-&#125;
-</code></pre>
-<h1 id="5override"><a class="markdownIt-Anchor" href="#5override"></a> 5.override</h1>
-<p><code>override</code>是一个关键字，用于指示派生类中的虚函数将覆盖基类中的虚函数。它可以用于明确地指示编译器该函数是用于覆盖基类中的虚函数，如果不匹配则会导致编译错误。<br />
-<strong>作用</strong>：<br />
-在于提高程序的可读性以及健壮性，在派生类中重写基类函数需要声明基类函数为虚函数，声明关键字<code>override</code> 可以告诉读者重写了基类中的虚函数。<br />
-就程序运行而言，<code>override</code>声明与否不会对程序运行有任何影响。</p>
-<h1 id="6堆与栈"><a class="markdownIt-Anchor" href="#6堆与栈"></a> 6.堆与栈</h1>
-<p>栈区内存由操作系统自动分配和释放，堆区内存由程序员手动分配和释放。<br />
-两者的主要区别：</p>
-<ul>
-<li>内存管理方式：栈区内存由操作系统自动分配和释放，而堆区内存则是手动分配和释放。</li>
-<li>内存大小：栈区内存一般较小，通常为MB级别，而堆区内存相对较大，可以达到GB级别。</li>
-<li>内存访问方式：栈区内存访问速度很快，因为它的内存分配方式是连续的，可以直接通过指针访问。堆区内存的访问速度较慢，因为它的内存分配方式是不连续的，需要通过指针间接访问。</li>
-<li>内存分配效率：栈区内存的分配效率很高，因为它的内存分配方式是栈式的，只需移动指针即可。堆区的内存分配效率较低，它需要维护一张内存空闲表来记录哪些内存块已经分配，哪些内存块未被分配。</li>
-<li>内存分配方式：栈区内存的分配方式是先进后出，堆区的内存分配方式是按照程序员的指令随时分配和释放，没有顺序限制。</li>
-</ul>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c/" rel="tag">c++</a></li></ul>
-
-    </footer>
-  </div>
-
-   
-   
-  
-</article>
-
-    
-    <article
-  id="post-cuda/CUDA 编程简介"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2023/04/26/cuda/cuda-bian-cheng-jian-jie/"
-    >cuda编程 简介</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2023/04/26/cuda/cuda-bian-cheng-jian-jie/" class="article-date">
-  <time datetime="2023-04-25T16:00:00.000Z" itemprop="datePublished">2023-04-26</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/cuda/">cuda</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h1 id="cuda编程模型"><a class="markdownIt-Anchor" href="#cuda编程模型"></a> CUDA编程模型</h1>
-<p>CUDA编程模型假设系统是由一个主机(CPU)和一个设备(GPU)组成的，而各自拥有独立的内存。因此，在CUDA编程中我们需要编写在设备(GPU)上运行的代码，也被称为核函数(Kernel)，其并行地运行在GPU的多个处理器上，这极大的提高了计算速度。</p>
-<p>典型的CUDA程序执行步骤：</p>
-<blockquote>
-<ul>
-<li>把数据从CPU内存拷贝到GPU内存。</li>
-<li>调用核函数对存储在GPU内存中的数据进行操作。</li>
-<li>将数据从GPU内存传回CPU内存。</li>
-</ul>
-</blockquote>
-<p>CUDA编程模型的两个特点：<br />
-1.通过层次结构来组织线程</p>
-<blockquote>
-<ul>
-<li>一般CPU一个核只支持一到两个硬件线程，而GPU在硬件层面就支持成百上千个并发线程。在CUDA编程中，线程是通过线程网格(Grid)、线程块(Block)、线程束(Warp)、线程(Thread)这几个层次管理。</li>
-<li>由一个内核启动所产生的所有线程统称为一个网格(Grid),同一网格中的所有线程共享相同的全局内存空间。向下一级，一个网格由多个线程块(Block)构成。再下一级，一个线程块由一组线程(Thread)构成</li>
-</ul>
-</blockquote>
-<p>2.内存的使用</p>
-<blockquote>
-<ul>
-<li>GPU中的各级缓存以及各种内存是可以软件控制的，这些内存包括寄存器、共享内存、常量内存、全局内存等。</li>
-</ul>
-</blockquote>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cuda/" rel="tag">cuda</a></li></ul>
-
-    </footer>
-  </div>
-
-   
-   
-  
-</article>
-
-    
-    <article
-  id="post-hexo 简介"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2023/04/21/hexo-jian-jie/"
-    >hexo 简介</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2023/04/21/hexo-jian-jie/" class="article-date">
-  <time datetime="2023-04-20T16:00:00.000Z" itemprop="datePublished">2023-04-21</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/hexo/">hexo</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h1 id="1什么是hexo"><a class="markdownIt-Anchor" href="#1什么是hexo"></a> 1.什么是Hexo?</h1>
-<p>Hexo是一个快速、简洁且高效的静态博客框架，使用Node.js编写，支持Markdown语法和EJS模板引擎。</p>
-<h1 id="2hexo常用命令"><a class="markdownIt-Anchor" href="#2hexo常用命令"></a> 2.Hexo常用命令</h1>
-<blockquote>
-<ul>
-<li>hexo clean：清除缓存文件</li>
-<li>hexo g: 生成静态文件，即将Markdown文件生成为HTML文件。</li>
-<li>hexo s: 启动本地服务器，用于本地浏览。</li>
-<li>hexo d: 部署博客，将静态文件上传到远程服务器或者GitHub Pages.</li>
-<li>hexo new post “article”: 新建一篇名为article的文章。</li>
-<li>hexo new page “title”: 用于新建一个空的页面，相当于生成一个文件夹并在文件夹里面有一个初始md文件。</li>
-<li>hexo init：新建博客，相当于初始化一个Hexo博客demo，需要空文件夹下执行该命令。</li>
-</ul>
-</blockquote>
-<h1 id="3简述hexo构建流程"><a class="markdownIt-Anchor" href="#3简述hexo构建流程"></a> 3.简述Hexo构建流程</h1>
-<p>该部分只对hexo搭建个人博客所需环境以及步骤列个目录，具体详情参见<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/35668237">这里</a>。</p>
-<h3 id="所需环境与步骤"><a class="markdownIt-Anchor" href="#所需环境与步骤"></a> 所需环境与步骤</h3>
-<blockquote>
-<ul>
-<li>安装Node.js</li>
-<li>安装Git</li>
-<li>注册Github账号</li>
-<li>安装Hexo</li>
-<li>连接Github与本地</li>
-</ul>
-</blockquote>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li></ul>
-
-    </footer>
-  </div>
-
-   
-   
-  
-</article>
-
-    
   </article>
   
 
@@ -1727,7 +1706,7 @@ int main()
     <ul>
       <li>
         Copyrights &copy;
-        2015-2025
+        2015-2026
         <i class="ri-heart-fill heart_icon"></i> twlelev的博客
       </li>
     </ul>
