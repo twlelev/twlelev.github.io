@@ -152,6 +152,67 @@
     
     
     <article
+  id="post-muduo学习/muduo学习"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2023/08/12/muduo-xue-xi/muduo-xue-xi/"
+    >muduo</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/08/12/muduo-xue-xi/muduo-xue-xi/" class="article-date">
+  <time datetime="2023-08-12T02:15:31.000Z" itemprop="datePublished">2023-08-12</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/muduo/">muduo</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="线程安全的对象生命期管理"><a class="markdownIt-Anchor" href="#线程安全的对象生命期管理"></a> 线程安全的对象生命期管理</h1>
+<p>why?</p>
+<ul>
+<li>在即将析构一个对象时，从何而知此刻是否有其它线程在执行该对象的成员函数？</li>
+<li>如何保证在执行成员函数期间，对象不会在另一个线程被析构？</li>
+<li>在调用某个对象的成员函数之前，如何得知这个对象还活着？它的析构函数会不会碰巧执行到一半？</li>
+</ul>
+<p>以shared_ptr一劳永逸解决这些问题。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/muduo/" rel="tag">muduo</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
   id="post-视频编码/视频编码基础"
   class="article article-type-post"
   itemscope

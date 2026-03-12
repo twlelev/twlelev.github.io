@@ -87,7 +87,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.5k</span>
+            <span class="post-count">1.6k</span>
         </span>
     </span>
 
@@ -186,8 +186,16 @@ paper原文: we denote the UNET features in the path without ID embedding as <sp
 <h3 id="instantids-identitynet-architecture"><a class="markdownIt-Anchor" href="#instantids-identitynet-architecture"></a> InstantID’s IdentityNet Architecture</h3>
 <p>利用包含200万张美观肖像图像的数据集，IdentityNet增强了关键点控制，提高了身份证一致性与面部真实性。在训练过程中，IP-adapter被冻结，仅训练IdentityNet。landmark被用作条件输入，而face embeddings则通过cross-attention集成到IdentityNet中。</p>
 <h2 id="infiniteyou"><a class="markdownIt-Anchor" href="#infiniteyou"></a> InfiniteYou</h2>
-<p><strong>核心：</strong> 针对FLUX(DiT)架构深度定制的身份保持(Identity-Preserving）方案。通过InfuseNet方式注入，不同与IPA通过cross-attention修改主模型的中间层，而是通过残差连接注入。<br />
+<p><strong>核心：</strong> 针对FLUX(DiT)架构深度定制的身份保持(Identity-Preserving）方案。通过InfuseNet方式注入，不同于IPA通过cross-attention修改主模型的中间层，而是通过残差连接注入。<br />
 <img src="/images/AIGC/20251221154015.png" alt="" /></p>
+<h3 id="flux-joint-attention和-cross-attention-的本质区别"><a class="markdownIt-Anchor" href="#flux-joint-attention和-cross-attention-的本质区别"></a> FLUX Joint Attention和 Cross-Attention 的本质区别</h3>
+<pre class="highlight"><code class="javascript"><span class="hljs-title class_">Cross</span>-<span class="hljs-title class_">Attention</span>:
+  Q = img,  K = <span class="hljs-variable constant_">ID</span>,  V = <span class="hljs-variable constant_">ID</span>   → 只有 img 更新，<span class="hljs-variable constant_">ID</span> 是静态条件
+
+<span class="hljs-variable constant_">FLUX</span> <span class="hljs-title class_">Joint</span> <span class="hljs-title class_">Attention</span>:
+  Q = [<span class="hljs-variable constant_">ID</span>; img],  K = [<span class="hljs-variable constant_">ID</span>; img],  V = [<span class="hljs-variable constant_">ID</span>; img]  → 两者都更新，双向交互，相互attend
+</code></pre>
+<p>InfiniteYou 中ID embedding注入InfuseNet的方式是Joint Attention（联合注意力），不是Cross-Attention,也不是self-attention，是img token 和 ID token共同参与的。这是 FLUX区别于Stable Diffusion的核心架构之一。</p>
  
       <!-- reward -->
       

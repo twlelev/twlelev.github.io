@@ -6,10 +6,36 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2026-01-09T08:07:55.597Z</updated>
+  <updated>2026-03-09T10:23:17.053Z</updated>
   <id>http://example.com/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Helios</title>
+    <link href="http://example.com/2026/03/09/aigc/helios/"/>
+    <id>http://example.com/2026/03/09/aigc/helios/</id>
+    <published>2026-03-09T10:02:07.000Z</published>
+    <updated>2026-03-09T10:23:17.053Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;heliospipeline-vs-2d-图像生成-pipeline-的核心区别&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#heliospipeline-vs-2d-图像生成-pipeline-的核心区别&quot;&gt;&lt;/a&gt;
+        
+      
+    
+    </summary>
+    
+      <category term="Videos" scheme="http://example.com/categories/Videos/"/>
+    
+    
+      <category term="AIGC" scheme="http://example.com/tags/AIGC/"/>
+    
+  </entry>
   
   <entry>
     <title>强化学习V值学习之td_target实验分析</title>
@@ -68,7 +94,7 @@
     <link href="http://example.com/2025/12/24/python-huan-jing/python-huan-jing/"/>
     <id>http://example.com/2025/12/24/python-huan-jing/python-huan-jing/</id>
     <published>2025-12-24T02:39:49.000Z</published>
-    <updated>2025-12-24T02:49:09.706Z</updated>
+    <updated>2026-02-11T06:37:31.441Z</updated>
     
     <summary type="html">
     
@@ -121,7 +147,7 @@
     <link href="http://example.com/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/"/>
     <id>http://example.com/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/</id>
     <published>2025-12-21T00:49:43.000Z</published>
-    <updated>2025-12-23T02:58:32.930Z</updated>
+    <updated>2026-03-12T07:29:22.597Z</updated>
     
     <summary type="html">
     
@@ -513,34 +539,6 @@
     
     
       <category term="linux" scheme="http://example.com/tags/linux/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>上传git仓库</title>
-    <link href="http://example.com/2023/04/13/git/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/"/>
-    <id>http://example.com/2023/04/13/git/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/</id>
-    <published>2023-04-13T03:05:31.000Z</published>
-    <updated>2025-12-18T02:37:01.948Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;p&gt;上传git仓库：&lt;br /&gt;
-1.首先需要通过 $git init 初始化本地仓库，即需要cd 到需要上传仓库的目录下，使用当前目录作为Git仓库，也可以指定目录作为Git仓库 $git init reponame&lt;/p&gt;
-&lt;p&gt;2.在本地仓库中添加内容 git add
-        
-      
-    
-    </summary>
-    
-      <category term="git" scheme="http://example.com/categories/git/"/>
-    
-    
-      <category term="git" scheme="http://example.com/tags/git/"/>
     
   </entry>
   
