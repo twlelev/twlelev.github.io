@@ -152,6 +152,123 @@
     
     
     <article
+  id="post-LLM/大模型实战营"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2024/12/18/llm/da-mo-xing-shi-zhan-ying/"
+    >LMDeploy的量化和部署</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2024/12/18/llm/da-mo-xing-shi-zhan-ying/" class="article-date">
+  <time datetime="2024-12-18T07:31:01.000Z" itemprop="datePublished">2024-12-18</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/LLM/">LLM</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="lmdeploy的量化和部署"><a class="markdownIt-Anchor" href="#lmdeploy的量化和部署"></a> LMDeploy的量化和部署</h1>
+<h2 id="环境配置"><a class="markdownIt-Anchor" href="#环境配置"></a> 环境配置</h2>
+<h2 id="2服务部署"><a class="markdownIt-Anchor" href="#2服务部署"></a> 2服务部署</h2>
+<h3 id="21模型转换"><a class="markdownIt-Anchor" href="#21模型转换"></a> 2.1模型转换</h3>
+<p>使用TurboMind推理模型需要先将模型转换为TurboMind的格式，目前支持在线转换和李离线转换两种形式。在线转换可以直接加载Huggingface模型，离线转换需要先保存模型再加载。<br />
+TurboMind是一款关于LLM推理的高效推理引擎，基于英伟达的FasterTransformer研发而成。它的主要供功能包括：LLaMa结构模型的支持，persistent batch推理模式和可扩展的KV缓存管理器。</p>
+<h4 id="211"><a class="markdownIt-Anchor" href="#211"></a> 2.1.1</h4>
+<ul>
+<li>(<strong>IBAction</strong>)predict:(<strong>id</strong>)sender {</li>
+</ul>
+<p>// load image</p>
+<p>UIImage* image = [UIImage imageNamed:@“test.jpg”];</p>
+<p>// get rgba pixels from image</p>
+<p><strong>int</strong> w = image.size.width;</p>
+<p><strong>int</strong> h = image.size.height;</p>
+<p>fprintf(stderr, “%d x %d\n”, w, h);</p>
+<p><strong>unsigned</strong> <strong>char</strong>* rgba = <strong>new</strong> <strong>unsigned</strong> <strong>char</strong>[w<em>h</em>4];</p>
+<p>{</p>
+<p>CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);</p>
+<p>CGContextRef contextRef = CGBitmapContextCreate(rgba, w, h, 8, w*4,</p>
+<p>colorSpace,</p>
+<p>kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault);</p>
+<p>CGContextDrawImage(contextRef, CGRectMake(0, 0, w, h), image.CGImage);</p>
+<p>CGContextRelease(contextRef);</p>
+<p>}</p>
+<p>NSString *paramPath = [[NSBundle mainBundle] pathForResource:@“squeezenet_v1.1” ofType:@“param”];</p>
+<p>NSString *binPath = [[NSBundle mainBundle] pathForResource:@“squeezenet_v1.1” ofType:@“bin”];</p>
+<p>// init net</p>
+<p>ncnn::Net net;</p>
+<p>{</p>
+<p><strong>int</strong> r0 = net.load_param([paramPath UTF8String]);</p>
+<p><strong>int</strong> r1 = net.load_model([binPath UTF8String]);</p>
+<p>fprintf(stderr, “net load %d %d\n”, r0, r1);</p>
+<p>}</p>
+<p>std::vector<a href="std::string">std::string</a> labels;</p>
+<p>NSString *labelPath = [[NSBundle mainBundle] pathForResource:@“synset_words” ofType:@“txt”];</p>
+<p>load_labels([labelPath UTF8String], labels);</p>
+<p>// run forward</p>
+<p>ncnn::Mat <strong>out</strong>;</p>
+<p>{</p>
+<p>ncnn::Extractor ex = net.create_extractor();</p>
+<p>ex.set_light_mode(<strong>true</strong>);</p>
+<p>ex.set_num_threads(2);</p>
+<p>ncnn::Mat <strong>in</strong> = ncnn::Mat::from_pixels_resize(rgba, ncnn::Mat::PIXEL_RGBA2BGR, w, h, 227, 227);</p>
+<p><strong>const</strong> <strong>float</strong> mean_vals[3] = {104.f, 117.f, 123.f};</p>
+<p><strong>in</strong>.substract_mean_normalize(mean_vals, 0);</p>
+<p>ex.input(“data”, <strong>in</strong>);</p>
+<p>ex.extract(“prob”, <strong>out</strong>);</p>
+<p>}</p>
+<p>// get prob</p>
+<p>std::vector&lt;<strong>float</strong>&gt; cls_scores;</p>
+<p>{</p>
+<p>cls_scores.resize(<strong>out</strong>.c);</p>
+<p><strong>for</strong> (<strong>int</strong> j=0; j&lt;<strong>out</strong>.c; j++)</p>
+<p>{</p>
+<p><strong>const</strong> <strong>float</strong>* prob = <strong>out</strong>.data + <strong>out</strong>.cstep * j;</p>
+<p>cls_scores[j] = prob[0];</p>
+<p>}</p>
+<p>}</p>
+<p>NSString *result = print_topk(cls_scores, 3, labels);</p>
+<p><strong>self</strong>.resultLabel.text = result;</p>
+<p>// clean</p>
+<p><strong>delete</strong>[] rgba;</p>
+<p>}</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LLM/" rel="tag">LLM</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
   id="post-muduo学习/muduo学习"
   class="article article-type-post"
   itemscope
