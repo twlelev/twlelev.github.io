@@ -152,6 +152,249 @@
     
     
     <article
+  id="post-TensorRT/TensorRT动态尺寸推理技术"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/"
+    >TensorRT动态尺寸推理技术</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/" class="article-date">
+  <time datetime="2025-06-26T07:52:26.000Z" itemprop="datePublished">2025-06-26</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/TensorRT/">TensorRT</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="tensorrt-动态尺寸推理技术方案深度解析"><a class="markdownIt-Anchor" href="#tensorrt-动态尺寸推理技术方案深度解析"></a> TensorRT 动态尺寸推理技术方案深度解析</h1>
+<p>在 Stable Diffusion XL (SDXL) 和 InstantID 等生成式 AI 项目中，提升推理效率的同时支持多种分辨率输入是核心需求。本文将结合代码，详细介绍两种主流的 TensorRT 动态尺寸推理方案。</p>
+<hr />
+<h2 id="方案一full-dynamic完全动态-项目当前采用方案"><a class="markdownIt-Anchor" href="#方案一full-dynamic完全动态-项目当前采用方案"></a> 方案一：Full Dynamic（完全动态）—— 项目当前采用方案</h2>
+<h3 id="1-技术原理"><a class="markdownIt-Anchor" href="#1-技术原理"></a> 1. 技术原理</h3>
+<p>完全动态方案利用 TensorRT 的 <code>IExecutionContext::setInputShape</code> API。引擎在构建阶段通过 Profile 指定一个连续的可选范围。推理时，根据实际输入形状动态调整算子策略。</p>
+<p><strong>关键流程：</strong></p>
+<ol>
+<li>
+<p><strong>形状感知</strong>：检测输入 Tensor 的 <code>shape</code> 是否发生变化。</p>
+</li>
+<li>
+<p><strong>上下文更新</strong>：调用 <code>context.set_input_shape</code> 重新计算各层输入输出张量大小。</p>
+</li>
+<li>
+<p><strong>内存重新分配</strong>：由于输出尺寸变化，释放并重新申请 PyTorch 显存。</p>
+</li>
+<li>
+<p><strong>地址重绑定</strong>：通过 <code>set_tensor_address</code> 将新的显存指针告知 TensorRT。</p>
+</li>
+</ol>
+<h3 id="2-代码实现分析-基于-utilitiespy"><a class="markdownIt-Anchor" href="#2-代码实现分析-基于-utilitiespy"></a> 2. 代码实现分析 (基于 <code>utilities.py</code>)</h3>
+<pre class="highlight"><code class="python">
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">infer</span>(<span class="hljs-params">self, feed_dict, stream, device, use_cuda_graph=<span class="hljs-literal">False</span></span>):
+
+    <span class="hljs-comment"># 1. 生成形状唯一键，检测是否变化</span>
+
+    shape_key = <span class="hljs-string">&quot;_&quot;</span>.join([<span class="hljs-string">f&quot;<span class="hljs-subst">&#123;name&#125;</span>_<span class="hljs-subst">&#123;<span class="hljs-built_in">tuple</span>(buf.shape)&#125;</span>&quot;</span> <span class="hljs-keyword">for</span> name, buf <span class="hljs-keyword">in</span> feed_dict.items()])
+
+    shape_changed = <span class="hljs-keyword">not</span> <span class="hljs-built_in">hasattr</span>(self, <span class="hljs-string">&#x27;last_shape_key&#x27;</span>) <span class="hljs-keyword">or</span> self.last_shape_key != shape_key
+
+    <span class="hljs-keyword">if</span> shape_changed:
+
+        <span class="hljs-comment"># 2. 释放旧张量，创建新张量 (保持显存紧凑)</span>
+
+        <span class="hljs-keyword">for</span> name, buf <span class="hljs-keyword">in</span> feed_dict.items():
+
+            <span class="hljs-keyword">if</span> name <span class="hljs-keyword">in</span> self.tensors:
+
+                <span class="hljs-keyword">del</span> self.tensors[name]
+
+            <span class="hljs-comment"># 重新分配输入/输出 Tensor</span>
+
+            self.tensors[name] = torch.empty(buf.shape, dtype=dtype, device=device)
+
+            <span class="hljs-comment"># 3. 核心步骤：更新 TRT 内部输入形状</span>
+
+            <span class="hljs-keyword">if</span> self.engine.get_tensor_mode(name) == trt.TensorIOMode.INPUT:
+
+                self.context.set_input_shape(name, buf.shape)
+
+  
+
+    <span class="hljs-comment"># 4. 每次推理必须重新绑定地址，因为 data_ptr 改变了</span>
+
+    <span class="hljs-keyword">for</span> name, tensor <span class="hljs-keyword">in</span> self.tensors.items():
+
+        self.context.set_tensor_address(name, tensor.data_ptr())
+
+  
+
+    <span class="hljs-comment"># 5. 执行：如果尺寸改变，必须销毁图并同步执行</span>
+
+    <span class="hljs-keyword">if</span> shape_changed:
+
+        self._cleanup_cuda_graph()
+
+        self.context.execute_async_v3(stream)
+
+    <span class="hljs-keyword">else</span>:
+
+        <span class="hljs-comment"># 如果尺寸没变，则使用缓存的单个 cuda_graph</span>
+
+        cudart.cudaGraphLaunch(self.cuda_graph_instance, stream)
+
+</code></pre>
+<h3 id="3-优缺点"><a class="markdownIt-Anchor" href="#3-优缺点"></a> 3. 优缺点</h3>
+<ul>
+<li>
+<p><strong>优点</strong>：显存利用率极高；支持 [min, max] 间任意分辨率；无需 Padding。</p>
+</li>
+<li>
+<p><strong>缺点</strong>：在改变分辨率的那一帧（Switching Frame），由于要重新分配内存和计算算子，会有明显的瞬时延迟（Jitter）。</p>
+</li>
+</ul>
+<hr />
+<h2 id="方案二预分配-图缓存-bucketingmulti-graph"><a class="markdownIt-Anchor" href="#方案二预分配-图缓存-bucketingmulti-graph"></a> 方案二：预分配 + 图缓存 (Bucketing/Multi-Graph)</h2>
+<h3 id="1-技术原理-2"><a class="markdownIt-Anchor" href="#1-技术原理-2"></a> 1. 技术原理</h3>
+<p>该方案预设几个常用的分辨率档位（Buckets）。对于非标准输入，通过 Padding 或 Resize 归一化到最接近的档位。其核心是<strong>为每个档位各录制并保存一个 CUDA Graph</strong>。</p>
+<p><strong>关键流程：</strong></p>
+<ol>
+<li>
+<p><strong>分桶映射</strong>：将输入形状 <code>(W, H)</code> 映射到最近的大尺寸桶 <code>(W_bucket, H_bucket)</code>。</p>
+</li>
+<li>
+<p><strong>输入对齐</strong>：对输入进行 Padding 补边。</p>
+</li>
+<li>
+<p><strong>多图字典</strong>：推理时查找 <code>cuda_graph_instances[bucket_key]</code>。</p>
+</li>
+<li>
+<p><strong>显存复用</strong>：预先申请最大桶的显存，所有桶共享同一块物理地址或使用 Slice。</p>
+</li>
+</ol>
+<h3 id="2-建议代码实现-改造-engine-类"><a class="markdownIt-Anchor" href="#2-建议代码实现-改造-engine-类"></a> 2. 建议代码实现 (改造 <code>Engine</code> 类)</h3>
+<pre class="highlight"><code class="python">
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">BucketingEngine</span>(<span class="hljs-title class_ inherited__">Engine</span>):
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, engine_path</span>):
+
+        <span class="hljs-built_in">super</span>().__init__(engine_path)
+
+        <span class="hljs-comment"># 用字典存储多个 CUDA Graph 实例</span>
+
+        self.cuda_graph_instances = &#123;&#125;
+
+        <span class="hljs-comment"># 预设桶：例如 [(512,512), (768,768), (1024,1024)]</span>
+
+        self.buckets = self._define_buckets()
+
+  
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">infer_bucketing</span>(<span class="hljs-params">self, feed_dict, stream, device</span>):
+
+        <span class="hljs-comment"># 1. 找到最适配的桶</span>
+
+        raw_shape = feed_dict[<span class="hljs-string">&#x27;input&#x27;</span>].shape
+
+        bucket_shape = self._map_to_bucket(raw_shape)
+
+        bucket_key = <span class="hljs-string">f&quot;b_<span class="hljs-subst">&#123;bucket_shape[<span class="hljs-number">2</span>]&#125;</span>x<span class="hljs-subst">&#123;bucket_shape[<span class="hljs-number">3</span>]&#125;</span>&quot;</span>
+
+        <span class="hljs-comment"># 2. 如果该桶图没录制，在此处录制并缓存</span>
+
+        <span class="hljs-keyword">if</span> bucket_key <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.cuda_graph_instances:
+
+            self._prepare_bucket_resources(bucket_shape) <span class="hljs-comment"># 预分配/Resize Tensors</span>
+
+            self._record_bucket_graph(bucket_key, stream)
+
+        <span class="hljs-comment"># 3. 快速启动：直接发射对应的 CUDA Graph，无任何逻辑延迟</span>
+
+        cudart.cudaGraphLaunch(self.cuda_graph_instances[bucket_key], stream)
+
+        <span class="hljs-comment"># 4. (可选) 裁剪输出：根据 raw_shape 裁掉 Padding 部分</span>
+
+        <span class="hljs-keyword">return</span> self._crop_output(self.tensors[<span class="hljs-string">&#x27;output&#x27;</span>], raw_shape)
+
+</code></pre>
+<h3 id="3-优缺点-2"><a class="markdownIt-Anchor" href="#3-优缺点-2"></a> 3. 优缺点</h3>
+<ul>
+<li>
+<p><strong>优点</strong>：切换分辨率瞬间<strong>零卡顿</strong>；推理性能达到了静态形状的高度。</p>
+</li>
+<li>
+<p><strong>缺点</strong>：显存空间换速度（需要维护更多状态）；如果桶太多会消耗大量显存；需要额外的补边逻辑。</p>
+</li>
+</ul>
+<hr />
+<h2 id="常见问题解析resize-与-padding-对推理结果的影响"><a class="markdownIt-Anchor" href="#常见问题解析resize-与-padding-对推理结果的影响"></a> 常见问题解析：Resize 与 Padding 对推理结果的影响</h2>
+<p>在分桶方案中，强制将输入适配到桶尺寸确实会对结果产生影响，具体取决于处理手段：</p>
+<h3 id="1-强制-resize-的影响-风险较高"><a class="markdownIt-Anchor" href="#1-强制-resize-的影响-风险较高"></a> 1. 强制 Resize 的影响 (风险较高)</h3>
+<ul>
+<li>
+<p><strong>畸变问题</strong>：如果输入比例（如 4:3）与桶比例（如 1:1）不一致，非等比缩放会导致画面拉伸。对于人脸交换（FaceSwap）任务，这会导致特征提取器（如 InstantID 中的识别模型）提取到错误的脸型特征，造成身份不匹配（Identity Mismatch）。</p>
+</li>
+<li>
+<p><strong>分辨率敏感性</strong>：Diffusion 模型在训练时通常锁定在特定分辨率。大幅度的 Resize 会改变像素密度，可能导致生成的纹理模糊或出现不自然伪影。</p>
+</li>
+</ul>
+<h3 id="2-zero-padding-的影响-业界主流推荐"><a class="markdownIt-Anchor" href="#2-zero-padding-的影响-业界主流推荐"></a> 2. Zero Padding 的影响 (业界主流推荐)</h3>
+<ul>
+<li>
+<p><strong>原理</strong>：保持原始比例缩放，并将图像放入桶的左上角，其余部分补零（Black Padding）。推理结束后再将对应的有效区域截取出来。</p>
+</li>
+<li>
+<p>** identity 保持**：由于像素比例是 1:1 维持的，人脸的几何特征不会受损，结果最稳定。</p>
+</li>
+<li>
+<p><strong>注意力干扰</strong>：在 Self-Attention 层中，模型会关注到全黑区域。虽然这在深层网络中可能带来极轻微的全局偏移，但通常通过“将 Padding 填充为图像均值”或“使用简单的截断逻辑”可以忽略不计。</p>
+</li>
+</ul>
+<hr />
+<h2 id="总结与建议"><a class="markdownIt-Anchor" href="#总结与建议"></a> 总结与建议</h2>
+<p>| 特性 | 完全动态方案 (Full Dynamic) | 图缓存分桶方案 (Bucketing) |</p>
+<p>| :— | :— | :— |</p>
+<p>| <strong>支持形状</strong> | 任意 [min, max] | 仅限预设桶 (Padding) |</p>
+<p>| <strong>CUDA Graph</strong> | 单实例，改变尺寸需销毁 | 多实例，常驻字典缓存 |</p>
+<p>| <strong>切换瞬间延迟</strong> | 高 (重新分配 + 重绘) | 零 (直接发射 Graph) |</p>
+<p>| <strong>显存占用</strong> | 低 (按需) | 高 (多图多缓存) |</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TensorRT/" rel="tag">TensorRT</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
   id="post-LLM/大模型实战营"
   class="article article-type-post"
   itemscope
