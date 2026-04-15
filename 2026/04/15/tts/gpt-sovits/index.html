@@ -13,7 +13,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>归档: 2026 |  twlelev的博客</title>
+      <title>GPT-SoVITS |  twlelev的博客</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -55,157 +55,219 @@
       
     <main class="content on">
       <section class="outer">
-  
-  
-  <article class="articles">
+  <article
+  id="post-TTS/GPT-SoVITS"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
     
-    
-    <h1 class="page-type-title">2026</h1>
-    
-    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  GPT-SoVITS
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2026/04/15/tts/gpt-sovits/" class="article-date">
+  <time datetime="2026-04-15T06:02:09.000Z" itemprop="datePublished">2026-04-15</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/TTS/">TTS</a>
+  </div>
   
-  
-  
-  
-  
-  
-  <div class="archives-wrap">
-    <div class="archive-year-wrap">
-      <a href="/archives/2026" class="archive-year">2026</a>
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">497</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">2 分钟</span>
+        </span>
+    </span>
+</div>
+ 
     </div>
-    <div class="archives">
       
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2026/04/15/tts/gpt-sovits/" class="archive-article-date">
-  <time datetime="2026-04-15T06:02:09.000Z" itemprop="datePublished">04/15</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2026/04/15/tts/gpt-sovits/"
-    >GPT-SoVITS</a> 
-</h2>
- 
+    <div class="tocbot"></div>
 
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2026/04/03/tts/vibe-voice-finetune-shi-jian/" class="archive-article-date">
-  <time datetime="2026-04-03T07:55:22.000Z" itemprop="datePublished">04/03</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2026/04/03/tts/vibe-voice-finetune-shi-jian/"
-    >VibeVoice 声音克隆微调实践</a> 
-</h2>
- 
 
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2026/04/01/tts/qwen-tts/" class="archive-article-date">
-  <time datetime="2026-04-01T08:01:36.000Z" itemprop="datePublished">04/01</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2026/04/01/tts/qwen-tts/"
-    >qwen-tts</a> 
-</h2>
- 
 
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2026/03/25/claude-code-shi-yong/" class="archive-article-date">
-  <time datetime="2026-03-25T07:53:08.000Z" itemprop="datePublished">03/25</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2026/03/25/claude-code-shi-yong/"
-    >Claude Code使用</a> 
-</h2>
- 
 
-    </header>
-    
-    
-  </div>
-</article>
-      
   
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2026/03/09/aigc/helios/" class="archive-article-date">
-  <time datetime="2026-03-09T10:02:07.000Z" itemprop="datePublished">03/09</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
        
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2026/03/09/aigc/helios/"
-    >Helios</a> 
-</h2>
- 
+  <h1 id="gpt-sovits-架构全链路详解"><a class="markdownIt-Anchor" href="#gpt-sovits-架构全链路详解"></a> GPT-SoVITS 架构全链路详解</h1>
+<h2 id="第一阶段-参考音频预处理"><a class="markdownIt-Anchor" href="#第一阶段-参考音频预处理"></a> 第一阶段: 参考音频预处理</h2>
+<pre class="highlight"><code class="">参考音频 (3~10s)
+    │
+    ├─→ 16kHz resampling
+    │       → CNHuBERT → HuBERT 特征 (768维, 50fps)
+    │               → VQ Quantizer (RVQ, 1024码本)
+    │                       → prompt_semantic  ← [1, T_ref] 离散 token
+    │                                                  缓存，作为 GPT 的 prompt
+    │
+    └─→ 原始采样率 spectrogram → refer_spec  ← Mel 频谱，送给 SoVITS 提取音色
+         (v2Pro 额外保留 16kHz 音频 → CAM++ → sv_emb 512维)
+</code></pre>
+<h2 id="第二阶段gptar自回归预测目标语义token"><a class="markdownIt-Anchor" href="#第二阶段gptar自回归预测目标语义token"></a> 第二阶段：GPT(AR自回归)预测目标语义token</h2>
+<p><strong>GPT的输入不只是text(音素序列 phones + BERT 特征), 还包括参考音频的语义token作为prompt</strong></p>
+<pre class="highlight"><code class="">
+输入：
+  ├─ 目标文本 → 前端处理 → 音素序列 phones + BERT 特征
+  └─ prompt_semantic (参考音频的语义 token，作为上文)
 
-    </header>
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2026/01/09/qiang-hua-xue-xi/qiang-hua-xue-xi-v-zhi-xue-xi-zhi-td-target-shi-yan-fen-xi/" class="archive-article-date">
-  <time datetime="2026-01-09T07:01:53.000Z" itemprop="datePublished">01/09</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/2026/01/09/qiang-hua-xue-xi/qiang-hua-xue-xi-v-zhi-xue-xi-zhi-td-target-shi-yan-fen-xi/"
-    >强化学习V值学习之td_target实验分析</a> 
-</h2>
- 
+GPT AR 自回归：
+  [prompt_semantic | BOS] → 逐 token 预测 → pred_semantic
+                                              [T_pred] 个离散 token
 
-    </header>
-    
-    
-  </div>
-</article>
+</code></pre>
+<p>prompt_semantic的作用是让GPT对齐说话人的节奏/韵律风格，进行in-context仿说。</p>
+<h2 id="第三阶段sovits解码为音频"><a class="markdownIt-Anchor" href="#第三阶段sovits解码为音频"></a> 第三阶段：SoVITS解码为音频</h2>
+<pre class="highlight"><code class="">pred_semantic (离散 token)
+    → RVQ Decoder → quantized (连续向量, 768维)
+    → ssl_proj + interpolate (25hz→50hz)
+    ↓
+TextEncoder (enc_p)：
+    ├─ 输入1: quantized (语义内容)
+    ├─ 输入2: phones (文本音素，控制发音)
+    └─ 输入3: ge (音色/风格向量)
+    → 通过 MRTE 模块融合三路信息
+    → 输出: m_p, logs_p (先验分布参数)
+    ↓
+Flow (正规化流，逆向)：
+    z_p ~ N(m_p, exp(logs_p)) → z
+    ↓
+Generator (HiFi-GAN 风格声码器)：
+    z + ge → 波形音频
+
+</code></pre>
+<p>v2Pro = v2 的 SoVITS 架构 + <strong>SV Embedding</strong> + <strong>v3 的 GPT 模型</strong>，本质上是把两个最大的升级（更强语义 GPT + 说话人身份强化）合并到 v2 的轻量声学框架里，不引入外部 Vocoder，保持推理简洁</p>
+<h1 id="z_p-z-flow的关系"><a class="markdownIt-Anchor" href="#z_p-z-flow的关系"></a> z_p、z、Flow的关系</h1>
+<pre class="highlight"><code class="">训练：真实mel → enc_q → z ──Flow正向──→ z_p   (然后算 KL: z_p分布 vs 先验分布)
+推理：先验采样 z_p ──Flow逆向──→ z → Generator
+Flow：是可逆双射函数
+</code></pre>
+<p>KL loss 主要训练 <strong>enc_p（先验编码器）</strong>，让它预测的 N(m_p, exp(logs_p)) 去拟合后验 z 经 Flow 正向映射后的分布。Flow 本身主要被重建损失训练。两者共同保证：推理时先验采样 z_p → Flow 逆向 → z，与训练时 enc_q(真实mel) → z 的分布一致。</p>
+ 
+      <!-- reward -->
       
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
       
     </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2026/04/15/tts/gpt-sovits/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TTS/" rel="tag">TTS</a></li></ul>
+
+    </footer>
   </div>
-  
-  
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/2026/04/03/tts/vibe-voice-finetune-shi-jian/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">VibeVoice 声音克隆微调实践</div>
+      </a>
+    
+  </nav>
 
   
+   
+  
+   
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
 </section>
       <footer class="footer">
   <div class="outer">
@@ -329,6 +391,22 @@
 <script src="/js/lazyload.min.js"></script>
 
 <!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
 
 <script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
 <link

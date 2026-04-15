@@ -6,10 +6,72 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2026-04-01T08:45:33.184Z</updated>
+  <updated>2026-04-15T06:54:52.361Z</updated>
   <id>http://example.com/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>GPT-SoVITS</title>
+    <link href="http://example.com/2026/04/15/tts/gpt-sovits/"/>
+    <id>http://example.com/2026/04/15/tts/gpt-sovits/</id>
+    <published>2026-04-15T06:02:09.000Z</published>
+    <updated>2026-04-15T06:54:52.361Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;gpt-sovits-架构全链路详解&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#gpt-sovits-架构全链路详解&quot;&gt;&lt;/a&gt; GPT-SoVITS 架构全链路详解&lt;/h1&gt;
+&lt;h2 id=&quot;第一阶段-参考音频预处理&quot;&gt;&lt;a
+        
+      
+    
+    </summary>
+    
+      <category term="TTS" scheme="http://example.com/categories/TTS/"/>
+    
+    
+      <category term="TTS" scheme="http://example.com/tags/TTS/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>VibeVoice 声音克隆微调实践</title>
+    <link href="http://example.com/2026/04/03/tts/vibe-voice-finetune-shi-jian/"/>
+    <id>http://example.com/2026/04/03/tts/vibe-voice-finetune-shi-jian/</id>
+    <published>2026-04-03T07:55:22.000Z</published>
+    <updated>2026-04-03T08:04:45.755Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;模型架构速览&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#模型架构速览&quot;&gt;&lt;/a&gt; 模型架构速览&lt;/h2&gt;
+&lt;p&gt;VibeVoice 本质上是 &lt;strong&gt;Qwen2.5 LLM + 扩散解码头&lt;/strong&gt;
+        
+      
+    
+    </summary>
+    
+      <category term="TTS" scheme="http://example.com/categories/TTS/"/>
+    
+    
+      <category term="TTS" scheme="http://example.com/tags/TTS/"/>
+    
+      <category term="Voice Cloning" scheme="http://example.com/tags/Voice-Cloning/"/>
+    
+      <category term="Fine-tuning" scheme="http://example.com/tags/Fine-tuning/"/>
+    
+      <category term="VibeVoice" scheme="http://example.com/tags/VibeVoice/"/>
+    
+      <category term="Diffusion" scheme="http://example.com/tags/Diffusion/"/>
+    
+  </entry>
   
   <entry>
     <title>qwen-tts</title>
@@ -484,58 +546,6 @@
     
     
       <category term="c++" scheme="http://example.com/tags/c/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>cuda编程 简介</title>
-    <link href="http://example.com/2023/04/26/cuda/cuda-bian-cheng-jian-jie/"/>
-    <id>http://example.com/2023/04/26/cuda/cuda-bian-cheng-jian-jie/</id>
-    <published>2023-04-25T16:00:00.000Z</published>
-    <updated>2025-12-18T02:22:36.014Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h1 id=&quot;cuda编程模型&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#cuda编程模型&quot;&gt;&lt;/a&gt;
-        
-      
-    
-    </summary>
-    
-      <category term="cuda" scheme="http://example.com/categories/cuda/"/>
-    
-    
-      <category term="cuda" scheme="http://example.com/tags/cuda/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>hexo 简介</title>
-    <link href="http://example.com/2023/04/21/hexo-jian-jie/"/>
-    <id>http://example.com/2023/04/21/hexo-jian-jie/</id>
-    <published>2023-04-20T16:00:00.000Z</published>
-    <updated>2025-12-18T02:55:48.324Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h1 id=&quot;1什么是hexo&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#1什么是hexo&quot;&gt;&lt;/a&gt;
-        
-      
-    
-    </summary>
-    
-      <category term="hexo" scheme="http://example.com/categories/hexo/"/>
-    
-    
-      <category term="hexo" scheme="http://example.com/tags/hexo/"/>
     
   </entry>
   

@@ -13,7 +13,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>qwen-tts |  twlelev的博客</title>
+      <title>VibeVoice 声音克隆微调实践 |  twlelev的博客</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -56,7 +56,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-TTS/qwen-tts"
+  id="post-TTS/vibe-voice-finetune实践"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -67,7 +67,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  qwen-tts
+  VibeVoice 声音克隆微调实践
 </h1>
  
 
@@ -75,11 +75,11 @@
     </header>
      
     <div class="article-meta">
-      <a href="/2026/04/01/tts/qwen-tts/" class="article-date">
-  <time datetime="2026-04-01T08:01:36.000Z" itemprop="datePublished">2026-04-01</time>
+      <a href="/2026/04/03/tts/vibe-voice-finetune-shi-jian/" class="article-date">
+  <time datetime="2026-04-03T07:55:22.000Z" itemprop="datePublished">2026-04-03</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/qwen-tts/">qwen-tts</a>
+    <a class="article-category-link" href="/categories/TTS/">TTS</a>
   </div>
   
 <div class="word_count">
@@ -87,7 +87,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.1k</span>
+            <span class="post-count">1.6k</span>
         </span>
     </span>
 
@@ -96,7 +96,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">4 分钟</span>
+            <span class="post-count">6 分钟</span>
         </span>
     </span>
 </div>
@@ -111,149 +111,392 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="qwen3-tts-整体网络框架"><a class="markdownIt-Anchor" href="#qwen3-tts-整体网络框架"></a> Qwen3-TTS 整体网络框架</h1>
-<pre class="highlight"><code class="mermaid">flowchart TD
-    SI[&quot;ref_mel [B, T_mel, 128]&quot;]
-    SO[&quot;spk_embed [B, D]&quot;]
-    IE[&quot;input_embeds [B, T, D]&quot;]
-    HS[&quot;hidden_states [B, T, D]&quot;]
-    CH[&quot;codec_head — codebook 0 logits [B,T,V]&quot;]
-    CP[&quot;Sub-Talker — codebook 1-15 logits [B,15,V]&quot;]
-    ST[&quot;speech_tokenizer — waveform&quot;]
-
-    subgraph SE[&quot;SpeakerEncoder (ECAPA-TDNN)&quot;]
-        SI --&gt; SO
-    end
-
-    subgraph MT[&quot;Main Talker (28层 Transformer Decoder)&quot;]
-        IE --&gt; HS
-    end
-
-    SO -- &quot;注入 idx 3000&quot; --&gt; IE
-    HS --&gt; CH
-    HS --&gt; CP
-    CH --&gt; ST
-    CP --&gt; ST
-</code></pre>
-<h1 id="推理流程自回归逐步生成"><a class="markdownIt-Anchor" href="#推理流程自回归逐步生成"></a> 推理流程（自回归逐步生成）</h1>
-<pre class="highlight"><code class="mermaid">flowchart TD
-    P1[&quot;Step 1: Prefill — text + ref_audio → Main Talker&quot;]
-    A[&quot;Main Talker: hidden_state[t] → codebook[0]&quot;]
-    B[&quot;Sub-Talker: codebook[1] → [2] → … → [15]&quot;]
-    C[&quot;16个 codebook embeddings 求和 → 下一步输入&quot;]
-    P3[&quot;Step 3: 解码 — speech_tokenizer → waveform&quot;]
-
-    P1 --&gt; A --&gt; B --&gt; C
-    C -- &quot;下一时间步 t+1&quot; --&gt; A
-    C --&gt; P3
-</code></pre>
-<h1 id="各模块维度汇总"><a class="markdownIt-Anchor" href="#各模块维度汇总"></a> 各模块维度汇总</h1>
+  <h2 id="模型架构速览"><a class="markdownIt-Anchor" href="#模型架构速览"></a> 模型架构速览</h2>
+<p>VibeVoice 本质上是 <strong>Qwen2.5 LLM + 扩散解码头</strong> 的混合架构，将大语言模型的文本理解能力与扩散模型的声学生成能力结合起来。</p>
 <table>
 <thead>
 <tr>
-<th>模块</th>
-<th>层数</th>
-<th>维度</th>
-<th>说明</th>
+<th>组件</th>
+<th>作用</th>
+<th>参数量</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>SpeakerEncoder (ECAPA-TDNN)</td>
-<td>3× SE-Res2Net + pooling</td>
-<td>mel 128 → D</td>
-<td>提取说话人特征</td>
+<td>language_model (Qwen2.5)</td>
+<td>自回归生成条件向量</td>
+<td>~1.5B</td>
 </tr>
 <tr>
-<td>Main Talker</td>
-<td>28层 Transformer Decoder</td>
-<td>D (hidden_size)</td>
-<td>预测 codebook 0</td>
+<td>acoustic_tokenizer</td>
+<td>VAE 编解码音频波形</td>
+<td>~60M</td>
 </tr>
 <tr>
-<td>CodePredictor (Sub-Talker)</td>
-<td>5层 Transformer Decoder</td>
-<td>较小 hidden_size</td>
-<td>预测 codebook 1–15</td>
+<td>semantic_tokenizer</td>
+<td>VQ-VAE 编码语义特征（自监督语音模型）</td>
+<td>~60M</td>
 </tr>
 <tr>
-<td>codec_head</td>
-<td>1层 Linear</td>
-<td>D → vocab_size</td>
-<td>codebook 0 分类头</td>
+<td>acoustic_connector</td>
+<td>投影 acoustic latent → LLM hidden dim</td>
+<td>~8M</td>
 </tr>
 <tr>
-<td>lm_head × 15</td>
-<td>各 1层 Linear</td>
-<td>sub_D → vocab_size</td>
-<td>codebook 1–15 分类头</td>
+<td>semantic_connector</td>
+<td>投影 semantic latent → LLM hidden dim</td>
+<td>~8M</td>
 </tr>
 <tr>
-<td>small_to_mtp_projection</td>
-<td>1层 Linear</td>
-<td>D → sub_D</td>
-<td>Main → Sub 维度映射</td>
+<td><strong>prediction_head（扩散）</strong></td>
+<td>噪声预测器，将 LLM hidden state → 音频 latent</td>
+<td>~123M</td>
 </tr>
 </tbody>
 </table>
-<h1 id="微调问题汇总"><a class="markdownIt-Anchor" href="#微调问题汇总"></a> 微调问题汇总</h1>
-<h2 id="1过拟合丢失生成eos-token能力"><a class="markdownIt-Anchor" href="#1过拟合丢失生成eos-token能力"></a> 1.过拟合丢失生成EOS token能力</h2>
-<p>数据中 EOS：</p>
-<pre class="highlight"><code class=""># codec channel 中，EOS 只出现一次：在所有 audio codec 之后
-input_ids[i, 8+text_ids_len-1+codec_ids_len, 1] = codec_eos_token_id
+<h3 id="文本与参考语音的融合机制"><a class="markdownIt-Anchor" href="#文本与参考语音的融合机制"></a> 文本与参考语音的融合机制</h3>
+<p>模型接受文本和参考音频两路输入，其融合发生在 embedding 层：</p>
+<ol>
+<li><strong>构造 prompt</strong>：<code>系统提示 + [SPEECH_PLACEHOLDER × N] + Speaker 1: 目标文本 + &lt;speech_start&gt;</code></li>
+<li><strong>Tokenize</strong>：整个 prompt 转为 token IDs</li>
+<li><strong>查 Embedding 表</strong>：每个 token ID 映射为向量</li>
+<li><strong>替换占位符</strong>：用参考音频的真实 embedding（<code>acoustic_connector + semantic_connector</code> 双路）覆盖占位符位置</li>
+</ol>
+<pre class="highlight"><code class="python">inputs_embeds = embed_layer(input_ids).clone()
+ref_speech_embeds = acoustic_connector(scaled_ac) + semantic_connector(se_latents)
+ref_positions = speech_input_mask[<span class="hljs-number">0</span>].nonzero()
+inputs_embeds[<span class="hljs-number">0</span>, ref_positions[:n_ref]] = ref_speech_embeds[<span class="hljs-number">0</span>, :n_ref]
 </code></pre>
-<p>label中:</p>
-<pre class="highlight"><code class="">codec_0_labels[i, 8+text_ids_len-1+codec_ids_len] = codec_eos_token_id
+<p>最终送入 LLM 的是 <strong>文本 embedding + 参考语音 embedding</strong> 混合序列——文本告诉它「说什么」，参考语音告诉它「用谁的声音说」。</p>
+<hr />
+<h2 id="推理中的-semantic-feedback"><a class="markdownIt-Anchor" href="#推理中的-semantic-feedback"></a> 推理中的 Semantic Feedback</h2>
+<h3 id="自回归生成循环"><a class="markdownIt-Anchor" href="#自回归生成循环"></a> 自回归生成循环</h3>
+<p>每次生成一个音频 token 的流程：</p>
+<pre class="highlight"><code class="">for 每个输出 token:
+    1. 扩散采样（DPM solver, ~10步）
+       输入: last_hidden（LLM 条件向量）
+       输出: scaled_latent [1, vae_dim]
+
+    2. 反馈路由 → Acoustic-only 或 Acoustic+Semantic
+
+    3. LLM 前向传播（单步，利用 KV cache）
+       输出: 新的 last_hidden → 用于下一次扩散采样
 </code></pre>
-<p>每条训练样本中，EOS token只出现1次，而audio codec token出现几百次。<br />
-假设一条16秒音频在12HZ生成192 个codec frame, 模型看到的label分布是:</p>
+<h3 id="两种反馈模式"><a class="markdownIt-Anchor" href="#两种反馈模式"></a> 两种反馈模式</h3>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>反馈内容</th>
+<th>公式</th>
+<th>速度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Acoustic-only</td>
+<td>仅 acoustic embedding</td>
+<td><code>next = acoustic_connector(latent)</code></td>
+<td>快</td>
+</tr>
+<tr>
+<td><strong>Acoustic+Semantic</strong></td>
+<td>解码→重编码→双路</td>
+<td><code>next = ac_connector(latent) + se_connector(semantic_re_encode(decode(latent)))</code></td>
+<td>慢（每步解码+重编码）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!tip] 为什么 Semantic Feedback 是必要条件？<br />
+训练时 forward pass 用的是 acoustic + semantic <strong>双路</strong>输入（有 ground truth semantic token）。Base model 推理默认用 acoustic-only——速度快，且 base model 没有严重的训练/推理分布偏移。</p>
+<p>但<strong>微调后</strong> prediction_head 发生变化，生成的 latent 分布与训练时不完全一致。若只反馈 acoustic，缺少 semantic 信号会让 LLM 偏离正常分布，导致退化（循环、噪声）。加上 semantic feedback 后，反馈信号与训练时一致，推理才稳定。</p>
+</blockquote>
+<p>注意：这里的 semantic <strong>不是</strong> NLP 意义上「从文本得到的语义」，而是<strong>从音频波形中提取的语音内容特征</strong>（类似 HuBERT/w2vBERT）。因此必须先 decode → waveform → 再用 semantic_tokenizer 重新编码，无法从 acoustic latent 直接转换。</p>
+<hr />
+<h2 id="微调方案"><a class="markdownIt-Anchor" href="#微调方案"></a> 微调方案</h2>
+<h3 id="方案一diffusion-only主要方案"><a class="markdownIt-Anchor" href="#方案一diffusion-only主要方案"></a> 方案一：Diffusion-only（主要方案）</h3>
+<p><strong>冻结所有参数，仅训练 prediction_head（~123M params）。</strong></p>
+<p>原理：LLM hidden states 与 base model 完全一致，仅让扩散去噪器学习目标说话人的声学特征。</p>
+<pre class="highlight"><code class="">finetuning-tts/finetune_diffusion_only.py   # 训练
+finetuning-tts/inference_diffusion.py       # 推理（含 semantic feedback）
+</code></pre>
+<h3 id="方案二lora-on-llm对比方案"><a class="markdownIt-Anchor" href="#方案二lora-on-llm对比方案"></a> 方案二：LoRA on LLM（对比方案）</h3>
+<p>在 LLM 上应用 LoRA adapter（q/k/v/o/gate/up/down_proj）+ 同时训练 prediction_head。</p>
+<p>LoRA 修改 LLM hidden states 使其更适应目标说话人，prediction_head 联合训练以适应修改后的 hidden states。</p>
+<hr />
+<h2 id="实验设计"><a class="markdownIt-Anchor" href="#实验设计"></a> 实验设计</h2>
+<p><strong>固定参数</strong>：batch_size=1，gradient_accumulation=8（有效 batch=8），lr_scheduler=cosine，warmup_ratio=0.05，weight_decay=0.01，bf16 精度，训练数据 4704 样本。</p>
+<p><strong>搜索变量</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>搜索范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>微调方法</td>
+<td>diffusion-only / LoRA</td>
+</tr>
+<tr>
+<td>学习率 (lr)</td>
+<td>1e-7 ~ 5e-6</td>
+</tr>
+<tr>
+<td>训练轮数 (epochs)</td>
+<td>1 ~ 20</td>
+</tr>
+<tr>
+<td>LoRA rank</td>
+<td>8, 16</td>
+</tr>
+<tr>
+<td>LoRA alpha</td>
+<td>16, 32</td>
+</tr>
+</tbody>
+</table>
+<p><strong>评估指标</strong>：</p>
 <ul>
-<li>192个正常codec token(如id=0~4095的各种值)</li>
-<li>1个EOS token(id=4198)</li>
+<li><strong>说话人相似度</strong>：Resemblyzer VoiceEncoder，生成音频与参考音频的余弦相似度</li>
+<li><strong>ASR 正确性</strong>：faster-whisper (medium)，检查生成内容是否正确</li>
 </ul>
-<p>当模型在752条数据上训练20epoch出现过拟合：</p>
+<hr />
+<h2 id="实验结果"><a class="markdownIt-Anchor" href="#实验结果"></a> 实验结果</h2>
+<h3 id="完整结果表"><a class="markdownIt-Anchor" href="#完整结果表"></a> 完整结果表</h3>
+<table>
+<thead>
+<tr>
+<th>排名</th>
+<th>实验</th>
+<th>方法</th>
+<th>lr</th>
+<th>epochs</th>
+<th>相似度</th>
+<th>ASR</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td><strong>E06</strong></td>
+<td><strong>diffusion</strong></td>
+<td><strong>5e-7</strong></td>
+<td><strong>10</strong></td>
+<td><strong>0.9234</strong></td>
+<td><strong>正确</strong></td>
+<td><strong>最佳</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>E11</td>
+<td>diffusion</td>
+<td>5e-7</td>
+<td>20</td>
+<td>0.919</td>
+<td>正确</td>
+<td>过拟合</td>
+</tr>
+<tr>
+<td>3</td>
+<td>E08</td>
+<td>diffusion</td>
+<td>2.5e-7</td>
+<td>10</td>
+<td>0.9161</td>
+<td>正确</td>
+<td>lr 偏低</td>
+</tr>
+<tr>
+<td>4</td>
+<td>E04</td>
+<td>diffusion</td>
+<td>5e-7</td>
+<td>5</td>
+<td>0.9093</td>
+<td>正确</td>
+<td>欠训练</td>
+</tr>
+<tr>
+<td>7</td>
+<td>E12</td>
+<td><strong>lora</strong></td>
+<td>1e-7</td>
+<td>1</td>
+<td>0.8943</td>
+<td>正确</td>
+<td>LoRA 可用！</td>
+</tr>
+<tr>
+<td>-</td>
+<td>base</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>0.829</td>
+<td>正确</td>
+<td>基线</td>
+</tr>
+<tr>
+<td>9</td>
+<td>E10</td>
+<td>diffusion</td>
+<td>5e-6</td>
+<td>1</td>
+<td>0.7689</td>
+<td>损坏</td>
+<td>lr 过高</td>
+</tr>
+<tr>
+<td>11</td>
+<td>E07</td>
+<td>diffusion</td>
+<td>1e-6</td>
+<td>10</td>
+<td>0.7503</td>
+<td>循环</td>
+<td>lr 过高</td>
+</tr>
+<tr>
+<td>14</td>
+<td>E14</td>
+<td>diffusion</td>
+<td>3e-6</td>
+<td>5</td>
+<td>0.6944</td>
+<td>损坏</td>
+<td>lr 过高</td>
+</tr>
+</tbody>
+</table>
+<h3 id="学习率敏感度极窄有效窗口"><a class="markdownIt-Anchor" href="#学习率敏感度极窄有效窗口"></a> 学习率敏感度：极窄有效窗口</h3>
+<p>prediction_head 对学习率<strong>极其敏感</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>lr 范围</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>5e-7</strong></td>
+<td><strong>最优</strong>：ASR 正确，相似度最高</td>
+</tr>
+<tr>
+<td>7.5e-7</td>
+<td>可用但偏弱</td>
+</tr>
+<tr>
+<td>2e-7 ~ 2.5e-7</td>
+<td>安全但偏弱</td>
+</tr>
+<tr>
+<td>1e-6</td>
+<td>危险：ASR 开始退化（循环、重复）</td>
+</tr>
+<tr>
+<td>≥ 2e-6</td>
+<td>完全损坏：输出噪声</td>
+</tr>
+</tbody>
+</table>
+<p><strong>有效学习率窗口：2e-7 ~ 5e-7</strong>，最优点在 <strong>5e-7</strong>。</p>
+<h3 id="训练轮数分析lr5e-7"><a class="markdownIt-Anchor" href="#训练轮数分析lr5e-7"></a> 训练轮数分析（lr=5e-7）</h3>
+<table>
+<thead>
+<tr>
+<th>epochs</th>
+<th>相似度</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0.8863</td>
+<td>欠训练</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0.9093</td>
+<td>正常</td>
+</tr>
+<tr>
+<td><strong>10</strong></td>
+<td><strong>0.9234</strong></td>
+<td><strong>最佳</strong></td>
+</tr>
+<tr>
+<td>12</td>
+<td>0.8965</td>
+<td>过拟合！</td>
+</tr>
+<tr>
+<td>20</td>
+<td>0.919</td>
+<td>过拟合</td>
+</tr>
+</tbody>
+</table>
+<p><strong>最优训练轮数 = 10 epochs</strong>。超过 10 后出现过拟合，相似度反而下降。</p>
+<h3 id="lora-方案分析"><a class="markdownIt-Anchor" href="#lora-方案分析"></a> LoRA 方案分析</h3>
+<table>
+<thead>
+<tr>
+<th>lr</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1e-4 ~ 5e-6</td>
+<td>完全损坏（sim 0.45-0.58，ASR 错误）</td>
+</tr>
+<tr>
+<td><strong>1e-7</strong></td>
+<td><strong>首次可用</strong>（sim 0.894，ASR 正确）</td>
+</tr>
+</tbody>
+</table>
+<p>LoRA 在极低 lr 下才可工作，但收益不如 diffusion-only（0.894 vs 0.923）。LLM hidden states 对 LoRA 修改非常敏感——这也从反面印证了「冻结 LLM，只调扩散头」的正确性。</p>
+<hr />
+<h2 id="关键结论"><a class="markdownIt-Anchor" href="#关键结论"></a> 关键结论</h2>
+<blockquote>
+<p>[!success] 最优配置</p>
 <ul>
-<li>模型对每条样本的codec 序列背的滚瓜烂熟，loss趋于0</li>
-<li>在这种情况下，模型学习到的codec 序列和EOS绑定在一起，一起背住了</li>
-<li>当模型推理，输入没见过的text,模型找不到匹配的记忆模型，找不到EOS结束位置。</li>
+<li><strong>方法</strong>：Diffusion-only（仅训练 prediction_head，~123M）</li>
+<li><strong>学习率</strong>：5e-7</li>
+<li><strong>训练轮数</strong>：10 epochs</li>
+<li><strong>调度器</strong>：cosine，warmup_ratio=0.05</li>
+<li><strong>推理</strong>：semantic feedback + CFG 1.3 + DPM 10 steps</li>
+<li><strong>结果</strong>：说话人相似度 <strong>0.9234</strong>（base model 0.829，<strong>+11.3%</strong>）</li>
 </ul>
-<h2 id="2过拟合导致文本提示失效"><a class="markdownIt-Anchor" href="#2过拟合导致文本提示失效"></a> 2.过拟合导致文本提示失效</h2>
-<p>loss如下:</p>
-<pre class="highlight"><code class="">outputs = model.talker(
-    inputs_embeds=input_embeddings,  # text embedding + codec embedding 混合
-    attention_mask=attention_mask,
-    labels=codec_0_labels,           # 只监督 codec_0 的预测
-    output_hidden_states=True
-)
-loss = outputs.loss + 0.3 * sub_talker_loss
+</blockquote>
+<ol>
+<li><strong>Diffusion-only &gt; LoRA</strong>：冻结 LLM 只调 prediction_head 是最优策略。修改 LLM hidden states 会严重破坏语音生成质量。</li>
+<li><strong>lr 窗口极窄</strong>：有效范围仅 2e-7~5e-7。≥1e-6 即 ASR 退化，≥2e-6 完全损坏。</li>
+<li><strong>10 epochs 恰好</strong>：少训欠拟合，多训过拟合，曲线对称。</li>
+<li><strong>Semantic feedback 必须开启</strong>：微调后推理必须反馈 acoustic + semantic 双路，否则分布偏移导致循环/噪声。</li>
+<li><strong>目标 0.95 未达成</strong>：Diffusion-only 的天花板约为 0.92-0.93。进一步突破可能需要更多训练数据或探索数据增强策略。</li>
+</ol>
+<hr />
+<h2 id="最佳模型与推理命令"><a class="markdownIt-Anchor" href="#最佳模型与推理命令"></a> 最佳模型与推理命令</h2>
+<pre class="highlight"><code class="">experiments/E06/model/prediction_head.pt
 </code></pre>
-<p>loss只衡量&quot;给定前面所有token, 预测下一个codec token的准确度&quot;。现在考虑两种降低loss的策略:</p>
-<ol>
-<li>(理想泛化学习)理解文本内容 -&gt; 根据文本语义发音 -&gt; 预测对应的codec token</li>
-<li>(死记硬背)根据codec token序列[a,b,c,…] -&gt; 直接记住a后面是b,b后面是c,预测下一个codec token</li>
-</ol>
-<p>两种策略都能然loss下降，但策略2更简单，梯度下降优先选择这条路。</p>
-<ol>
-<li>输入中 codec embedding 和 text embedding 是叠加的</li>
-</ol>
-<pre class="highlight"><code class="">input_embeddings = input_text_embedding + input_codec_embedding
+<pre class="highlight"><code class="bash">python finetuning-tts/inference_diffusion.py \
+    --base_model microsoft/VibeVoice-1.5B \
+    --prediction_head_path ./experiments/E06/model/prediction_head.pt \
+    --ref_audio ./ref.ogg \
+    --text <span class="hljs-string">&quot;要合成的文本&quot;</span> \
+    --output_path ./output.wav \
+    --cfg_scale 1.3 \
+    --num_inference_steps 10
 </code></pre>
-<p>模型可以选择性关注codec通道而忽略text通道<br />
-2. codec自身具有极强的自相关性 - 语音信号是连续的，相邻帧的codec是高度相似的。仅靠前几帧就能预测下一帧，不需要看文本。</p>
-<h2 id="3过拟合导致重复循环"><a class="markdownIt-Anchor" href="#3过拟合导致重复循环"></a> 3.过拟合导致重复循环</h2>
-<p><strong>训练时：不存在重复循环</strong><br />
-训练时用的是teacher forcing， 上下文中每一个codec token都是ground truth.所以训练时模型永远看到正确的上下文，不会出现循环。Loss 下降是正常的。<br />
-<strong>推理时</strong><br />
-推理用的是autoregressive decoding - 每一步的输入是模型上一步生成的token.<br />
-这就是 train-inference mismatch（训练-推理不一致）问题,推理时很快偏离真实分布。</p>
-<p><strong>过拟合的模型在推理时会这样崩溃：</strong></p>
-<ol>
-<li>第 1 步：输入新文本，模型没见过，输出一个不太对的 codec token</li>
-<li>第 2 步：输入 X，这个 X 不在任何训练样本的正常上下文中，模型又输出一个偏离的 Y</li>
-<li>误差累积：几步之后，模型进入一个它在训练中完全没见过的状态空间</li>
-<li>在陌生状态下：模型的输出概率分布变得混乱，很容易产生一个短序列 [A, B, C] 使得 A→B, B→C, C→A 形成闭环</li>
-<li>闭环一旦形成就无法逃脱 — 因为模型没有&quot;识别自己在循环&quot;的能力，且不会生成 EOS</li>
-</ol>
+<p><strong>实验环境</strong>：4× NVIDIA RTX 4090 (24GB)，2 GPU 并行训练，总运行时间约 12 小时（14 个实验，7 轮并行）。</p>
  
       <!-- reward -->
       
@@ -324,12 +567,12 @@ loss = outputs.loss + 0.3 * sub_talker_loss
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2026/04/01/tts/qwen-tts/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2026/04/03/tts/vibe-voice-finetune-shi-jian/" alt="微信分享二维码">
     </div>
 </div>
 
 <div id="share-mask"></div>  
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TTS/" rel="tag">TTS</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Diffusion/" rel="tag">Diffusion</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Fine-tuning/" rel="tag">Fine-tuning</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TTS/" rel="tag">TTS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/VibeVoice/" rel="tag">VibeVoice</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Voice-Cloning/" rel="tag">Voice Cloning</a></li></ul>
 
     </footer>
   </div>
@@ -337,19 +580,19 @@ loss = outputs.loss + 0.3 * sub_talker_loss
    
   <nav class="article-nav">
     
-      <a href="/2026/04/03/tts/vibe-voice-finetune-shi-jian/" class="article-nav-link">
+      <a href="/2026/04/15/tts/gpt-sovits/" class="article-nav-link">
         <strong class="article-nav-caption">上一篇</strong>
         <div class="article-nav-title">
           
-            VibeVoice 声音克隆微调实践
+            GPT-SoVITS
           
         </div>
       </a>
     
     
-      <a href="/2026/03/25/claude-code-shi-yong/" class="article-nav-link">
+      <a href="/2026/04/01/tts/qwen-tts/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">Claude Code使用</div>
+        <div class="article-nav-title">qwen-tts</div>
       </a>
     
   </nav>
