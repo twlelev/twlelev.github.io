@@ -925,7 +925,36 @@ loss = outputs.loss + 0.3 * sub_talker_loss
 </blockquote>
 <hr />
 <h2 id="0使用前配置"><a class="markdownIt-Anchor" href="#0使用前配置"></a> 0.使用前配置</h2>
-<p>/plugins  在Manage plugins中的Marketplaces中添加<a target="_blank" rel="noopener" href="https://github.com/anthropics/claude-plugins-official.git">https://github.com/anthropics/claude-plugins-official.git</a>，随后便能在Plugins中添加插件，一般排名前几的都是比较好用的。</p>
+<p><strong>添加skills</strong><br />
+/plugins  在Manage plugins中的Marketplaces中添加<a target="_blank" rel="noopener" href="https://github.com/anthropics/claude-plugins-official.git">https://github.com/anthropics/claude-plugins-official.git</a>，随后便能在Plugins中添加插件，一般排名前几的都是比较好用的，推荐superpowers。</p>
+<blockquote>
+<p><strong>superpowers 简介</strong>：一套元能力集合，把资深工程师的工作纪律（先想后做、TDD、验证后再声明完成、代码审查）固化成可自动触发的 skills。核心包括 <code>brainstorming</code>（探索需求）、<code>writing-plans</code>（写实施计划）、<code>executing-plans</code>（执行计划）、<code>test-driven-development</code>（严格TDD）、<code>systematic-debugging</code>（系统化排查）、<code>verification-before-completion</code>（禁止幻觉式完成）、<code>using-git-worktrees</code>（隔离工作区）等。好用在于：<strong>强制纪律</strong>（禁止跳过测试就声称&quot;修好了&quot;）+ <strong>触发式调用</strong>（系统在合适时机自动提醒）+ <strong>可组合</strong>（构成完整流水线）。</p>
+</blockquote>
+<p><strong>允许claude code所有权限</strong><br />
+在当前项目下创建.claude/settings.local.json<br />
+在其中配置：</p>
+<pre class="highlight"><code class="">&#123;
+  &quot;permissions&quot;: &#123;
+    &quot;defaultMode&quot;: &quot;bypassPermissions&quot;,
+    &quot;allow&quot;: [
+      &quot;Bash&quot;,
+      &quot;Read&quot;,
+      &quot;Write&quot;,
+      &quot;Edit&quot;,
+      &quot;Glob&quot;,
+      &quot;Grep&quot;,
+      &quot;WebFetch&quot;,
+      &quot;WebSearch&quot;,
+      &quot;NotebookEdit&quot;,
+      &quot;Agent&quot;,
+      &quot;TodoWrite&quot;
+    ],
+    &quot;deny&quot;: []
+  &#125;
+&#125;
+
+</code></pre>
+<p>配置好后，不用每一步都需要确认各种权限，让claude code畅通无阻执行各种权限。</p>
 <h2 id="1-claudemd-最被低估的功能"><a class="markdownIt-Anchor" href="#1-claudemd-最被低估的功能"></a> 1. <a target="_blank" rel="noopener" href="http://CLAUDE.md">CLAUDE.md</a> — 最被低估的功能</h2>
 <blockquote>
 <p>如果你只记住这篇文章的一件事，那就是：写好 <a target="_blank" rel="noopener" href="http://claude.md">claude.md</a>。</p>
