@@ -6,10 +6,36 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2026-04-15T06:54:52.361Z</updated>
+  <updated>2026-05-18T07:28:05.871Z</updated>
   <id>http://example.com/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>reconstruct中相机相关基础</title>
+    <link href="http://example.com/2026/05/18/3d/3d-reconstruct-zhong-xiang-ji-xiang-guan-ji-chu/"/>
+    <id>http://example.com/2026/05/18/3d/3d-reconstruct-zhong-xiang-ji-xiang-guan-ji-chu/</id>
+    <published>2026-05-18T07:20:39.000Z</published>
+    <updated>2026-05-18T07:28:05.871Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;相机参数-位姿-fov-与-uv-反投&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#相机参数-位姿-fov-与-uv-反投&quot;&gt;&lt;/a&gt; 相机参数、位姿、FOV 与 UV
+        
+      
+    
+    </summary>
+    
+      <category term="基础" scheme="http://example.com/categories/%E5%9F%BA%E7%A1%80/"/>
+    
+    
+      <category term="3D" scheme="http://example.com/tags/3D/"/>
+    
+  </entry>
   
   <entry>
     <title>GPT-SoVITS</title>
@@ -520,32 +546,6 @@
     
     
       <category term="ncnn" scheme="http://example.com/tags/ncnn/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>c++基础</title>
-    <link href="http://example.com/2023/04/27/c/c-ji-chu/"/>
-    <id>http://example.com/2023/04/27/c/c-ji-chu/</id>
-    <published>2023-04-27T02:15:31.000Z</published>
-    <updated>2025-12-18T02:22:36.014Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h1 id=&quot;1static-inline&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#1static-inline&quot;&gt;&lt;/a&gt; 1.static
-        
-      
-    
-    </summary>
-    
-      <category term="c++" scheme="http://example.com/categories/c/"/>
-    
-    
-      <category term="c++" scheme="http://example.com/tags/c/"/>
     
   </entry>
   

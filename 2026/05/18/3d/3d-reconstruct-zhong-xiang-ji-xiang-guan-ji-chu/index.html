@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="用于记录学习笔记的个人网站" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>reconstruct中相机相关基础 |  twlelev的博客</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-3D/3D reconstruct 中相机相关基础"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  reconstruct中相机相关基础
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2026/05/18/3d/3d-reconstruct-zhong-xiang-ji-xiang-guan-ji-chu/" class="article-date">
+  <time datetime="2026-05-18T07:20:39.000Z" itemprop="datePublished">2026-05-18</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%9F%BA%E7%A1%80/">基础</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2.8k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">11 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="相机参数-位姿-fov-与-uv-反投"><a class="markdownIt-Anchor" href="#相机参数-位姿-fov-与-uv-反投"></a> 相机参数、位姿、FOV 与 UV 反投</h1>
+<p>这份笔记整理相机内参、外参、相机位姿、FOV 的关系，以及它们在 Pixal3D 和 UV 反投中的作用。</p>
+<h2 id="1-相机参数分为两类"><a class="markdownIt-Anchor" href="#1-相机参数分为两类"></a> 1. 相机参数分为两类</h2>
+<p>相机参数通常分成：</p>
+<pre class="highlight"><code class="text">内参 K：相机自身如何成像，也就是镜头和图像平面的参数
+外参 R,t：相机在世界坐标中放在哪里、朝哪里看
+</code></pre>
+<p>直观理解：</p>
+<pre class="highlight"><code class="text">内参：镜头
+外参：相机架子
+</code></pre>
+<p>内参影响视野宽窄、透视强弱、图像中心位置。外参影响看到物体哪一面、相机远近、俯视还是仰视、物体在画面中的位置。</p>
+<h2 id="2-内参-k"><a class="markdownIt-Anchor" href="#2-内参-k"></a> 2. 内参 K</h2>
+<p>内参描述 3D 点进入相机坐标系之后，如何投影到 2D 像素坐标。常见内参矩阵：</p>
+<pre class="highlight"><code class="text">K = [ fx   0  cx
+      0   fy  cy
+      0    0   1 ]
+</code></pre>
+<p>含义：</p>
+<ul>
+<li><code>fx, fy</code>：焦距，单位是像素。焦距越大，视野越窄，物体看起来越大，透视越弱。</li>
+<li><code>cx, cy</code>：主点，通常接近图像中心。</li>
+<li>畸变参数、skew 等在很多深度学习或 3D 生成代码里会被忽略。</li>
+</ul>
+<p>如果一个点在相机坐标系下是 <code>(Xc, Yc, Zc)</code>，投影到像素坐标为：</p>
+<pre class="highlight"><code class="text">u = fx * Xc / Zc + cx
+v = fy * Yc / Zc + cy
+</code></pre>
+<p>这里的 <code>(u, v)</code> 是图像像素坐标。</p>
+<h2 id="3-外参-rt"><a class="markdownIt-Anchor" href="#3-外参-rt"></a> 3. 外参 R,t</h2>
+<p>外参描述世界坐标中的点如何变换到相机坐标。常见形式：</p>
+<pre class="highlight"><code class="text">Xc = R * Xw + t
+</code></pre>
+<p>其中：</p>
+<ul>
+<li><code>Xw</code>：世界坐标中的 3D 点。</li>
+<li><code>Xc</code>：相机坐标中的 3D 点。</li>
+<li><code>R</code>：旋转矩阵。</li>
+<li><code>t</code>：平移向量。</li>
+</ul>
+<p>矩阵形式：</p>
+<pre class="highlight"><code class="text">[ Xc ]   [ R  t ] [ Xw ]
+[ 1  ] = [ 0  1 ] [ 1  ]
+</code></pre>
+<p>这个 <code>[R | t]</code> 通常叫 <strong>world-to-camera</strong> 外参，也就是从世界坐标变到相机坐标。</p>
+<h2 id="4-相机位姿-camera-pose"><a class="markdownIt-Anchor" href="#4-相机位姿-camera-pose"></a> 4. 相机位姿 camera pose</h2>
+<p>很多图形学、SLAM、NeRF 代码里说的 camera pose，通常指的是 <strong>camera-to-world</strong> 矩阵：</p>
+<pre class="highlight"><code class="text">Xw = R_c2w * Xc + C
+</code></pre>
+<p>矩阵形式：</p>
+<pre class="highlight"><code class="text">T_c2w = [ R_c2w  C
+          0      1 ]
+</code></pre>
+<p>其中：</p>
+<ul>
+<li><code>C</code> 是相机中心在世界坐标中的位置。</li>
+<li><code>R_c2w</code> 是相机坐标轴在世界坐标中的朝向。</li>
+</ul>
+<p>它和 world-to-camera 外参互为逆：</p>
+<pre class="highlight"><code class="text">R_w2c = R_c2w^T
+t_w2c = -R_c2w^T * C
+</code></pre>
+<p>反过来：</p>
+<pre class="highlight"><code class="text">R_c2w = R_w2c^T
+C = -R_w2c^T * t_w2c
+</code></pre>
+<p>因此：</p>
+<pre class="highlight"><code class="text">外参 world-to-camera = T_w2c
+相机位姿 camera pose = T_c2w
+T_w2c = inverse(T_c2w)
+</code></pre>
+<blockquote>
+<p>[!warning] 容易混淆<br />
+有些库把 pose 叫外参，有些库把 pose 叫外参的逆。实际使用时一定要确认矩阵方向是 <code>world_to_camera</code> 还是 <code>camera_to_world</code>。</p>
+</blockquote>
+<h2 id="5-完整投影公式"><a class="markdownIt-Anchor" href="#5-完整投影公式"></a> 5. 完整投影公式</h2>
+<p>世界坐标点投影到图像像素，一般分两步：</p>
+<pre class="highlight"><code class="text">Xc = R * Xw + t
+
+u = fx * Xc / Zc + cx
+v = fy * Yc / Zc + cy
+</code></pre>
+<p>合起来可以写成：</p>
+<pre class="highlight"><code class="text">s [u, v, 1]^T = K [R | t] [Xw, Yw, Zw, 1]^T
+</code></pre>
+<p>其中：</p>
+<ul>
+<li><code>K</code> 是内参。</li>
+<li><code>[R | t]</code> 是外参。</li>
+<li><code>s</code> 是尺度，通常对应深度。</li>
+</ul>
+<h2 id="6-方位角-仰角-距离"><a class="markdownIt-Anchor" href="#6-方位角-仰角-距离"></a> 6. 方位角、仰角、距离</h2>
+<p>在很多 3D 生成和渲染代码里，外参不直接写成 <code>R,t</code>，而是用更直观的参数：</p>
+<pre class="highlight"><code class="text">azimuth   方位角：绕竖直轴转多少，例如正面、左侧、右侧
+elevation 仰角：相机从上往下还是从下往上看
+distance  距离：相机离物体中心多远
+target    观察目标点，通常是物体中心
+</code></pre>
+<p>这些参数可以通过 <code>look_at</code> 方法转换成 camera pose。例如：</p>
+<pre class="highlight"><code class="text">azimuth = 0 deg      正面
+azimuth = 90 deg     侧面
+elevation = 20 deg   略微俯视或仰视，取决于坐标系约定
+distance = 2.5       离物体中心 2.5 个单位
+</code></pre>
+<p>得到相机位置 <code>C</code> 和相机朝向 <code>R_c2w</code> 后，取逆即可得到 world-to-camera 外参 <code>[R | t]</code>。</p>
+<h2 id="7-fov-是什么"><a class="markdownIt-Anchor" href="#7-fov-是什么"></a> 7. FOV 是什么</h2>
+<p>FOV 是 <strong>Field of View</strong>，即视场角或视野角。它描述相机镜头一次能看到多宽的范围。常见类型：</p>
+<pre class="highlight"><code class="text">horizontal FOV / camera_angle_x：水平视场角
+vertical FOV / camera_angle_y：垂直视场角
+diagonal FOV：对角线视场角
+</code></pre>
+<p>FOV 属于内参相关概念。它描述镜头成像范围，不描述相机在哪里、朝哪里看。</p>
+<p>水平 FOV 与 <code>fx</code> 的关系：</p>
+<pre class="highlight"><code class="text">fov_x = 2 * atan(image_width / (2 * fx))
+</code></pre>
+<p>反过来：</p>
+<pre class="highlight"><code class="text">fx = image_width / (2 * tan(fov_x / 2))
+</code></pre>
+<p>因此：</p>
+<pre class="highlight"><code class="text">fx 大  -&gt; FOV 小 -&gt; 视野窄 -&gt; 物体看起来更大，透视更弱
+fx 小  -&gt; FOV 大 -&gt; 视野宽 -&gt; 物体看起来更小，透视更强
+</code></pre>
+<p>直观例子：</p>
+<pre class="highlight"><code class="text">长焦镜头：FOV 小，像望远镜，脸部透视被压缩
+广角镜头：FOV 大，像近距离手机自拍，鼻子更突出，透视更强
+</code></pre>
+<p>如果图像宽度为 <code>512</code>：</p>
+<pre class="highlight"><code class="text">fx = 512
+fov_x = 2 * atan(512 / (2 * 512)) ~= 53.1 deg
+
+fx = 256
+fov_x = 2 * atan(512 / (2 * 256)) = 90 deg
+</code></pre>
+<p>这样不同视角中 person/head 的位置和画面占比才更稳定，也更适合后续 UV 反投。</p>
+<h2 id="8-uv-反投需要什么相机参数"><a class="markdownIt-Anchor" href="#8-uv-反投需要什么相机参数"></a> 8. UV 反投需要什么相机参数</h2>
+<p>如果要把多视角图像反投到 mesh 的 UV 上，仅有 MoGe 提供的内参不够。UV 反投至少需要：</p>
+<pre class="highlight"><code class="text">1. mesh 顶点、面、UV
+2. 每张图的相机内参 K：fx, fy, cx, cy
+3. 每张图的相机外参 R,t 或 camera pose
+4. 可见性判断：z-buffer / depth test
+</code></pre>
+<p>反投流程可以按 UV texel 做：</p>
+<pre class="highlight"><code class="text">对每个 UV texel
+  -&gt; 找到它属于哪个 triangle
+  -&gt; 用 barycentric 插值得到 3D surface point
+  -&gt; 用 K[R|t] 投影到每张 view image
+  -&gt; depth test 判断是否可见
+  -&gt; 从图像采样颜色/PBR
+  -&gt; 多视角加权融合
+  -&gt; 对没覆盖区域做 padding / inpaint
+</code></pre>
+<p>也可以按图像像素做：</p>
+<pre class="highlight"><code class="text">每张图像像素
+  -&gt; rasterization 得到 triangle id、barycentric、depth
+  -&gt; 找到对应 UV 坐标
+  -&gt; 把像素颜色 splat / accumulate 到 UV atlas
+</code></pre>
+<p>如果多视角图是自己从已知 mesh 渲染出来的，那么渲染时本来就有 <code>K, R, t</code>，此时不一定需要 MoGe。</p>
+<p>如果多视角图是生成模型产生的，或者来自未知相机，那么 MoGe 只能提供内参线索，还必须估计每张图相对于 mesh 的外参：</p>
+<pre class="highlight"><code class="text">R_i, t_i = camera_pose_estimation(mesh, image_i)
+</code></pre>
+<p>对于 3D head，可以使用：</p>
+<ul>
+<li>2D facial landmarks + FLAME/mesh 对应点做 PnP。</li>
+<li>silhouette、normal、depth 的 differentiable rendering 优化。</li>
+<li>face parsing、眼角、鼻尖、嘴角等语义区域约束。</li>
+<li>MoGe depth/point map 与 mesh 对齐，但仍然要解相机/物体位姿。</li>
+</ul>
+<h2 id="9-multi-view-diffusion-生成图用于反投-uv"><a class="markdownIt-Anchor" href="#9-multi-view-diffusion-生成图用于反投-uv"></a> 9. Multi-view diffusion 生成图用于反投 UV</h2>
+<p>如果 multi-view images 是通过 diffusion 生成的，那么生成阶段最好明确控制或记录每张图的相机协议。至少需要：</p>
+<pre class="highlight"><code class="text">azimuth：水平绕物体旋转角
+elevation：俯仰角
+distance 或 camera radius：相机离物体中心多远
+target / look_at center：相机看向哪里，通常是 head center
+projection type：perspective 或 orthographic
+image resolution：图像宽高
+coordinate convention：坐标系约定
+</code></pre>
+<p>如果使用透视投影，还需要：</p>
+<pre class="highlight"><code class="text">FOV 或 focal length
+near / far
+aspect
+</code></pre>
+<p>如果使用正交投影，还需要：</p>
+<pre class="highlight"><code class="text">ortho_scale / ortho_size
+near / far
+aspect
+</code></pre>
+<p>正交投影下没有透视里的 <code>Xc / Zc</code> 和 <code>Yc / Zc</code>，物体大小主要由 <code>ortho_scale</code> 控制。对 FLAME 或稳定拓扑 head 做 UV 反投时，正交投影常常更稳定，因为 diffusion 生成的多视角图未必有严格真实透视。</p>
+<p>一个常见 head multi-view 协议可以是：</p>
+<pre class="highlight"><code class="text">front:       azimuth =   0 deg, elevation = 0 deg
+front-left:  azimuth = -45 deg, elevation = 0 deg
+left:        azimuth = -90 deg, elevation = 0 deg
+front-right: azimuth =  45 deg, elevation = 0 deg
+right:       azimuth =  90 deg, elevation = 0 deg
+back:        azimuth = 180 deg, elevation = 0 deg
+
+projection = orthographic
+ortho_scale = fixed
+target = head center
+resolution = 1024 or 2048
+</code></pre>
+<blockquote>
+<p>[!note] Camera prompt ≠ 真实相机<br />
+控制 diffusion 的 camera prompt 或 condition，不等于生成图真的严格符合该相机。比如指定 <code>left view, azimuth=-90 deg</code>，生成结果可能实际是 70 度侧脸，头部比例、耳朵、头发也可能发生生成式偏移。</p>
+</blockquote>
+<p>因此反投前通常还需要做一次 pose refinement：</p>
+<pre class="highlight"><code class="text">1. 设定目标相机 azimuth / elevation / projection
+2. multi-view diffusion 生成一致视图
+3. 对每张生成图重新估计或优化相机位姿、scale、translation
+4. 用优化后的相机做 UV 反投
+</code></pre>
+<p>对于正交 head 视图，常优化：</p>
+<pre class="highlight"><code class="text">azimuth
+elevation
+roll
+translation x/y
+ortho_scale
+</code></pre>
+<p>对于透视投影，还可能优化：</p>
+<pre class="highlight"><code class="text">focal length / FOV
+distance
+</code></pre>
+<h2 id="10-nvdiffrast-中相机约定如何生效"><a class="markdownIt-Anchor" href="#10-nvdiffrast-中相机约定如何生效"></a> 10. nvdiffrast 中相机约定如何生效</h2>
+<p>nvdiffrast 本身不负责定义或推断相机参数。它只接收已经变换到 clip space 的顶点，以及三角面索引，然后做 rasterization 和 interpolation。典型调用类似：</p>
+<pre class="highlight"><code class="python">rast_out, _ = dr.rasterize(ctx, pos_clip, tri, resolution=[H, W])
+</code></pre>
+<p>关键是 <code>pos_clip</code>：</p>
+<pre class="highlight"><code class="text">pos_clip = MVP @ vertices_homo
+</code></pre>
+<p>其中：</p>
+<pre class="highlight"><code class="text">MVP = Projection @ View @ Model
+</code></pre>
+<p>三部分含义：</p>
+<pre class="highlight"><code class="text">Model：mesh 从 object/local 坐标到 world 坐标
+View：world-to-camera，来自 azimuth/elevation/distance/target/look_at
+Projection：camera-to-clip，来自 perspective FOV 或 orthographic scale
+</code></pre>
+<p>所以：</p>
+<pre class="highlight"><code class="text">azimuth / elevation / distance / target
+  -&gt; 用来构造 camera pose 或 View matrix
+
+FOV / near / far / aspect
+  -&gt; 用来构造 perspective Projection matrix
+
+ortho_scale / near / far / aspect
+  -&gt; 用来构造 orthographic Projection matrix
+
+resolution
+  -&gt; 传给 dr.rasterize(ctx, ..., resolution=[H, W])
+
+crop / resize
+  -&gt; 通常不在 nvdiffrast 内部处理，需要同步修改 projection/K 或记录后处理变换
+
+坐标系约定
+  -&gt; 体现在 View matrix、Projection matrix、顶点坐标、图像 Y 轴和 UV V 方向里
+</code></pre>
+<p>做 UV 反投时，常见流程是先用 nvdiffrast 渲染可见面，再插值得到每个像素对应的 UV：</p>
+<pre class="highlight"><code class="python">uv_img, _ = dr.interpolate(uv, rast_out, tri)
+</code></pre>
+<p>这样每个可见像素就知道自己对应到 mesh 的哪个 UV 位置，之后就可以把该像素颜色写回 UV atlas，或者累积多视角颜色。</p>
+<blockquote>
+<p>[!warning] nvdiffrast 中最容易出错的约定</p>
+<ul>
+<li><strong>矩阵方向</strong>：如果手里是 <code>camera-to-world pose</code>，通常要先求逆成 <code>world-to-camera View</code>。</li>
+<li><strong>相机看向方向</strong>：OpenGL 风格通常看 <code>-Z</code>，一些 CV 代码使用 <code>+Z</code>。</li>
+<li><strong>NDC 深度范围</strong>：OpenGL 常见是 <code>[-1, 1]</code>，一些库使用 <code>[0, 1]</code>。</li>
+<li><strong>图像 Y 轴</strong>：图像数组通常 <code>y</code> 向下，OpenGL/NDC 常常 <code>y</code> 向上。</li>
+<li><strong>UV V 方向</strong>：有些 UV 约定 <code>v=0</code> 在底部，而图像第 0 行在顶部，常需要 <code>v = 1 - v</code>。</li>
+<li><strong>crop/resize</strong>：nvdiffrast 不会知道 diffusion 图后处理过，需要你把变换等效进 projection/K 或额外记录。</li>
+</ul>
+</blockquote>
+<p>因此，<code>azimuth/elevation/FOV/ortho_scale/target/坐标系</code> 这些约定会通过你构造的 <code>View</code> 和 <code>Projection</code> 矩阵进入 nvdiffrast；nvdiffrast 只执行 rasterization 和 interpolation。</p>
+<h2 id="11-cropresize-对内参的影响"><a class="markdownIt-Anchor" href="#11-cropresize-对内参的影响"></a> 11. Crop/Resize 对内参的影响</h2>
+<p>如果图像被裁剪或缩放，内参必须同步变换，否则反投会整体偏移。</p>
+<p>缩放 <code>sx, sy</code> 后：</p>
+<pre class="highlight"><code class="text">fx&#x27; = sx * fx
+fy&#x27; = sy * fy
+cx&#x27; = sx * cx
+cy&#x27; = sy * cy
+</code></pre>
+<p>如果先裁剪，裁剪左上角为 <code>(x0, y0)</code>：</p>
+<pre class="highlight"><code class="text">cx_crop = cx - x0
+cy_crop = cy - y0
+</code></pre>
+<p>再缩放到新分辨率时继续乘缩放比例。</p>
+<blockquote>
+<p>[!important] Head reconstruction 与 UV 反投<br />
+即使内参本身估计正确，只要 crop/resize 没同步更新 <code>K</code>，投影和反投都会错位。</p>
+</blockquote>
+<h2 id="12-总结"><a class="markdownIt-Anchor" href="#12-总结"></a> 12. 总结</h2>
+<pre class="highlight"><code class="text">内参 K / FOV：描述镜头如何成像
+外参 R,t：描述世界点如何变到相机坐标
+相机位姿 T_c2w：描述相机在世界中的位置和朝向
+world-to-camera 外参 T_w2c = inverse(T_c2w)
+</code></pre>
+<p>Pixal3D 主要用 MoGe 估计内参/FOV，用于把图像特征对齐到 3D token。它不依赖完整相机位姿。</p>
+<p>UV 反投则必须有完整相机几何：内参、外参、mesh UV 和可见性判断。只有内参时，无法判断图像中的像素对应 mesh 的哪一面。</p>
+<p>如果 multi-view 图来自 diffusion，生成时要明确投影类型、视角、scale/FOV、target、分辨率和坐标系约定；反投前最好再做 pose refinement。</p>
+<p>nvdiffrast 不替用户定义相机。相机约定需要先被转换成 <code>Model/View/Projection</code> 矩阵，最终通过 <code>pos_clip = MVP @ vertices_homo</code> 进入 rasterization。</p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2026/05/18/3d/3d-reconstruct-zhong-xiang-ji-xiang-guan-ji-chu/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/3D/" rel="tag">3D</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/2026/04/15/tts/gpt-sovits/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">GPT-SoVITS</div>
+      </a>
+    
+  </nav>
+
+  
+   
+  
+   
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2026
+        <i class="ri-heart-fill heart_icon"></i> twlelev的博客
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="twlelev的博客"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+ 
+    
+        <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.css">
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.js"></script>
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/contrib/auto-render.min.js"></script>
+        
+    
+ 
+<!-- busuanzi  -->
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>
