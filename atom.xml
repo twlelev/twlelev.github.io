@@ -6,10 +6,38 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2026-05-18T07:28:05.871Z</updated>
+  <updated>2026-06-22T06:01:31.689Z</updated>
   <id>http://example.com/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>“pixel3dmm”</title>
+    <link href="http://example.com/2026/06/15/3d/pixel3dmm/"/>
+    <id>http://example.com/2026/06/15/3d/pixel3dmm/</id>
+    <published>2026-06-15T03:17:09.000Z</published>
+    <updated>2026-06-22T06:01:31.689Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;![[/images/3D/Pasted image 20260622135821.png]]&lt;/p&gt;
+&lt;p&gt;核心：屏幕空间稠密先验(screen-space dense priors)。&lt;/p&gt;
+&lt;h1 id=&quot;search-uv-机制详解&quot;&gt;&lt;a
+        
+      
+    
+    </summary>
+    
+      <category term="FLAME" scheme="http://example.com/categories/FLAME/"/>
+    
+    
+      <category term="3D" scheme="http://example.com/tags/3D/"/>
+    
+  </entry>
   
   <entry>
     <title>reconstruct中相机相关基础</title>
@@ -520,32 +548,6 @@
     
     
       <category term="视频编码基础" scheme="http://example.com/tags/%E8%A7%86%E9%A2%91%E7%BC%96%E7%A0%81%E5%9F%BA%E7%A1%80/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>ncnn基础</title>
-    <link href="http://example.com/2023/07/08/ncnn/ncnn/"/>
-    <id>http://example.com/2023/07/08/ncnn/ncnn/</id>
-    <published>2023-07-08T06:54:31.000Z</published>
-    <updated>2025-12-26T05:59:38.807Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h1 id=&quot;1ncnn简介&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#1ncnn简介&quot;&gt;&lt;/a&gt;
-        
-      
-    
-    </summary>
-    
-      <category term="ncnn" scheme="http://example.com/categories/ncnn/"/>
-    
-    
-      <category term="ncnn" scheme="http://example.com/tags/ncnn/"/>
     
   </entry>
   

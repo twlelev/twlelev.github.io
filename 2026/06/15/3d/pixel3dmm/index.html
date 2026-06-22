@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="用于记录学习笔记的个人网站" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>“pixel3dmm” |  twlelev的博客</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-3D/pixel3dmm"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  “pixel3dmm”
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2026/06/15/3d/pixel3dmm/" class="article-date">
+  <time datetime="2026-06-15T03:17:09.000Z" itemprop="datePublished">2026-06-15</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/FLAME/">FLAME</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.1k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">4 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>![[/images/3D/Pasted image 20260622135821.png]]</p>
+<p>核心：屏幕空间稠密先验(screen-space dense priors)。</p>
+<h1 id="search-uv-机制详解"><a class="markdownIt-Anchor" href="#search-uv-机制详解"></a> “search uv” 机制详解</h1>
+<p>“search uv” 的本质是:<strong>用 KNN 在网络预测的 UV 图里,为每个 FLAME 顶点反查出它对应的图像像素位置</strong>,从而把&quot;per-pixel 的 UV 预测&quot;转成&quot;per-vertex 的 2D 重投影目标&quot;来拟合 FLAME 参数。</p>
+<p><strong>个人总结，通俗解释</strong>：<br />
+网络预测uv coordinates, 得到屏幕像素空间与uv坐标的映射，因为canonical uv坐标与3d顶点存在对应的关系，因此通过转换可以得到屏幕像素空间与3d顶点的对应。<br />
+预测的uv坐标不一定准确，所以通过search_uv优化，将其与canonical uv比较(最邻近搜索，排除距离远的奇异点等)得到屏幕空间每一个像素对应的3d坐标作为gt来监督。</p>
+<h2 id="a1-前提两套-uv-的定义"><a class="markdownIt-Anchor" href="#a1-前提两套-uv-的定义"></a> A.1 前提:两套 UV 的定义</h2>
+<p><strong>(a) Canonical UV(模板顶点的固定 UV)</strong> — <a href="src/pixel3dmm/tracking/losses.py#L60-L61">losses.py:60-61</a></p>
+<pre class="highlight"><code class="python">self.can_uv = torch.from_numpy(np.load(env_paths.FLAME_UV_COORDS)[self.valid_verts, :]).cuda().unsqueeze(<span class="hljs-number">0</span>).<span class="hljs-built_in">float</span>()
+self.can_uv[..., <span class="hljs-number">1</span>] = (self.can_uv[..., <span class="hljs-number">1</span>] * -<span class="hljs-number">1</span>) + <span class="hljs-number">1</span>   <span class="hljs-comment"># OBJ-v 翻成 image-style v</span>
+</code></pre>
+<ul>
+<li><code>FLAME_UV_COORDS</code> 是 FLAME 模板每个顶点在 UV 图集上的<strong>固定坐标</strong>,与姿态/表情无关(对应正文 §5 的&quot;横向独立平面 UV ∈ [0,1]²&quot;)。</li>
+<li><code>valid_verts</code>(<a href="src/pixel3dmm/tracking/losses.py#L56-L59">losses.py:56-59</a>)剔除后脑勺/脖子等不可靠区域;<code>stricter_mask</code> 时用更窄的集合。</li>
+<li>第 61 行 <code>v = 1 - v</code>,把 OBJ 约定翻成图像坐标,与网络预测 UV 同约定。</li>
+</ul>
+<p><strong>(b) Predicted UV(网络对每个图像像素的 UV 预测)</strong> — 即 <code>uv_map</code>,网络输出 2 通道,每像素值是&quot;该像素落在 FLAME UV 图集的哪个位置&quot;。</p>
+<h2 id="a2-核心搜索compute_corresp"><a class="markdownIt-Anchor" href="#a2-核心搜索compute_corresp"></a> A.2 核心搜索:<code>compute_corresp</code></h2>
+<p><a href="src/pixel3dmm/tracking/losses.py#L79-L95">losses.py:79-95</a>:</p>
+<pre class="highlight"><code class="python">
+gt_uv = gt[:, :<span class="hljs-number">2</span>, :, :].permute(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>)           <span class="hljs-comment"># 取预测 UV 的 2 通道</span>
+gt_uv = gt_uv.reshape(gt_uv.shape[<span class="hljs-number">0</span>], -<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)          <span class="hljs-comment"># B x (H*W) x 2,每个像素当成 UV 空间一个点</span>
+can_uv = self.can_uv.repeat(gt_uv.shape[<span class="hljs-number">0</span>], <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)     <span class="hljs-comment"># B x N_verts x 2</span>
+knn_result = knn_points(can_uv, gt_uv)                <span class="hljs-comment"># 关键:在 UV 空间做最近邻</span>
+pixel_position_width  = knn_result.idx % gt.shape[-<span class="hljs-number">1</span>] <span class="hljs-comment"># 展平索引拆回 (x, y)</span>
+pixel_position_height = knn_result.idx // gt.shape[-<span class="hljs-number">2</span>]
+self.dists = knn_result.dists.clone()
+self.gt_2_verts = torch.cat([pixel_position_width, pixel_position_height], dim=-<span class="hljs-number">1</span>)
+</code></pre>
+<p>要点:</p>
+<ul>
+<li><strong>搜索发生在 UV 空间,而非图像空间。</strong> <code>knn_points(can_uv, gt_uv)</code> 对每个顶点的 canonical UV,在全部 <code>H*W</code> 个像素的预测 UV 里找<strong>欧氏距离最近</strong>的像素。含义:“哪个图像像素的预测 UV,最接近这个顶点本该所在的 UV?”</li>
+<li><code>knn_result.idx</code> 是展平像素下标,<code>% width</code> / <code>// width</code> 还原成 <code>(x, y)</code> → 存进 <code>gt_2_verts</code>(每个有效顶点一个 2D 目标点)。</li>
+<li><code>dists</code> 记录每个匹配的 UV 距离,用作置信度门控。</li>
+<li><code>@torch.compiler.disable</code>(<a href="src/pixel3dmm/tracking/losses.py#L79">losses.py:79</a>):KNN 不走 torch.compile。</li>
+<li>GT 侧 UV 在 <code>uv_pred_to_mesh</code> 里(<a href="src/pixel3dmm/utils/uv.py#L51-L55">uv.py:51-55</a>)先 <code>(x+1)/2</code> 归一化、用 mask 清背景、把 <code>abs&gt;=1</code> 的无效预测设成 10(推到 UV 无穷远), 保证无效像素<strong>永不被选中</strong>。</li>
+</ul>
+<h2 id="a3-把搜索结果变成-losscompute_loss"><a class="markdownIt-Anchor" href="#a3-把搜索结果变成-losscompute_loss"></a> A.3 把搜索结果变成 loss:<code>compute_loss</code></h2>
+<p><a href="src/pixel3dmm/tracking/losses.py#L99-L127">losses.py:99-127</a>:</p>
+<pre class="highlight"><code class="python">valid_proj_v = proj_vertices[:, self.valid_vertex_index, ..., :<span class="hljs-number">2</span>]  <span class="hljs-comment"># 当前 FLAME 参数投影出的顶点 2D</span>
+v_dist_2d = (gt_2_verts - valid_proj_v)                            <span class="hljs-comment"># 目标像素 - 投影像素</span>
+uv_loss = (
+    (v_dist_2d / self.gt.shape[-<span class="hljs-number">1</span>])                               <span class="hljs-comment"># 归一化到图像尺度</span>
+    * (self.dists &lt; self.delta)                                   <span class="hljs-comment"># 门控① UV 距离</span>
+    * (v_dist_2d.<span class="hljs-built_in">abs</span>().<span class="hljs-built_in">sum</span>(dim=-<span class="hljs-number">1</span>) &lt; self.dist_uv).unsqueeze(-<span class="hljs-number">1</span>)  <span class="hljs-comment"># 门控② 2D 位移</span>
+    * not_occluded.unsqueeze(-<span class="hljs-number">1</span>)                                  <span class="hljs-comment"># 门控③ 遮挡</span>
+).<span class="hljs-built_in">abs</span>().mean()
+</code></pre>
+<p><code>l2_loss=True</code> 时改用平方 loss ×100,否则 L1。<br />
+含义：<strong>让每个有效顶点的2D投影位置，去逼近它在图像里对应像素的位置</strong></p>
+<p>仓库代码有两种作用不同层级的loss:</p>
+<ul>
+<li>loss/uv_pixel: 把FLAME mesh用光栅化器渲染成一张UV图<code>ops['uv_images']</code>,和网络预测的 <code>uv_map</code> 做<strong>逐像素</strong>比较。是render-and-compare、图像空间的稠密loss.</li>
+<li>loss/uv(本文主角): 不渲染，直接在顶点级别用KNN对应做2D距离。</li>
+</ul>
+<h2 id="a4-在-tracker-里的调用时序"><a class="markdownIt-Anchor" href="#a4-在-tracker-里的调用时序"></a> A.4 在 tracker 里的调用时序</h2>
+<p><a href="src/pixel3dmm/tracking/tracker.py#L1145-L1151">tracker.py:1145-1151</a>:</p>
+<pre class="highlight"><code class="python"><span class="hljs-keyword">if</span> self.uv_loss_fn.gt_2_verts <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+    self.uv_loss_fn.compute_corresp(uv_map, selected_frames=selected_frames)  <span class="hljs-comment"># search 只做一次</span>
+uv_loss = self.uv_loss_fn.compute_loss(proj_vertices, ..., is_visible_verts_idx=is_visible_verts_idx)
+losses[<span class="hljs-string">&#x27;loss/uv&#x27;</span>] = uv_loss * self.config.uv_map_super
+</code></pre>
+<ul>
+<li><strong>KNN 搜索在一帧/一个优化阶段内只跑一次</strong>(<code>is_next()</code> 在 <a href="src/pixel3dmm/tracking/tracker.py#L1838">tracker.py:1838</a> 重置 <code>gt_2_verts</code>)。对应关系来自固定的预测 UV,不随 FLAME 参数迭代变化;变化的只是 <code>proj_vertices</code>,所以内循环只重算 <code>compute_loss</code>。昂贵的 KNN 不进优化内循环——类似 ICP 的&quot;先定对应,再求变换&quot;。</li>
+<li><code>UVLoss</code> 初始化(<a href="src/pixel3dmm/tracking/tracker.py#L163-L168">tracker.py:163-168</a>)参数全来自 config,<code>compute_loss</code> 被 <code>torch.compile</code> 加速,<code>compute_corresp</code> 不被 compile。</li>
+<li><code>finish_stage1</code>(<a href="src/pixel3dmm/tracking/losses.py#L70-L74">losses.py:70-74</a>,<a href="src/pixel3dmm/tracking/tracker.py#L1893">tracker.py:1893</a>):粗→细阶段切换时换更严格的 <code>delta_uv_fine</code> / <code>dist_uv_fine</code>。</li>
+</ul>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2026/06/15/3d/pixel3dmm/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/3D/" rel="tag">3D</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/2026/05/18/3d/3d-reconstruct-zhong-xiang-ji-xiang-guan-ji-chu/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">reconstruct中相机相关基础</div>
+      </a>
+    
+  </nav>
+
+  
+   
+  
+   
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2026
+        <i class="ri-heart-fill heart_icon"></i> twlelev的博客
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="twlelev的博客"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+ 
+    
+        <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.css">
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.js"></script>
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/contrib/auto-render.min.js"></script>
+        
+    
+ 
+<!-- busuanzi  -->
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>

@@ -152,6 +152,127 @@
     
     
     <article
+  id="post-3D/pixel3dmm"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2026/06/15/3d/pixel3dmm/"
+    >“pixel3dmm”</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2026/06/15/3d/pixel3dmm/" class="article-date">
+  <time datetime="2026-06-15T03:17:09.000Z" itemprop="datePublished">2026-06-15</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/FLAME/">FLAME</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>![[/images/3D/Pasted image 20260622135821.png]]</p>
+<p>核心：屏幕空间稠密先验(screen-space dense priors)。</p>
+<h1 id="search-uv-机制详解"><a class="markdownIt-Anchor" href="#search-uv-机制详解"></a> “search uv” 机制详解</h1>
+<p>“search uv” 的本质是:<strong>用 KNN 在网络预测的 UV 图里,为每个 FLAME 顶点反查出它对应的图像像素位置</strong>,从而把&quot;per-pixel 的 UV 预测&quot;转成&quot;per-vertex 的 2D 重投影目标&quot;来拟合 FLAME 参数。</p>
+<p><strong>个人总结，通俗解释</strong>：<br />
+网络预测uv coordinates, 得到屏幕像素空间与uv坐标的映射，因为canonical uv坐标与3d顶点存在对应的关系，因此通过转换可以得到屏幕像素空间与3d顶点的对应。<br />
+预测的uv坐标不一定准确，所以通过search_uv优化，将其与canonical uv比较(最邻近搜索，排除距离远的奇异点等)得到屏幕空间每一个像素对应的3d坐标作为gt来监督。</p>
+<h2 id="a1-前提两套-uv-的定义"><a class="markdownIt-Anchor" href="#a1-前提两套-uv-的定义"></a> A.1 前提:两套 UV 的定义</h2>
+<p><strong>(a) Canonical UV(模板顶点的固定 UV)</strong> — <a href="src/pixel3dmm/tracking/losses.py#L60-L61">losses.py:60-61</a></p>
+<pre class="highlight"><code class="python">self.can_uv = torch.from_numpy(np.load(env_paths.FLAME_UV_COORDS)[self.valid_verts, :]).cuda().unsqueeze(<span class="hljs-number">0</span>).<span class="hljs-built_in">float</span>()
+self.can_uv[..., <span class="hljs-number">1</span>] = (self.can_uv[..., <span class="hljs-number">1</span>] * -<span class="hljs-number">1</span>) + <span class="hljs-number">1</span>   <span class="hljs-comment"># OBJ-v 翻成 image-style v</span>
+</code></pre>
+<ul>
+<li><code>FLAME_UV_COORDS</code> 是 FLAME 模板每个顶点在 UV 图集上的<strong>固定坐标</strong>,与姿态/表情无关(对应正文 §5 的&quot;横向独立平面 UV ∈ [0,1]²&quot;)。</li>
+<li><code>valid_verts</code>(<a href="src/pixel3dmm/tracking/losses.py#L56-L59">losses.py:56-59</a>)剔除后脑勺/脖子等不可靠区域;<code>stricter_mask</code> 时用更窄的集合。</li>
+<li>第 61 行 <code>v = 1 - v</code>,把 OBJ 约定翻成图像坐标,与网络预测 UV 同约定。</li>
+</ul>
+<p><strong>(b) Predicted UV(网络对每个图像像素的 UV 预测)</strong> — 即 <code>uv_map</code>,网络输出 2 通道,每像素值是&quot;该像素落在 FLAME UV 图集的哪个位置&quot;。</p>
+<h2 id="a2-核心搜索compute_corresp"><a class="markdownIt-Anchor" href="#a2-核心搜索compute_corresp"></a> A.2 核心搜索:<code>compute_corresp</code></h2>
+<p><a href="src/pixel3dmm/tracking/losses.py#L79-L95">losses.py:79-95</a>:</p>
+<pre class="highlight"><code class="python">
+gt_uv = gt[:, :<span class="hljs-number">2</span>, :, :].permute(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>)           <span class="hljs-comment"># 取预测 UV 的 2 通道</span>
+gt_uv = gt_uv.reshape(gt_uv.shape[<span class="hljs-number">0</span>], -<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)          <span class="hljs-comment"># B x (H*W) x 2,每个像素当成 UV 空间一个点</span>
+can_uv = self.can_uv.repeat(gt_uv.shape[<span class="hljs-number">0</span>], <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)     <span class="hljs-comment"># B x N_verts x 2</span>
+knn_result = knn_points(can_uv, gt_uv)                <span class="hljs-comment"># 关键:在 UV 空间做最近邻</span>
+pixel_position_width  = knn_result.idx % gt.shape[-<span class="hljs-number">1</span>] <span class="hljs-comment"># 展平索引拆回 (x, y)</span>
+pixel_position_height = knn_result.idx // gt.shape[-<span class="hljs-number">2</span>]
+self.dists = knn_result.dists.clone()
+self.gt_2_verts = torch.cat([pixel_position_width, pixel_position_height], dim=-<span class="hljs-number">1</span>)
+</code></pre>
+<p>要点:</p>
+<ul>
+<li><strong>搜索发生在 UV 空间,而非图像空间。</strong> <code>knn_points(can_uv, gt_uv)</code> 对每个顶点的 canonical UV,在全部 <code>H*W</code> 个像素的预测 UV 里找<strong>欧氏距离最近</strong>的像素。含义:“哪个图像像素的预测 UV,最接近这个顶点本该所在的 UV?”</li>
+<li><code>knn_result.idx</code> 是展平像素下标,<code>% width</code> / <code>// width</code> 还原成 <code>(x, y)</code> → 存进 <code>gt_2_verts</code>(每个有效顶点一个 2D 目标点)。</li>
+<li><code>dists</code> 记录每个匹配的 UV 距离,用作置信度门控。</li>
+<li><code>@torch.compiler.disable</code>(<a href="src/pixel3dmm/tracking/losses.py#L79">losses.py:79</a>):KNN 不走 torch.compile。</li>
+<li>GT 侧 UV 在 <code>uv_pred_to_mesh</code> 里(<a href="src/pixel3dmm/utils/uv.py#L51-L55">uv.py:51-55</a>)先 <code>(x+1)/2</code> 归一化、用 mask 清背景、把 <code>abs&gt;=1</code> 的无效预测设成 10(推到 UV 无穷远), 保证无效像素<strong>永不被选中</strong>。</li>
+</ul>
+<h2 id="a3-把搜索结果变成-losscompute_loss"><a class="markdownIt-Anchor" href="#a3-把搜索结果变成-losscompute_loss"></a> A.3 把搜索结果变成 loss:<code>compute_loss</code></h2>
+<p><a href="src/pixel3dmm/tracking/losses.py#L99-L127">losses.py:99-127</a>:</p>
+<pre class="highlight"><code class="python">valid_proj_v = proj_vertices[:, self.valid_vertex_index, ..., :<span class="hljs-number">2</span>]  <span class="hljs-comment"># 当前 FLAME 参数投影出的顶点 2D</span>
+v_dist_2d = (gt_2_verts - valid_proj_v)                            <span class="hljs-comment"># 目标像素 - 投影像素</span>
+uv_loss = (
+    (v_dist_2d / self.gt.shape[-<span class="hljs-number">1</span>])                               <span class="hljs-comment"># 归一化到图像尺度</span>
+    * (self.dists &lt; self.delta)                                   <span class="hljs-comment"># 门控① UV 距离</span>
+    * (v_dist_2d.<span class="hljs-built_in">abs</span>().<span class="hljs-built_in">sum</span>(dim=-<span class="hljs-number">1</span>) &lt; self.dist_uv).unsqueeze(-<span class="hljs-number">1</span>)  <span class="hljs-comment"># 门控② 2D 位移</span>
+    * not_occluded.unsqueeze(-<span class="hljs-number">1</span>)                                  <span class="hljs-comment"># 门控③ 遮挡</span>
+).<span class="hljs-built_in">abs</span>().mean()
+</code></pre>
+<p><code>l2_loss=True</code> 时改用平方 loss ×100,否则 L1。<br />
+含义：<strong>让每个有效顶点的2D投影位置，去逼近它在图像里对应像素的位置</strong></p>
+<p>仓库代码有两种作用不同层级的loss:</p>
+<ul>
+<li>loss/uv_pixel: 把FLAME mesh用光栅化器渲染成一张UV图<code>ops['uv_images']</code>,和网络预测的 <code>uv_map</code> 做<strong>逐像素</strong>比较。是render-and-compare、图像空间的稠密loss.</li>
+<li>loss/uv(本文主角): 不渲染，直接在顶点级别用KNN对应做2D距离。</li>
+</ul>
+<h2 id="a4-在-tracker-里的调用时序"><a class="markdownIt-Anchor" href="#a4-在-tracker-里的调用时序"></a> A.4 在 tracker 里的调用时序</h2>
+<p><a href="src/pixel3dmm/tracking/tracker.py#L1145-L1151">tracker.py:1145-1151</a>:</p>
+<pre class="highlight"><code class="python"><span class="hljs-keyword">if</span> self.uv_loss_fn.gt_2_verts <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+    self.uv_loss_fn.compute_corresp(uv_map, selected_frames=selected_frames)  <span class="hljs-comment"># search 只做一次</span>
+uv_loss = self.uv_loss_fn.compute_loss(proj_vertices, ..., is_visible_verts_idx=is_visible_verts_idx)
+losses[<span class="hljs-string">&#x27;loss/uv&#x27;</span>] = uv_loss * self.config.uv_map_super
+</code></pre>
+<ul>
+<li><strong>KNN 搜索在一帧/一个优化阶段内只跑一次</strong>(<code>is_next()</code> 在 <a href="src/pixel3dmm/tracking/tracker.py#L1838">tracker.py:1838</a> 重置 <code>gt_2_verts</code>)。对应关系来自固定的预测 UV,不随 FLAME 参数迭代变化;变化的只是 <code>proj_vertices</code>,所以内循环只重算 <code>compute_loss</code>。昂贵的 KNN 不进优化内循环——类似 ICP 的&quot;先定对应,再求变换&quot;。</li>
+<li><code>UVLoss</code> 初始化(<a href="src/pixel3dmm/tracking/tracker.py#L163-L168">tracker.py:163-168</a>)参数全来自 config,<code>compute_loss</code> 被 <code>torch.compile</code> 加速,<code>compute_corresp</code> 不被 compile。</li>
+<li><code>finish_stage1</code>(<a href="src/pixel3dmm/tracking/losses.py#L70-L74">losses.py:70-74</a>,<a href="src/pixel3dmm/tracking/tracker.py#L1893">tracker.py:1893</a>):粗→细阶段切换时换更严格的 <code>delta_uv_fine</code> / <code>dist_uv_fine</code>。</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/3D/" rel="tag">3D</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
   id="post-3D/3D reconstruct 中相机相关基础"
   class="article article-type-post"
   itemscope
@@ -2694,102 +2815,6 @@ paper原文: we denote the UNET features in the path without ID embedding as <sp
   Q = [<span class="hljs-variable constant_">ID</span>; img],  K = [<span class="hljs-variable constant_">ID</span>; img],  V = [<span class="hljs-variable constant_">ID</span>; img]  → 两者都更新，双向交互，相互attend
 </code></pre>
 <p>InfiniteYou 中 ID embedding注入InfuseNet的方式是Joint Attention（联合注意力），不是Cross-Attention,也不是self-attention，是img token 和 ID token共同参与的。这是 FLUX区别于Stable Diffusion的核心架构之一。</p>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AIGC/" rel="tag">AIGC</a></li></ul>
-
-    </footer>
-  </div>
-
-   
-   
-  
-</article>
-
-    
-    <article
-  id="post-AIGC/LCM-LORA"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2025/12/19/aigc/lcm-lora/"
-    >LCM LORA</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2025/12/19/aigc/lcm-lora/" class="article-date">
-  <time datetime="2025-12-19T07:04:10.000Z" itemprop="datePublished">2025-12-19</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/AIGC/">AIGC</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h1 id="技术深度解析lcm-lora-原理与-scheduler-源码实现"><a class="markdownIt-Anchor" href="#技术深度解析lcm-lora-原理与-scheduler-源码实现"></a> 技术深度解析：LCM-LoRA 原理与 Scheduler 源码实现</h1>
-<h2 id="1-背景介绍"><a class="markdownIt-Anchor" href="#1-背景介绍"></a> 1. 背景介绍</h2>
-<p>在扩散模型（Diffusion Models）的推理过程中，传统的采样方法（如 DDIM, Euler）通常需要 20-50 步迭代。<strong>一致性模型（Consistency Models, CM）</strong> 的出现旨在打破这一限制，通过学习一个“一致性映射”，模型可以直接从噪声状态 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">x_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 预测到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">x_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。<br />
-<strong>本质：</strong> 不是在求解 ODE，而是在直接预测 ODE 轨迹的<strong>不动点</strong>。</p>
-<p><strong>LCM-LoRA</strong> 则是将 LCM 的蒸馏技术与 LoRA（低秩自适应）结合，使得原本庞大的采样步数可以压缩至 2-8 步，且可以像普通 LoRA 一样灵活插拔，极大地降低了推理成本。</p>
-<hr />
-<h2 id="2-核心数学理论"><a class="markdownIt-Anchor" href="#2-核心数学理论"></a> 2. 核心数学理论</h2>
-<h3 id="21-概率流-ode-pf-ode"><a class="markdownIt-Anchor" href="#21-概率流-ode-pf-ode"></a> 2.1 概率流 ODE (PF-ODE)</h3>
-<p>扩散模型的前向过程可以映射为一个概率流常微分方程（Probability Flow ODE）。传统的采样器本质上是在数值求解这个 ODE。</p>
-<h3 id="22-一致性映射consistency-mapping"><a class="markdownIt-Anchor" href="#22-一致性映射consistency-mapping"></a> 2.2 一致性映射（Consistency Mapping）</h3>
-<p>一致性模型旨在学习一个函数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo separator="true">,</mo><mi>t</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f(x_t, t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span>，其满足：<br />
-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo separator="true">,</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><msup><mi>t</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></msub><mo separator="true">,</mo><msup><mi>t</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">)</mo><mo>=</mo><msub><mi>x</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">f(x_t, t) = f(x_{t&#x27;}, t&#x27;) = x_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal">t</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.001892em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32797999999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6828285714285715em;"><span style="top:-2.786em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.751892em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><br />
-这意味着对于同一条 PF-ODE 轨迹上的任何点，无论时间步 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.61508em;vertical-align:0em;"></span><span class="mord mathnormal">t</span></span></span></span> 是多少，经过该函数映射后都应该指向同一个终点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">x_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。</p>
-<h3 id="23-lcm-蒸馏公式"><a class="markdownIt-Anchor" href="#23-lcm-蒸馏公式"></a> 2.3 LCM 蒸馏公式</h3>
-<p>LCM 在训练时使用预训练模型作为指导，通过以下边界条件定义映射：<br />
-<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>x</mi><mo>^</mo></mover><mn>0</mn></msub><mo>=</mo><msub><mi>f</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo separator="true">,</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>c</mi><mrow><mi>s</mi><mi>k</mi><mi>i</mi><mi>p</mi></mrow></msub><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><msub><mi>x</mi><mi>t</mi></msub><mo>+</mo><msub><mi>c</mi><mrow><mi>o</mi><mi>u</mi><mi>t</mi></mrow></msub><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><msub><mi>F</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo separator="true">,</mo><mi>t</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\hat{x}_0 = f_\theta(x_t, t) = c_{skip}(t)x_t + c_{out}(t)F_\theta(x_t, t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">x</span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.22222em;"><span class="mord">^</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.10764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal">t</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.036108em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">p</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span><br />
-其中：</p>
-<ul>
-<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>c</mi><mrow><mi>s</mi><mi>k</mi><mi>i</mi><mi>p</mi></mrow></msub><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">c_{skip}(t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.036108em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">p</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>c</mi><mrow><mi>o</mi><mi>u</mi><mi>t</mi></mrow></msub><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">c_{out}(t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span> 是缩放系数，确保在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">t=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.61508em;vertical-align:0em;"></span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">0</span></span></span></span> 时满足边界条件 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo><mo>=</mo><msub><mi>x</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">f(x_0, 0) = x_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。</li>
-<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>F</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo separator="true">,</mo><mi>t</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">F_\theta(x_t, t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span> 是神经网络预测的内容（通常是基于噪声预测）。</li>
-</ul>
-<h2 id="3-scheduler-源码深度分析"><a class="markdownIt-Anchor" href="#3-scheduler-源码深度分析"></a> 3. Scheduler 源码深度分析</h2>
-<p>结合 <code>diffusers</code> 库中的 <code>LCMScheduler</code>，我们可以看到理论是如何转化为代码的。</p>
-<h3 id="核心步骤-1预测并还原-x_0"><a class="markdownIt-Anchor" href="#核心步骤-1预测并还原-x_0"></a> 核心步骤 1：预测并还原 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">x_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></h3>
-<p>这是所有去噪逻辑的起点。调度器根据 UNet 预测的噪声 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϵ</mi><mi>θ</mi></msub></mrow><annotation encoding="application/x-tex">\epsilon_\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">ϵ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>（即代码中的 model_output）反推 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">x_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>：</p>
-<pre class="highlight"><code class="python"><span class="hljs-comment"># 理论公式：x_0 = (x_t - sqrt(1 - alpha_t) * epsilon) / sqrt(alpha_t)</span>
-pred_original_sample = (sample - (<span class="hljs-number">1</span> - alpha_prod_t)**<span class="hljs-number">0.5</span> * model_output) / alpha_prod_t**<span class="hljs-number">0.5</span>
-</code></pre>
-<h3 id="核心步骤-2应用一致性比例进行跳跃"><a class="markdownIt-Anchor" href="#核心步骤-2应用一致性比例进行跳跃"></a> 核心步骤 2：应用一致性比例进行跳跃</h3>
-<p>传统调度器会根据导数走一小步，而 LCM 调度器通过 <code>c_skip</code> 和 <code>c_out</code> 执行“跨步”：</p>
-<pre class="highlight"><code class="python"><span class="hljs-comment"># c_skip 和 c_out 由当前时间步 t 决定</span>
-c_skip, c_out = self.get_scalings_for_boundary_condition(timestep)
-
-<span class="hljs-comment"># 直接计算下一状态 (LCM 模型的一致性步进)</span>
-<span class="hljs-comment"># prev_sample = x_&#123;t-1&#125;</span>
-prev_sample = c_skip * sample + c_out * pred_original_sample
-</code></pre>
-<h3 id="核心步骤-3多步随机性补偿"><a class="markdownIt-Anchor" href="#核心步骤-3多步随机性补偿"></a> 核心步骤 3：多步随机性补偿</h3>
-<p>为了增强生成的纹理细节，如果是运行多步（Multi-step LCM），会在最后注入微量的高斯噪声：</p>
-<pre class="highlight"><code class="python"><span class="hljs-keyword">if</span> self.num_inference_steps &gt; <span class="hljs-number">1</span> <span class="hljs-keyword">and</span> timestep &gt; <span class="hljs-number">0</span>:
-    noise = randn_tensor(model_output.shape, generator=generator)
-    prev_sample = prev_sample + noise * self.sigmas[timestep]
-</code></pre>
  
       <!-- reward -->
       
