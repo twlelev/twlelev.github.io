@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="用于记录学习笔记的个人网站" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>代码/知识图谱工具：codebase-memory-mcp 与 graphify |  twlelev的博客</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-skills/codebase-memory-graphify"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  代码/知识图谱工具：codebase-memory-mcp 与 graphify
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2026/06/23/skills/codebase-memory-graphify/" class="article-date">
+  <time datetime="2026-06-23T06:31:46.000Z" itemprop="datePublished">2026-06-23</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/skills/">skills</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">3.4k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">13 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>两个把&quot;一堆文件 → 知识图谱 → 喂给 AI agent&quot;的工具，定位互补：</p>
+<ul>
+<li><strong>codebase-memory-mcp</strong> — 只吃<strong>代码</strong>，极致省 token，毫秒级建图，接 Claude Code 做架构/调用链分析。</li>
+<li><strong>graphify</strong> — 吃<strong>代码/文档/论文/图片</strong>，产出社区聚类 + wiki + 跨文档惊喜连接。</li>
+</ul>
+<p>本文上半部分讲 codebase-memory-mcp（第一~七节），下半部分讲 graphify（第八节），最后给选型表（第九节）。</p>
+<hr />
+<h1 id="part-a-codebase-memory-mcp"><a class="markdownIt-Anchor" href="#part-a-codebase-memory-mcp"></a> Part A · codebase-memory-mcp</h1>
+<blockquote>
+<p>仓库：<a target="_blank" rel="noopener" href="https://github.com/DeusData/codebase-memory-mcp">DeusData/codebase-memory-mcp</a></p>
+</blockquote>
+<h2 id="一-它是什么"><a class="markdownIt-Anchor" href="#一-它是什么"></a> 一、它是什么</h2>
+<p>一个<strong>纯 C 写、零依赖、单二进制</strong>的 MCP 服务器：用 tree-sitter 把代码库解析成<strong>持久化知识图谱</strong>，让 AI agent 用<strong>一条结构化图查询</strong>替代几十轮 <code>grep</code>/<code>read</code>，把&quot;理解大型代码库&quot;的 token 开销从约 41 万压到约 3,400。</p>
+<p><strong>核心价值</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>痛点</th>
+<th>它的解法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>agent 读代码靠 grep + 整文件塞上下文，token 爆炸</td>
+<td>一次建图，之后&quot;谁调谁/谁实现谁/改这里炸哪里&quot;都是单次图查询，只返回符号关系不返回源码</td>
+</tr>
+<tr>
+<td>grep 是文本层操作，不懂&quot;调用/实现/导入&quot;结构语义</td>
+<td>13 种节点 + 20+ 关系的知识图谱，openCypher 查询亚毫秒返回</td>
+</tr>
+<tr>
+<td>传统图数据库磁盘 IO 慢</td>
+<td>全程内存 SQLite + LZ4，最后单次落盘；Linux 内核 2800 万行 3 分钟建图</td>
+</tr>
+</tbody>
+</table>
+<p><strong>和 graphify 的分工</strong>：codebase-memory-mcp 只吃<strong>代码</strong>、极致优化 token 效率；graphify 吃<strong>代码/文档/论文/图片</strong>、产出社区聚类 wiki。研究语料库用 graphify；<strong>接入真实大型代码仓库时</strong>才考虑 codebase-memory-mcp。</p>
+<hr />
+<h2 id="二-安装"><a class="markdownIt-Anchor" href="#二-安装"></a> 二、安装</h2>
+<pre class="highlight"><code class="bash"><span class="hljs-comment"># 一键安装（自动探测并配置已安装的 agent）—— 注意用 bash 不是 sh</span>
+curl -fsSL https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.sh | bash
+</code></pre>
+<blockquote>
+<p>⚠️ <strong>常见坑：<code>| sh</code> 报 <code>set: Illegal option -o pipefail</code></strong><br />
+Debian/Ubuntu 的 <code>/bin/sh</code> 是 <strong>dash</strong>，不认 bash 专属的 <code>set -o pipefail</code>。脚本本身没问题，是解释器选错了。<strong>把 <code>| sh</code> 换成 <code>| bash</code></strong> 即可。<br />
+更稳妥的做法（先看再跑，避免无审查执行远程脚本）：</p>
+<pre class="highlight"><code class="bash">curl -fsSL https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.sh -o /tmp/cbm-install.sh
+less /tmp/cbm-install.sh        <span class="hljs-comment"># 扫一眼装了啥、装哪</span>
+bash /tmp/cbm-install.sh        <span class="hljs-comment"># 确认无误后用 bash 跑</span>
+</code></pre>
+<p>极简容器若没装 bash：<code>which bash</code> 查不到就先 <code>apt-get install -y bash</code>。</p>
+</blockquote>
+<ul>
+<li>安装脚本只装<strong>二进制</strong>，Claude Code 集成逻辑在二进制内部。</li>
+<li>支持 macOS(arm64/amd64) / Linux(arm64/amd64) / Windows(amd64)，无 Docker、无 API key、无 Python 环境。</li>
+<li>安装时会自动探测并写入最多 <strong>11 个 agent</strong> 的配置：Claude Code（含 <code>.mcp.json</code> + 4 个 Skills + Grep/Glob 的 PreToolUse hook）、Codex CLI、Gemini CLI、Zed、VS Code、Aider 等。</li>
+<li>数据 <strong>100% 本地</strong>，存 <code>~/.cache/codebase-memory-mcp/</code>，代码不出机器。</li>
+</ul>
+<hr />
+<h2 id="三-claude-code含-vscode-扩展配置"><a class="markdownIt-Anchor" href="#三-claude-code含-vscode-扩展配置"></a> 三、Claude Code（含 VSCode 扩展）配置</h2>
+<p><strong>会自动配置</strong>——安装脚本探测到 Claude Code 后，自动写入 <code>.mcp.json</code> 并注册 4 个 Skills + PreToolUse hook，你<strong>无需手动改配置</strong>。</p>
+<p>验证是否生效：</p>
+<pre class="highlight"><code class="bash">codebase-memory-mcp --version       <span class="hljs-comment"># 二进制可用</span>
+<span class="hljs-comment"># 在 Claude Code 里：MCP 工具列表应出现 index_repository / query_graph 等 14 个工具</span>
+</code></pre>
+<p>claude code for vscode 插件：在命令面板输入 <code>/MCP servers</code>，查看是否是 connected 状态。</p>
+<hr />
+<h2 id="四-核心用法建图-查询"><a class="markdownIt-Anchor" href="#四-核心用法建图-查询"></a> 四、核心用法：建图 → 查询</h2>
+<h3 id="1-索引一个仓库每个新项目首次都要做一次"><a class="markdownIt-Anchor" href="#1-索引一个仓库每个新项目首次都要做一次"></a> 1. 索引一个仓库（每个新项目首次都要做一次）</h3>
+<p><strong>方式一</strong>：让 Claude 调用 <code>index_repository</code> 工具，或直接说：</p>
+<pre class="highlight"><code class="">帮我索引 /path/to/repo 这个代码库
+</code></pre>
+<p><strong>方式二</strong>：命令行直接调二进制</p>
+<pre class="highlight"><code class="bash">codebase-memory-mcp index /path/to/repo
+</code></pre>
+<ul>
+<li>建图是<strong>一次性</strong>的；之后图谱持久化在 <code>~/.cache/</code>，跨会话存活，<strong>不需要每次进项目重新索引</strong>。</li>
+<li><strong>增量自动同步</strong>：工具内置 git-polling，检测到代码改动会自动更新图谱。</li>
+</ul>
+<h3 id="2-如何触发-claude-用图谱而非-grep"><a class="markdownIt-Anchor" href="#2-如何触发-claude-用图谱而非-grep"></a> 2. 如何触发 Claude 用图谱而非 grep</h3>
+<p>三种方式，从被动到主动：</p>
+<ol>
+<li><strong>PreToolUse hook（自动、透明）</strong>：装好后，Claude 想 <code>grep</code>/<code>glob</code> 时，hook 自动用图谱增强结果——你什么都不用做。</li>
+<li><strong>显式要求</strong>：在 prompt 里说&quot;用 codebase-memory 查/用知识图谱查调用链&quot;，Claude 会优先调 MCP 工具。</li>
+<li><strong>直接给结构化问题</strong>：问&quot;main 最终调到哪些数据库写操作&quot;&quot;改 X 会影响哪些函数&quot;这类<strong>结构关系</strong>问题，Claude 自然倾向用 <code>trace_path</code>/<code>query_graph</code>。</li>
+</ol>
+<h3 id="3-常用-cypher-查询示例"><a class="markdownIt-Anchor" href="#3-常用-cypher-查询示例"></a> 3. 常用 Cypher 查询示例</h3>
+<pre class="highlight"><code class="cypher">-- 1) main 5 层内调用到的所有写操作
+MATCH (f:Function)-[:CALLS*1..5]-&gt;(w) WHERE f.name = 'main' AND w.label = 'WRITES' RETURN w.name
+
+-- 2) 死代码检测：没有任何调用者的函数
+MATCH (f:Function) WHERE NOT EXISTS &#123; (f)&lt;-[:CALLS]-() &#125; RETURN f.name
+
+-- 3) 谁实现了某接口
+MATCH (c:Class)-[:IMPLEMENTS]-&gt;(i:Interface) WHERE i.name = 'Handler' RETURN c.name
+</code></pre>
+<blockquote>
+<p>查询引擎是<strong>只读 openCypher 子集</strong>：支持 MATCH/WHERE/WITH/RETURN/ORDER BY/聚合等；不支持写操作（它是&quot;理解层&quot;不是&quot;编辑层&quot;），遇到不支持的语法会抛清晰错误而非静默返回空。</p>
+</blockquote>
+<hr />
+<h2 id="五-14-个-mcp-工具速查"><a class="markdownIt-Anchor" href="#五-14-个-mcp-工具速查"></a> 五、14 个 MCP 工具速查</h2>
+<p><strong>索引（3）</strong>：<code>index_repository</code>（建图+自动同步）/ <code>list_projects</code> / <code>delete_project</code></p>
+<p><strong>查询（9）</strong>：</p>
+<ul>
+<li><code>search_graph</code> — 按标签/名字/文件/度数过滤的结构化搜索</li>
+<li><code>trace_path</code> / <code>trace_call_path</code> — BFS&quot;谁调我 + 我调谁&quot;，深度 1–5</li>
+<li><code>detect_changes</code> — <strong>把 git diff 映射到受影响符号 + 爆炸半径 + 风险分级</strong>（改动影响分析，做 code review/重构利器）</li>
+<li><code>query_graph</code> — 执行只读 Cypher</li>
+<li><code>get_graph_schema</code> — 节点/边计数、关系模式</li>
+<li><code>get_code_snippet</code> — 按限定名读函数源码</li>
+<li><code>get_architecture</code> — 代码库概览（语言/包/路由/热点/聚类）</li>
+<li><code>search_code</code> — 索引内 grep 式文本搜索（兜底）</li>
+<li><code>manage_adr</code> — 架构决策记录增删改查</li>
+</ul>
+<p><strong>集成（2）</strong>：<code>index_status</code> / <code>ingest_traces</code>（<strong>摄入运行时 trace 校验静态推断的跨服务调用边</strong>）</p>
+<hr />
+<h2 id="六-多分支怎么办"><a class="markdownIt-Anchor" href="#六-多分支怎么办"></a> 六、多分支怎么办</h2>
+<p>工具按 git 当前 checkout 的状态建图，<strong>没有内置 per-branch 隔离</strong>——图谱按<strong>仓库路径</strong>存储，只反映&quot;这个目录此刻磁盘上是什么代码&quot;。</p>
+<p>切分支后，git-polling 会发现 HEAD 变了并<strong>自动把那唯一一份图谱同步成新分支的状态</strong>（你不用手动重 index），但它是&quot;覆盖式变形&quot;不是&quot;新增一份&quot;，旧分支的图谱同时就没了。另外 polling 是轮询不是实时，切分支后到图谱更新有<strong>延迟</strong>（检测延迟 + 增量重建），想立即刷新就手动 <code>codebase-memory-mcp index &lt;路径&gt;</code> 催一次，或用 <code>index-status</code> 看图谱当前对应哪个 commit。</p>
+<p>想<strong>同时</strong>保留多个分支的图谱，用 worktree 分隔：</p>
+<pre class="highlight"><code class="bash">git worktree add ../repo-featureX featureX     <span class="hljs-comment"># 每个分支一个独立工作目录</span>
+<span class="hljs-comment"># 在每个 worktree 里各 index 一次 → 各自独立图谱，互不污染</span>
+</code></pre>
+<p>因为是两个不同<strong>路径</strong>，就成了两份独立图谱，路径名本身还能充当分支标签，永远不会困惑&quot;这图是哪个分支的&quot;。</p>
+<hr />
+<h2 id="七-适用边界什么时候别用"><a class="markdownIt-Anchor" href="#七-适用边界什么时候别用"></a> 七、适用边界（什么时候别用）</h2>
+<p><strong>适合</strong>：大型 repo（10 万行+）接 Claude Code 省 token；跨文件架构/调用链分析；改动爆炸半径评估；死代码检测；Python/TS/Go/Rust/Java/C# 等 9 种主流语言。</p>
+<p><strong>要小心</strong>：</p>
+<ul>
+<li><strong>聚合查询大库会少计</strong>（200 行查询上限，<code>COUNT</code> 静默截断）——别拿它做精确统计。</li>
+<li><strong>属性提取不全</strong>——很多场景&quot;返回了函数但元数据是空&quot;。</li>
+<li><strong>长尾语言</strong>（OCaml/Haskell/Scala/Ruby 抽象方法）精度明显下降。</li>
+<li><strong>纯静态分析天花板</strong>——动态分发/反射/运行时元编程的调用边追不全（<code>ingest_traces</code> 部分缓解）。</li>
+<li><strong>只读</strong>——它是理解层，不能用它改图改代码。</li>
+</ul>
+<hr />
+<h1 id="part-b-graphify"><a class="markdownIt-Anchor" href="#part-b-graphify"></a> Part B · graphify</h1>
+<blockquote>
+<p>形态：一个 <strong>Claude Code Skill</strong>（不是二进制），底层是 Python 包 <code>graphifyy</code>。<br />
+触发：在 Claude Code 对话里输入 <code>/graphify</code>，<strong>不是 shell 可执行命令</strong>（<code>./graphify</code> 在终端会报&quot;不是内部或外部命令&quot;）。</p>
+</blockquote>
+<h2 id="八-graphify-简介与使用方法"><a class="markdownIt-Anchor" href="#八-graphify-简介与使用方法"></a> 八、graphify 简介与使用方法</h2>
+<h3 id="0-从零安装教程"><a class="markdownIt-Anchor" href="#0-从零安装教程"></a> 0. 从零安装教程</h3>
+<p>graphify 有<strong>两层</strong>：① Python 后端包 <code>graphifyy</code>（干活的引擎）；② Skill（<code>/graphify</code> 斜杠命令）。<code>pip install</code> 一步就同时拿到引擎和各平台 skill 模板，所以不用去别处下载。</p>
+<p><strong>前置：确认有 Python</strong></p>
+<pre class="highlight"><code class="bash">python --version      <span class="hljs-comment"># 需要 Python 3.8+</span>
+pip --version
+</code></pre>
+<p><strong>第一步：装后端包 <code>graphifyy</code></strong>（注意三个 y）</p>
+<pre class="highlight"><code class="bash">pip install graphifyy
+<span class="hljs-comment"># 验证</span>
+python -c <span class="hljs-string">&quot;import graphify; print(&#x27;OK:&#x27;, graphify.__file__)&quot;</span>
+</code></pre>
+<p><strong>第二步：把 skill 装进 Claude Code</strong>（skill 模板就在刚装好的包里）</p>
+<pre class="highlight"><code class="bash"><span class="hljs-comment"># Linux / Mac —— 用通用版 skill.md</span>
+PKG=$(python -c <span class="hljs-string">&quot;import graphify, os; print(os.path.dirname(graphify.__file__))&quot;</span>)
+<span class="hljs-built_in">mkdir</span> -p ~/.claude/skills/graphify
+<span class="hljs-built_in">cp</span> <span class="hljs-string">&quot;<span class="hljs-variable">$PKG</span>/skill.md&quot;</span> ~/.claude/skills/graphify/SKILL.md
+</code></pre>
+<pre class="highlight"><code class="powershell"><span class="hljs-comment"># Windows PowerShell —— 用 skill-windows.md</span>
+<span class="hljs-variable">$PKG</span> = python <span class="hljs-literal">-c</span> <span class="hljs-string">&quot;import graphify, os; print(os.path.dirname(graphify.__file__))&quot;</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span> ~\.claude\skills\graphify | <span class="hljs-built_in">Out-Null</span>
+<span class="hljs-built_in">Copy-Item</span> <span class="hljs-string">&quot;<span class="hljs-variable">$PKG</span>\skill-windows.md&quot;</span> ~\.claude\skills\graphify\SKILL.md
+</code></pre>
+<blockquote>
+<p>包里有多个模板：<code>skill.md</code>（通用，给 Claude Code）、<code>skill-windows.md</code>（Windows）、<code>skill-codex.md</code> / <code>skill-claw.md</code> 等（其他 agent）。<strong>Linux/Mac 用 <code>skill.md</code>，Windows 用 <code>skill-windows.md</code>。</strong></p>
+</blockquote>
+<p><strong>第三步：重启会话</strong> —— 斜杠命令只在 Claude Code 会话启动时注册，拷完必须<strong>重开一个会话</strong>，<code>/graphify</code> 才出现。</p>
+<p><strong>第四步：验证</strong></p>
+<pre class="highlight"><code class="bash">python -c <span class="hljs-string">&quot;import graphify; print(&#x27;后端 OK&#x27;)&quot;</span>
+<span class="hljs-built_in">ls</span> ~/.claude/skills/graphify/SKILL.md            <span class="hljs-comment"># skill OK</span>
+<span class="hljs-comment"># 然后在对话里输入 /graphify 能触发即成功</span>
+</code></pre>
+<p><strong>第五步：首次跑一个图谱</strong></p>
+<pre class="highlight"><code class="">/graphify /path/to/your/repo        # 产出在 graphify-out/，先看 GRAPH_REPORT.md
+</code></pre>
+<p><strong>⚠️ 三个常见坑</strong></p>
+<table>
+<thead>
+<tr>
+<th>现象</th>
+<th>原因 / 解法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>终端敲 <code>./graphify</code> 报&quot;不是内部或外部命令&quot;</td>
+<td>graphify <strong>不是 shell 命令</strong>，是对话里的 <code>/graphify</code>，别在终端跑</td>
+</tr>
+<tr>
+<td>Windows 跑时 emoji 报 <code>UnicodeEncodeError: 'gbk'</code></td>
+<td>命令前加 <code>PYTHONIOENCODING=utf-8</code>（PowerShell：<code>$env:PYTHONIOENCODING=&quot;utf-8&quot;</code>）</td>
+</tr>
+<tr>
+<td>Remote-SSH 远程开发，本地装了却用不了</td>
+<td>extension host 在<strong>远程</strong>端，这套（pip 包 + skill）要装在<strong>远程服务器</strong>，不是本地</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>官方仓库（最新版 / 排查问题）：<a target="_blank" rel="noopener" href="https://github.com/safishamsi/graphify">github.com/safishamsi/graphify</a></p>
+</blockquote>
+<h3 id="1-它是什么"><a class="markdownIt-Anchor" href="#1-它是什么"></a> 1. 它是什么</h3>
+<p>把<strong>任意一个文件夹</strong>（论文 + 推文 + 截图 + 代码 + 笔记都行）变成可导航的知识图谱，三件 Claude 单独做不到的事：</p>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>持久化图谱</strong></td>
+<td>关系存在 <code>graphify-out/graph.json</code>，跨会话存活，几周后还能直接查，不用重读所有文件</td>
+</tr>
+<tr>
+<td><strong>诚实审计轨迹</strong></td>
+<td>每条边标 <code>EXTRACTED</code>（源里明确）/ <code>INFERRED</code>（合理推断）/ <code>AMBIGUOUS</code>（存疑待审），你知道哪些是&quot;找到的&quot;哪些是&quot;推的&quot;</td>
+</tr>
+<tr>
+<td><strong>跨文档惊喜</strong></td>
+<td>社区检测（Louvain）找出不同文件里你<strong>根本想不到去问</strong>的概念关联（god nodes、surprising connections、hyperedges）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>核心差异 vs codebase-memory-mcp</strong>：codebase-memory 只吃代码、只画结构图（调用/实现/导入）、极致省 token；graphify 吃<strong>一切输入</strong>、产出<strong>社区聚类 + wiki + 人话报告</strong>，是&quot;知识图谱&quot;而非纯&quot;代码图谱&quot;。</p>
+<h3 id="2-双层提取决定了成本"><a class="markdownIt-Anchor" href="#2-双层提取决定了成本"></a> 2. 双层提取（决定了成本）</h3>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>处理对象</th>
+<th>机制</th>
+<th>成本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>结构层（AST）</strong></td>
+<td>代码文件</td>
+<td>确定性 tree-sitter 解析</td>
+<td><strong>免费、自动</strong></td>
+</tr>
+<tr>
+<td><strong>语义层</strong></td>
+<td>文档/论文/图片</td>
+<td>派发 Claude 子 agent 抽取概念/引用/图意</td>
+<td><strong>花 token</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>关键推论：<strong>改代码可以免费自动更新图；改文档/论文/图片要手动 <code>/graphify --update</code>（语义抽取烧 token）</strong>。如果你的语料库主要是论文/文档，它不会自动更新，得记着手动跑。</p>
+</blockquote>
+<h3 id="3-常用命令在-claude-code-对话里输入"><a class="markdownIt-Anchor" href="#3-常用命令在-claude-code-对话里输入"></a> 3. 常用命令（在 Claude Code 对话里输入）</h3>
+<pre class="highlight"><code class="">/graphify                          # 对当前目录跑完整管线 → Obsidian vault
+/graphify &lt;path&gt;                   # 对指定路径跑
+/graphify &lt;path&gt; --update          # 增量：只重新抽取新增/改动的文件（最常用）
+/graphify &lt;path&gt; --mode deep       # 更激进的 INFERRED 边，更深抽取
+/graphify &lt;path&gt; --cluster-only    # 只在现有图上重跑社区聚类
+/graphify &lt;path&gt; --no-viz          # 跳过可视化，只出报告 + JSON
+
+/graphify add &lt;url&gt;                # 抓网页存进 ./raw 并更新图
+/graphify query &quot;&lt;问题&gt;&quot;            # BFS 遍历，给宽上下文回答
+/graphify query &quot;&lt;问题&gt;&quot; --dfs      # DFS，追一条具体路径
+/graphify path &quot;A&quot; &quot;B&quot;             # 求两个概念间最短路径
+/graphify explain &quot;SwinTransformer&quot;# 用人话解释某个节点
+</code></pre>
+<p>导出格式（按需加 flag）：<code>--svg</code>（贴 Notion/GitHub）、<code>--graphml</code>（Gephi/yEd）、<code>--neo4j</code>（生成 cypher.txt）、<code>--mcp</code>（起 MCP server 给 agent 访问）。</p>
+<h3 id="4-产出物都在-graphify-out"><a class="markdownIt-Anchor" href="#4-产出物都在-graphify-out"></a> 4. 产出物（都在 <code>graphify-out/</code>）</h3>
+<ul>
+<li><code>GRAPH_REPORT.md</code> — 人话报告：god nodes（核心抽象）、社区结构、surprising connections、建议追问。<strong>回答架构/全局问题前先读它。</strong></li>
+<li><code>graph.json</code> — GraphRAG-ready 的机器可读图。</li>
+<li><code>graph.html</code> — 交互式可视化（注意：<strong>节点 &gt; 5000 时自动跳过 HTML</strong>，需用 Obsidian vault 或 <code>--svg</code> 看）。</li>
+<li><code>wiki/index.md</code>（若生成）— 导航优先看它，别翻原始文件。</li>
+</ul>
+<h3 id="5-更新行为"><a class="markdownIt-Anchor" href="#5-更新行为"></a> 5. 更新行为</h3>
+<ul>
+<li><strong>代码改动</strong>：<code>python3 -c &quot;from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))&quot;</code> 免费重建。</li>
+<li><strong>文档/论文/图片改动</strong>：手动 <code>/graphify &lt;path&gt; --update</code>，语义抽取花 token。</li>
+<li>建议在项目的 <code>CLAUDE.md</code> 里记一行&quot;上次全量更新时间戳 + 基线统计&quot;，超 ~30 天没更新就提醒重跑——文档型语料库不会自动更新，很容易忘。</li>
+</ul>
+<hr />
+<h2 id="九-一图记住选型"><a class="markdownIt-Anchor" href="#九-一图记住选型"></a> 九、一图记住选型</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>选</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>研究语料库</strong>（论文+文档+图片+少量代码）</td>
+<td><strong>graphify</strong></td>
+</tr>
+<tr>
+<td>接入<strong>真实大型代码仓库</strong>给 Claude Code 省 token、做架构/调用链/改动影响分析</td>
+<td><strong>codebase-memory-mcp</strong></td>
+</tr>
+<tr>
+<td>要<strong>社区聚类 + wiki + 跨文档惊喜连接</strong></td>
+<td><strong>graphify</strong></td>
+</tr>
+<tr>
+<td>要<strong>毫秒级建图 + IDE 级类型解析 + 单二进制零依赖部署</strong></td>
+<td><strong>codebase-memory-mcp</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="两者关键对比"><a class="markdownIt-Anchor" href="#两者关键对比"></a> 两者关键对比</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th><strong>codebase-memory-mcp</strong></th>
+<th><strong>graphify</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>形态</td>
+<td>纯 C 单二进制 / MCP server</td>
+<td>Claude Code Skill（Python <code>graphifyy</code>）</td>
+</tr>
+<tr>
+<td>触发</td>
+<td><code>codebase-memory-mcp index &lt;path&gt;</code> 或 MCP 工具</td>
+<td>对话里 <code>/graphify &lt;path&gt;</code></td>
+</tr>
+<tr>
+<td>输入</td>
+<td><strong>仅代码</strong></td>
+<td><strong>代码 / 文档 / 论文 / 图片</strong></td>
+</tr>
+<tr>
+<td>提取</td>
+<td>tree-sitter（158 语法）+ Hybrid LSP（9 语义）</td>
+<td>AST（免费）+ Claude 子 agent 语义（花 token）</td>
+</tr>
+<tr>
+<td>产出</td>
+<td>openCypher 可查的结构图</td>
+<td>社区聚类 + wiki + 诚实审计报告 + 多格式导出</td>
+</tr>
+<tr>
+<td>更新</td>
+<td>git-polling 自动增量（仅代码）</td>
+<td>代码免费自动；文档/论文需手动 <code>--update</code></td>
+</tr>
+<tr>
+<td>核心卖点</td>
+<td><strong>token 效率 + 毫秒建图 + IDE 级类型解析</strong></td>
+<td><strong>通用输入 + 社区结构 + 跨文档惊喜连接</strong></td>
+</tr>
+<tr>
+<td>适用</td>
+<td>真实大型代码仓</td>
+<td>研究语料库 / 混合 /raw 文件夹</td>
+</tr>
+</tbody>
+</table>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://example.com/2026/06/23/skills/codebase-memory-graphify/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AI-Agent/" rel="tag">AI Agent</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Claude-Code/" rel="tag">Claude Code</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MCP/" rel="tag">MCP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1/" rel="tag">知识图谱</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/2026/06/22/3d/difflocks/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">“difflocks”</div>
+      </a>
+    
+  </nav>
+
+  
+   
+  
+   
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2026
+        <i class="ri-heart-fill heart_icon"></i> twlelev的博客
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="twlelev的博客"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+ 
+    
+        <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.css">
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.js"></script>
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/contrib/auto-render.min.js"></script>
+        
+    
+ 
+<!-- busuanzi  -->
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>

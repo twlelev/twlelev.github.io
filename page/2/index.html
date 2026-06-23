@@ -152,6 +152,211 @@
     
     
     <article
+  id="post-AIGC/FlashAttention"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2025/12/23/aigc/flashattention/"
+    >FlashAttention</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2025/12/23/aigc/flashattention/" class="article-date">
+  <time datetime="2025-12-23T02:58:30.000Z" itemprop="datePublished">2025-12-23</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/AIGC-Infer/">AIGC_Infer</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="1-标准注意力机制的问题"><a class="markdownIt-Anchor" href="#1-标准注意力机制的问题"></a> 1. 标准注意力机制的问题：</h2>
+<p>标准机制需要“频繁读写”，它在GPU上的计算逻辑如下：</p>
+<ul>
+<li>任务 A (MatMul)：从 HBM 读 Q, K <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 算出 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 写回 HBM（因为 SRAM 放不下整个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>×</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">N \times N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span>）。</li>
+<li>任务 B (Softmax)： 从 HBM 读回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 处理 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 写回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span></span></span></span> 到 HBM。</li>
+<li>任务 C (MatMul)：从 HBM 读回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo separator="true">,</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">P, V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 算出 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi></mrow><annotation encoding="application/x-tex">O</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 写回 HBM。</li>
+</ul>
+<h2 id="2flashattention解决思路"><a class="markdownIt-Anchor" href="#2flashattention解决思路"></a> 2.FlashAttention解决思路</h2>
+<p>SRAM (片上高性能内存）较小，gpu kernel计算从SRAM 中读取数据，SRAM 相比较于HBM没有IO瓶颈(IO读写速度高一个数量级)，但是内存小。因此flashattention利用这一点，利用tiling计算将所有中间结果都留在SRAM，既降低了显存又减少了SRAM与HBM之间的IO,当得到最终结果再放回HBM。</p>
+<p>FlashAttention 的核心思想是 <strong>“计算换 IO”</strong>。它主要通过以下两个核心技术实现：</p>
+<ul>
+<li><strong>分块 (Tiling)：</strong> 它将输入的查询（Query）、键（Key）和值（Value）切分成小块，加载到 SRAM（速度极快但容量小）中。在 SRAM 里完成局部的注意力计算（包括 Softmax 的部分求和）。</li>
+<li><strong>重计算/在线 Softmax (Recomputation / Online Softmax)：</strong> 标准的 Softmax 需要全局信息。FlashAttention 使用了一种数学技巧（Online Softmax），允许它在不存储完整得分矩阵的情况下，通过不断更新局部最大值和求和项，最终计算出精确的注意力输出。在反向传播（训练时）中，它也不存储中间矩阵，而是通过存储的统计量在需要时重新计算。</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AIGC-Infer/" rel="tag">AIGC_Infer</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
+  id="post-AIGC/AIGC-FaceSwap生图相关技术总结"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/"
+    >AIGC-FaceSwap生图相关技术总结</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/" class="article-date">
+  <time datetime="2025-12-21T00:49:43.000Z" itemprop="datePublished">2025-12-21</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/AIGC/">AIGC</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="相关paper核心详解"><a class="markdownIt-Anchor" href="#相关paper核心详解"></a> 相关Paper核心详解</h1>
+<h2 id="ipadapter"><a class="markdownIt-Anchor" href="#ipadapter"></a> IPAdapter</h2>
+<p>解决了将文本提示和图像提示整合到预训练的文生图模型中。<br />
+核心：提出了解耦的交叉注意力机制，将文本特征和图像特征交叉注意力解耦。<br />
+<img src="/images/AIGC/ipadapter.png" alt="avatar" /><br />
+在原本的SD中，文本提示通过clip的text encoder得到text features注入到cross attention来完成文本提示与生成图像的语义对齐。给定查询特征<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Z</mi></mrow><annotation encoding="application/x-tex">Z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span></span></span></span>和文本特征<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>c</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">c_{t}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，cross attention的输出<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>Z</mi><msup><mrow></mrow><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></msup></mrow><annotation encoding="application/x-tex">Z^{&#x27;}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.94248em;vertical-align:0em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.94248em;"><span style="top:-2.94248em;margin-right:0.05em;"><span class="pstrut" style="height:2.57948em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8278285714285715em;"><span style="top:-2.931em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>定义如下：<br />
+<img src="/images/AIGC/20251221092952.png" alt="" /><br />
+其中<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo>=</mo><mi>Z</mi><msub><mi>W</mi><mi>q</mi></msub><mo separator="true">,</mo><mi>K</mi><mo>=</mo><msub><mi>c</mi><mi>t</mi></msub><msub><mi>W</mi><mi>k</mi></msub><mo separator="true">,</mo><mi>V</mi><mo>=</mo><msub><mi>c</mi><mi>t</mi></msub><msub><mi>W</mi><mi>v</mi></msub></mrow><annotation encoding="application/x-tex">Q=ZW_{q},K=c_{t}W_{k},V=c_{t}W_{v}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal">Q</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">q</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mi>q</mi></msub><mo separator="true">,</mo><msub><mi>W</mi><mi>k</mi></msub><mo separator="true">,</mo><msub><mi>W</mi><mi>v</mi></msub></mrow><annotation encoding="application/x-tex">W_{q},W_{k},W_{v}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">q</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>是可训练投影层的权重矩阵。</p>
+<p>比较直觉的思想是将text features和image features 连接(concatenate)然后注入到cross attention,文中提到效果不好。个人理解：text cross attention其实可以看做是sd模型的一部分，将text features和image features 连接(concatenate)然后注入到cross attention其实会影响其预训练的效果。</p>
+<p>IPAdapter提出的解耦注意力机制decoupled cross attention是指将图像提示（image prompt）也看作是text，按照上面的公式原理计算image prompt和查询特征<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Z</mi></mrow><annotation encoding="application/x-tex">Z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span></span></span></span>的cross attention，最后将text prompt计算的cross attention和image prompt计算的cross attention相加。<br />
+<img src="/images/AIGC/20251221093311.png" alt="" /><br />
+其中，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo>=</mo><mi>Z</mi><msub><mi>W</mi><mi>q</mi></msub><mo separator="true">,</mo><msup><mi>K</mi><msup><mrow></mrow><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></msup><mo>=</mo><msub><mi>c</mi><mi>i</mi></msub><msubsup><mi>W</mi><mi>k</mi><msup><mrow></mrow><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></msubsup><mo separator="true">,</mo><msup><mi>V</mi><msup><mrow></mrow><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></msup><mo>=</mo><msub><mi>c</mi><mi>i</mi></msub><msubsup><mi>W</mi><mi>V</mi><msup><mrow></mrow><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></msubsup></mrow><annotation encoding="application/x-tex">Q=ZW_{q},K^{&#x27;}=c_{i}W^{&#x27;}_{k},V^{&#x27;}=c_{i}W^{&#x27;}_{V}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal">Q</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.228588em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">q</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.94248em;"><span style="top:-2.94248em;margin-right:0.05em;"><span class="pstrut" style="height:2.57948em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8278285714285715em;"><span style="top:-2.931em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.225588em;vertical-align:-0.2831079999999999em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.94248em;"><span style="top:-2.4168920000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8278285714285715em;"><span style="top:-2.931em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2831079999999999em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.94248em;"><span style="top:-2.94248em;margin-right:0.05em;"><span class="pstrut" style="height:2.57948em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8278285714285715em;"><span style="top:-2.931em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.217811em;vertical-align:-0.275331em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.94248em;"><span style="top:-2.424669em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.22222em;">V</span></span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8278285714285715em;"><span style="top:-2.931em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.275331em;"><span></span></span></span></span></span></span></span></span></span> ，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi></mrow><annotation encoding="application/x-tex">Q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal">Q</span></span></span></span>与text cross attention是一致的，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>c</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">c_{i}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>是图像特征。</p>
+<p><strong>Note:</strong><br />
+这里的image embedding是a pretrained CLIP image encoder model to extract image features， 即clip embedding.</p>
+<pre class="highlight"><code class=""># 注意力机制代码
+import numpy as np
+def softmax(x):
+	#为了数值稳定，防止exp(x)溢出
+	e_x = np.exp(x - np.max(x,axis=-1,keepdims=true))
+	return e_x/np.sum(e_x, axis=-1,keepdims=true)
+
+def scaled_dot_product_attention(q,k,v, scaled=true):
+	d_k = q.shape[-1]
+	scores = np.matmul(q,k.transpose(0,2,1))
+	if scaled:
+		scores = scores /sqrt(d_k)
+	weigths = softmax(scores)
+	outputs = np.matmul(weigths, v)
+	return outputs
+	
+</code></pre>
+<h2 id="instantid"><a class="markdownIt-Anchor" href="#instantid"></a> InstantID</h2>
+<p><strong>核心：</strong> 通过IdentityNet施加强语义(面部特征)和弱空间条件(关键点)，将facial and landmarks images和文本提示词结合去引导图像生成。</p>
+<p>设计思路是IP-Adapter 与 ControlNet 的融合与改进，通过弱空间条件landmarks去做人物脸部的位置和大小以及姿态控制。相比较于IP-Adapter 论文中使用通用的CLIP视觉编码器，InstantID通过人脸识别编码器(insightface)提取面部特征，并经过Resampler转为face embedding。</p>
+<p><strong>InstantID中Resampler的作用</strong><br />
+在人脸ID特征提取出来后，InstantID会接一个Resampler，将固定512维度的人脸特征，转换成为与SD文本Embedding空间一致的维度(例如 SD1.5 是 768，SDXL 是 2048)。Resampler 会输出 N 个（通常是 4 个、16 个）2048 维的向量。这里的N代表token数量，对齐文本embedding。文本 Prompts 通常是一个序列（77 个 token）。</p>
+<p><img src="/images/AIGC/20251221112305.png" alt="avatar" /></p>
+<h2 id="pulid"><a class="markdownIt-Anchor" href="#pulid"></a> PuLID</h2>
+<p><strong>核心:</strong> 通过contrastive alignment loss和accurate ID loss，最小化干扰原模型的同时确保高的ID保证度和可编辑性。<br />
+相比较于InstantID，测试其有几个明显特点:</p>
+<ol>
+<li>text prompt提示可控性更强，InstandID对提示词不敏感。</li>
+<li>ID一致性中头发还原更好，这是因为PuLID用的是IDEncoder(通过face parsing得到)而非FaceEncoder，头发先验信息更充足。</li>
+<li>PuLID没有类似于InstantID中IdentityNet注入弱空间条件(关键点)，即追求控制性，而追求的是最下化干扰原模型。<br />
+<img src="/images/AIGC/20251221115949.png" alt="" /></li>
+</ol>
+<h3 id="alignment-loss"><a class="markdownIt-Anchor" href="#alignment-loss"></a> alignment loss</h3>
+<p>alignment loss 包含两个部分：semantic alignment loss和layout alignment loss.<br />
+alignment loss本质上是一个<strong>正则化约束</strong>，确保注入的ID Embedding不对原模型生成图片产生破坏(原本属于文本控制的部分不发生任何变化)。</p>
+<h4 id="semantic-alignment-loss"><a class="markdownIt-Anchor" href="#semantic-alignment-loss"></a> semantic alignment loss</h4>
+<p>使用文本的特征K去query UNET特征Q,表示为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mi>t</mi><mi>t</mi><mi>e</mi><mi>n</mi><mi>t</mi><mi>i</mi><mi>o</mi><mi>n</mi><mo stretchy="false">(</mo><mi>K</mi><mo separator="true">,</mo><mi>Q</mi><mo separator="true">,</mo><mi>Q</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">Attention(K,Q,Q)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">A</span><span class="mord mathnormal">t</span><span class="mord mathnormal">t</span><span class="mord mathnormal">e</span><span class="mord mathnormal">n</span><span class="mord mathnormal">t</span><span class="mord mathnormal">i</span><span class="mord mathnormal">o</span><span class="mord mathnormal">n</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal">Q</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal">Q</span><span class="mclose">)</span></span></span></span> 可以理解为UNET features 对prompt的响应。<br />
+作者对其背后的解释为：如果ID的embedding 没有影响sd模型，不同的UNET features 对prompt的响应应该是相似的。semantic alignment loss表示如下：<br />
+<img src="/images/AIGC/20251221120702.png" alt="" /><br />
+paper原文: we denote the UNET features in the path without ID embedding as <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">Q_{t}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>, whereas the corresponding UNET features in the contrastive path with ID embedding as <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mrow><mi>t</mi><mi>i</mi><mi>d</mi></mrow></msub></mrow><annotation encoding="application/x-tex">Q_{tid}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>.<br />
+其中:<br />
+这里<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mrow><mi>t</mi><mi>i</mi><mi>d</mi></mrow></msub></mrow><annotation encoding="application/x-tex">Q_{tid}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 也是基于 Decoupled Cross-Attention（解耦交叉注意力）注入的。</p>
+<h4 id="layout-alignment-loss"><a class="markdownIt-Anchor" href="#layout-alignment-loss"></a> layout alignment loss</h4>
+<p>semantic alignment loss虽然能消除其对sd模型的影响，但不能保证布局一致性，所以添加layout alignment loss，表示如下：<br />
+<img src="/images/AIGC/20251221120759.png" alt="" /><br />
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">Q_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 是“原汁原味”的文本响应，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mrow><mi>t</mi><mi>i</mi><mi>d</mi></mrow></msub></mrow><annotation encoding="application/x-tex">Q_{tid}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 是“被入侵”后的响应。如果 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mi>S</mi><mi>E</mi><mo stretchy="false">(</mo><msub><mi>Q</mi><mi>t</mi></msub><mo separator="true">,</mo><msub><mi>Q</mi><mrow><mi>t</mi><mi>i</mi><mi>d</mi></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">MSE(Q_t, Q_{tid})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> 越小，说明 ID 的加入仅仅是精准地修改了面部像素，而没有干扰到全图的布局和语义语义特征。</p>
+<p><strong>aligment loss表示如下：</strong><br />
+<img src="/images/AIGC/20251221120931.png" alt="" /></p>
+<h3 id="id-loss"><a class="markdownIt-Anchor" href="#id-loss"></a> ID loss</h3>
+<p>在4步内从纯噪声中快速生成基于ID的精确<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">x_{0}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。对这个非常接近真实数据的<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">x_{0}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>计算ID loss,会让结果更精确。ID loss定义如下：<br />
+<img src="/images/AIGC/20251221121021.png" alt="" /><br />
+其中<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>T</mi></msub></mrow><annotation encoding="application/x-tex">x_{T}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>代表纯噪声，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mo>−</mo><mi>T</mi><mn>2</mn><mi>I</mi></mrow><annotation encoding="application/x-tex">L-T2I</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathnormal">L</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span></span></span></span>代表Lightning T2I branch，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϕ</mi></mrow><annotation encoding="application/x-tex">\phi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal">ϕ</span></span></span></span> 代表人脸识别backbone</p>
+<h2 id="ecomid"><a class="markdownIt-Anchor" href="#ecomid"></a> EcomID</h2>
+<p><strong>核心：</strong> <strong>PuLID IP-Adapter</strong>  +   <strong>InstantID’s IdentityNet</strong><br />
+相当于在PuLID的基础上加上IdentityNet并重新训练，引入弱空间控制<br />
+<img src="/images/AIGC/20251221144513.png" alt="" /></p>
+<h3 id="pulid-ip-adapter"><a class="markdownIt-Anchor" href="#pulid-ip-adapter"></a> PuLID IP-Adapter</h3>
+<p>通过alignment loss去训练ID-Encoder 和 cross attention部分。该方法有效地减少了ID embeddings 在cross attention部分对text embeddings 的影响， 将对底层模型文生图能力的破坏降到最低。</p>
+<h3 id="instantids-identitynet-architecture"><a class="markdownIt-Anchor" href="#instantids-identitynet-architecture"></a> InstantID’s IdentityNet Architecture</h3>
+<p>利用包含200万张美观肖像图像的数据集，IdentityNet增强了关键点控制，提高了身份一致性与面部真实性。在训练过程中，IP-adapter被冻结，仅训练IdentityNet。landmark被用作条件输入，而face embeddings则通过cross-attention集成到IdentityNet中。</p>
+<h2 id="infiniteyou"><a class="markdownIt-Anchor" href="#infiniteyou"></a> InfiniteYou</h2>
+<p><strong>核心：</strong> 针对FLUX(DiT)架构深度定制的身份保持(Identity-Preserving）方案。通过InfuseNet方式注入，不同于IPA通过cross-attention修改主模型的中间层，而是通过残差连接注入。<br />
+<img src="/images/AIGC/20251221154015.png" alt="" /></p>
+<h3 id="flux-joint-attention和-cross-attention-的本质区别"><a class="markdownIt-Anchor" href="#flux-joint-attention和-cross-attention-的本质区别"></a> FLUX Joint Attention和 Cross-Attention 的本质区别</h3>
+<pre class="highlight"><code class="javascript"><span class="hljs-title class_">Cross</span>-<span class="hljs-title class_">Attention</span>:
+  Q = img,  K = <span class="hljs-variable constant_">ID</span>,  V = <span class="hljs-variable constant_">ID</span>   → 只有 img 更新，<span class="hljs-variable constant_">ID</span> 是静态条件
+
+<span class="hljs-variable constant_">FLUX</span> <span class="hljs-title class_">Joint</span> <span class="hljs-title class_">Attention</span>:
+  Q = [<span class="hljs-variable constant_">ID</span>; img],  K = [<span class="hljs-variable constant_">ID</span>; img],  V = [<span class="hljs-variable constant_">ID</span>; img]  → 两者都更新，双向交互，相互attend
+</code></pre>
+<p>InfiniteYou 中 ID embedding注入InfuseNet的方式是Joint Attention（联合注意力），不是Cross-Attention,也不是self-attention，是img token 和 ID token共同参与的。这是 FLUX区别于Stable Diffusion的核心架构之一。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AIGC/" rel="tag">AIGC</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
   id="post-AIGC/LCM-LORA"
   class="article article-type-post"
   itemscope
@@ -1657,162 +1862,6 @@ int main()
     <footer class="article-footer">
        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c/" rel="tag">c++</a></li></ul>
-
-    </footer>
-  </div>
-
-   
-   
-  
-</article>
-
-    
-    <article
-  id="post-cuda/CUDA 编程简介"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2023/04/26/cuda/cuda-bian-cheng-jian-jie/"
-    >cuda编程 简介</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2023/04/26/cuda/cuda-bian-cheng-jian-jie/" class="article-date">
-  <time datetime="2023-04-25T16:00:00.000Z" itemprop="datePublished">2023-04-26</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/cuda/">cuda</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h1 id="cuda编程模型"><a class="markdownIt-Anchor" href="#cuda编程模型"></a> CUDA编程模型</h1>
-<p>CUDA编程模型假设系统是由一个主机(CPU)和一个设备(GPU)组成的，而各自拥有独立的内存。因此，在CUDA编程中我们需要编写在设备(GPU)上运行的代码，也被称为核函数(Kernel)，其并行地运行在GPU的多个处理器上，这极大的提高了计算速度。</p>
-<p>典型的CUDA程序执行步骤：</p>
-<blockquote>
-<ul>
-<li>把数据从CPU内存拷贝到GPU内存。</li>
-<li>调用核函数对存储在GPU内存中的数据进行操作。</li>
-<li>将数据从GPU内存传回CPU内存。</li>
-</ul>
-</blockquote>
-<p>CUDA编程模型的两个特点：<br />
-1.通过层次结构来组织线程</p>
-<blockquote>
-<ul>
-<li>一般CPU一个核只支持一到两个硬件线程，而GPU在硬件层面就支持成百上千个并发线程。在CUDA编程中，线程是通过线程网格(Grid)、线程块(Block)、线程束(Warp)、线程(Thread)这几个层次管理。</li>
-<li>由一个内核启动所产生的所有线程统称为一个网格(Grid),同一网格中的所有线程共享相同的全局内存空间。向下一级，一个网格由多个线程块(Block)构成。再下一级，一个线程块由一组线程(Thread)构成</li>
-</ul>
-</blockquote>
-<p>2.内存的使用</p>
-<blockquote>
-<ul>
-<li>GPU中的各级缓存以及各种内存是可以软件控制的，这些内存包括寄存器、共享内存、常量内存、全局内存等。</li>
-</ul>
-</blockquote>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cuda/" rel="tag">cuda</a></li></ul>
-
-    </footer>
-  </div>
-
-   
-   
-  
-</article>
-
-    
-    <article
-  id="post-hexo 简介"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2023/04/21/hexo-jian-jie/"
-    >hexo 简介</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2023/04/21/hexo-jian-jie/" class="article-date">
-  <time datetime="2023-04-20T16:00:00.000Z" itemprop="datePublished">2023-04-21</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/hexo/">hexo</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h1 id="1什么是hexo"><a class="markdownIt-Anchor" href="#1什么是hexo"></a> 1.什么是Hexo?</h1>
-<p>Hexo是一个快速、简洁且高效的静态博客框架，使用Node.js编写，支持Markdown语法和EJS模板引擎。</p>
-<h1 id="2hexo常用命令"><a class="markdownIt-Anchor" href="#2hexo常用命令"></a> 2.Hexo常用命令</h1>
-<blockquote>
-<ul>
-<li>hexo clean：清除缓存文件</li>
-<li>hexo g: 生成静态文件，即将Markdown文件生成为HTML文件。</li>
-<li>hexo s: 启动本地服务器，用于本地浏览。</li>
-<li>hexo d: 部署博客，将静态文件上传到远程服务器或者GitHub Pages.</li>
-<li>hexo new post “article”: 新建一篇名为article的文章。</li>
-<li>hexo new page “title”: 用于新建一个空的页面，相当于生成一个文件夹并在文件夹里面有一个初始md文件。</li>
-<li>hexo init：新建博客，相当于初始化一个Hexo博客demo，需要空文件夹下执行该命令。</li>
-</ul>
-</blockquote>
-<h1 id="3简述hexo构建流程"><a class="markdownIt-Anchor" href="#3简述hexo构建流程"></a> 3.简述Hexo构建流程</h1>
-<p>该部分只对hexo搭建个人博客所需环境以及步骤列个目录，具体详情参见<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/35668237">这里</a>。</p>
-<h3 id="所需环境与步骤"><a class="markdownIt-Anchor" href="#所需环境与步骤"></a> 所需环境与步骤</h3>
-<blockquote>
-<ul>
-<li>安装Node.js</li>
-<li>安装Git</li>
-<li>注册Github账号</li>
-<li>安装Hexo</li>
-<li>连接Github与本地</li>
-</ul>
-</blockquote>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li></ul>
 
     </footer>
   </div>
