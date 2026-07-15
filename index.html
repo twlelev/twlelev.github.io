@@ -646,7 +646,7 @@ PKG=$(python -c <span class="hljs-string">&quot;import graphify, os; print(os.pa
       
     <div class="article-entry" itemprop="articleBody">
        
-  <p>![[/images/3D/Pasted image 20260622135821.png]]</p>
+  <p>![[/images/3D/Pasted_image_20260622135821.png]]</p>
 <p>核心：屏幕空间稠密先验(screen-space dense priors)。</p>
 <h1 id="search-uv-机制详解"><a class="markdownIt-Anchor" href="#search-uv-机制详解"></a> “search uv” 机制详解</h1>
 <p>“search uv” 的本质是:<strong>用 KNN 在网络预测的 UV 图里,为每个 FLAME 顶点反查出它对应的图像像素位置</strong>,从而把&quot;per-pixel 的 UV 预测&quot;转成&quot;per-vertex 的 2D 重投影目标&quot;来拟合 FLAME 参数。</p>
