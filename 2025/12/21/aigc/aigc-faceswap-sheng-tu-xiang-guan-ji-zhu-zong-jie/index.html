@@ -196,6 +196,9 @@ paper原文: we denote the UNET features in the path without ID embedding as <sp
   Q = [<span class="hljs-variable constant_">ID</span>; img],  K = [<span class="hljs-variable constant_">ID</span>; img],  V = [<span class="hljs-variable constant_">ID</span>; img]  → 两者都更新，双向交互，相互attend
 </code></pre>
 <p>InfiniteYou 中 ID embedding注入InfuseNet的方式是Joint Attention（联合注意力），不是Cross-Attention,也不是self-attention，是img token 和 ID token共同参与的。这是 FLUX区别于Stable Diffusion的核心架构之一。</p>
+<h1 id="效果可视化"><a class="markdownIt-Anchor" href="#效果可视化"></a> 效果可视化</h1>
+<p><img src="/images/AIGC/server_swap_rgb_input_panel.png" alt="avatar" /></p>
+<p><img src="/images/AIGC/faceswap_default_avatar_panel.png" alt="avatar" /></p>
  
       <!-- reward -->
       

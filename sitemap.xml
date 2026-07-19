@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://example.com/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/</loc>
+    
+    <lastmod>2026-07-19</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://example.com/2026/06/15/3d/pixel3dmm/</loc>
     
     <lastmod>2026-07-19</lastmod>
@@ -68,15 +77,6 @@
     <loc>http://example.com/2026/04/01/tts/qwen-tts/</loc>
     
     <lastmod>2026-04-01</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://example.com/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/</loc>
-    
-    <lastmod>2026-03-26</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
