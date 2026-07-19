@@ -568,53 +568,6 @@ PKG=$(python -c <span class="hljs-string">&quot;import graphify, os; print(os.pa
 
     
     <article
-  id="post-3D/difflocks"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2026/06/22/3d/difflocks/"
-    >“difflocks”</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2026/06/22/3d/difflocks/" class="article-date">
-  <time datetime="2026-06-22T07:28:35.000Z" itemprop="datePublished">2026-06-22</time>
-</a>    
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-   
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-    </footer>
-  </div>
-
-   
-   
-  
-</article>
-
-    
-    <article
   id="post-3D/pixel3dmm"
   class="article article-type-post"
   itemscope
@@ -639,14 +592,14 @@ PKG=$(python -c <span class="hljs-string">&quot;import graphify, os; print(os.pa
   <time datetime="2026-06-15T03:17:09.000Z" itemprop="datePublished">2026-06-15</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/FLAME/">FLAME</a>
+    <a class="article-category-link" href="/categories/FLAME/">FLAME</a> / <a class="article-category-link" href="/categories/FLAME/3D/">3D</a>
   </div>
    
     </div>
       
     <div class="article-entry" itemprop="articleBody">
        
-  <p>![][/images/3D/Pasted_image_20260622135821.png]</p>
+  <p>![avatar][/images/3D/Pasted_image_20260622135821.png]</p>
 <p>核心：屏幕空间稠密先验(screen-space dense priors)。</p>
 <h1 id="search-uv-机制详解"><a class="markdownIt-Anchor" href="#search-uv-机制详解"></a> “search uv” 机制详解</h1>
 <p>“search uv” 的本质是:<strong>用 KNN 在网络预测的 UV 图里,为每个 FLAME 顶点反查出它对应的图像像素位置</strong>,从而把&quot;per-pixel 的 UV 预测&quot;转成&quot;per-vertex 的 2D 重投影目标&quot;来拟合 FLAME 参数。</p>
@@ -3084,6 +3037,73 @@ c100.7 8.3 195.3 44 280 108 55.3 42 101.7 93 139 153l9 14c2.7-4 5.7-8.7 9-14
     <footer class="article-footer">
        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Python%E7%8E%AF%E5%A2%83/" rel="tag">Python环境</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
+  id="post-AIGC/FlashAttention"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2025/12/23/aigc/flashattention/"
+    >FlashAttention</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2025/12/23/aigc/flashattention/" class="article-date">
+  <time datetime="2025-12-23T02:58:30.000Z" itemprop="datePublished">2025-12-23</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/AIGC-Infer/">AIGC_Infer</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="1-标准注意力机制的问题"><a class="markdownIt-Anchor" href="#1-标准注意力机制的问题"></a> 1. 标准注意力机制的问题：</h2>
+<p>标准机制需要“频繁读写”，它在GPU上的计算逻辑如下：</p>
+<ul>
+<li>任务 A (MatMul)：从 HBM 读 Q, K <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 算出 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 写回 HBM（因为 SRAM 放不下整个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>×</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">N \times N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span>）。</li>
+<li>任务 B (Softmax)： 从 HBM 读回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 处理 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 写回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span></span></span></span> 到 HBM。</li>
+<li>任务 C (MatMul)：从 HBM 读回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo separator="true">,</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">P, V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 算出 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi></mrow><annotation encoding="application/x-tex">O</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 写回 HBM。</li>
+</ul>
+<h2 id="2flashattention解决思路"><a class="markdownIt-Anchor" href="#2flashattention解决思路"></a> 2.FlashAttention解决思路</h2>
+<p>SRAM (片上高性能内存）较小，gpu kernel计算从SRAM 中读取数据，SRAM 相比较于HBM没有IO瓶颈(IO读写速度高一个数量级)，但是内存小。因此flashattention利用这一点，利用tiling计算将所有中间结果都留在SRAM，既降低了显存又减少了SRAM与HBM之间的IO,当得到最终结果再放回HBM。</p>
+<p>FlashAttention 的核心思想是 <strong>“计算换 IO”</strong>。它主要通过以下两个核心技术实现：</p>
+<ul>
+<li><strong>分块 (Tiling)：</strong> 它将输入的查询（Query）、键（Key）和值（Value）切分成小块，加载到 SRAM（速度极快但容量小）中。在 SRAM 里完成局部的注意力计算（包括 Softmax 的部分求和）。</li>
+<li><strong>重计算/在线 Softmax (Recomputation / Online Softmax)：</strong> 标准的 Softmax 需要全局信息。FlashAttention 使用了一种数学技巧（Online Softmax），允许它在不存储完整得分矩阵的情况下，通过不断更新局部最大值和求和项，最终计算出精确的注意力输出。在反向传播（训练时）中，它也不存储中间矩阵，而是通过存储的统计量在需要时重新计算。</li>
+</ul>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AIGC-Infer/" rel="tag">AIGC_Infer</a></li></ul>
 
     </footer>
   </div>

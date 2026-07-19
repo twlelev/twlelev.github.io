@@ -152,73 +152,6 @@
     
     
     <article
-  id="post-AIGC/FlashAttention"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
-    
-    <header class="article-header">
-       
-<h2 itemprop="name">
-  <a class="article-title" href="/2025/12/23/aigc/flashattention/"
-    >FlashAttention</a> 
-</h2>
- 
-
-      
-    </header>
-     
-    <div class="article-meta">
-      <a href="/2025/12/23/aigc/flashattention/" class="article-date">
-  <time datetime="2025-12-23T02:58:30.000Z" itemprop="datePublished">2025-12-23</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/AIGC-Infer/">AIGC_Infer</a>
-  </div>
-   
-    </div>
-      
-    <div class="article-entry" itemprop="articleBody">
-       
-  <h2 id="1-标准注意力机制的问题"><a class="markdownIt-Anchor" href="#1-标准注意力机制的问题"></a> 1. 标准注意力机制的问题：</h2>
-<p>标准机制需要“频繁读写”，它在GPU上的计算逻辑如下：</p>
-<ul>
-<li>任务 A (MatMul)：从 HBM 读 Q, K <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 算出 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 写回 HBM（因为 SRAM 放不下整个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>×</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">N \times N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span>）。</li>
-<li>任务 B (Softmax)： 从 HBM 读回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 处理 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 写回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span></span></span></span> 到 HBM。</li>
-<li>任务 C (MatMul)：从 HBM 读回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo separator="true">,</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">P, V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 算出 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi></mrow><annotation encoding="application/x-tex">O</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span></span></span></span> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> 写回 HBM。</li>
-</ul>
-<h2 id="2flashattention解决思路"><a class="markdownIt-Anchor" href="#2flashattention解决思路"></a> 2.FlashAttention解决思路</h2>
-<p>SRAM (片上高性能内存）较小，gpu kernel计算从SRAM 中读取数据，SRAM 相比较于HBM没有IO瓶颈(IO读写速度高一个数量级)，但是内存小。因此flashattention利用这一点，利用tiling计算将所有中间结果都留在SRAM，既降低了显存又减少了SRAM与HBM之间的IO,当得到最终结果再放回HBM。</p>
-<p>FlashAttention 的核心思想是 <strong>“计算换 IO”</strong>。它主要通过以下两个核心技术实现：</p>
-<ul>
-<li><strong>分块 (Tiling)：</strong> 它将输入的查询（Query）、键（Key）和值（Value）切分成小块，加载到 SRAM（速度极快但容量小）中。在 SRAM 里完成局部的注意力计算（包括 Softmax 的部分求和）。</li>
-<li><strong>重计算/在线 Softmax (Recomputation / Online Softmax)：</strong> 标准的 Softmax 需要全局信息。FlashAttention 使用了一种数学技巧（Online Softmax），允许它在不存储完整得分矩阵的情况下，通过不断更新局部最大值和求和项，最终计算出精确的注意力输出。在反向传播（训练时）中，它也不存储中间矩阵，而是通过存储的统计量在需要时重新计算。</li>
-</ul>
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <footer class="article-footer">
-       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AIGC-Infer/" rel="tag">AIGC_Infer</a></li></ul>
-
-    </footer>
-  </div>
-
-   
-   
-  
-</article>
-
-    
-    <article
   id="post-AIGC/AIGC-FaceSwap生图相关技术总结"
   class="article article-type-post"
   itemscope
@@ -1862,6 +1795,83 @@ int main()
     <footer class="article-footer">
        
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c/" rel="tag">c++</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+    
+    <article
+  id="post-cuda/CUDA 编程简介"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2023/04/26/cuda/cuda-bian-cheng-jian-jie/"
+    >cuda编程 简介</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/04/26/cuda/cuda-bian-cheng-jian-jie/" class="article-date">
+  <time datetime="2023-04-25T16:00:00.000Z" itemprop="datePublished">2023-04-26</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/cuda/">cuda</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="cuda编程模型"><a class="markdownIt-Anchor" href="#cuda编程模型"></a> CUDA编程模型</h1>
+<p>CUDA编程模型假设系统是由一个主机(CPU)和一个设备(GPU)组成的，而各自拥有独立的内存。因此，在CUDA编程中我们需要编写在设备(GPU)上运行的代码，也被称为核函数(Kernel)，其并行地运行在GPU的多个处理器上，这极大的提高了计算速度。</p>
+<p>典型的CUDA程序执行步骤：</p>
+<blockquote>
+<ul>
+<li>把数据从CPU内存拷贝到GPU内存。</li>
+<li>调用核函数对存储在GPU内存中的数据进行操作。</li>
+<li>将数据从GPU内存传回CPU内存。</li>
+</ul>
+</blockquote>
+<p>CUDA编程模型的两个特点：<br />
+1.通过层次结构来组织线程</p>
+<blockquote>
+<ul>
+<li>一般CPU一个核只支持一到两个硬件线程，而GPU在硬件层面就支持成百上千个并发线程。在CUDA编程中，线程是通过线程网格(Grid)、线程块(Block)、线程束(Warp)、线程(Thread)这几个层次管理。</li>
+<li>由一个内核启动所产生的所有线程统称为一个网格(Grid),同一网格中的所有线程共享相同的全局内存空间。向下一级，一个网格由多个线程块(Block)构成。再下一级，一个线程块由一组线程(Thread)构成</li>
+</ul>
+</blockquote>
+<p>2.内存的使用</p>
+<blockquote>
+<ul>
+<li>GPU中的各级缓存以及各种内存是可以软件控制的，这些内存包括寄存器、共享内存、常量内存、全局内存等。</li>
+</ul>
+</blockquote>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cuda/" rel="tag">cuda</a></li></ul>
 
     </footer>
   </div>

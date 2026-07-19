@@ -46,25 +46,11 @@
   </entry>
   
   <entry>
-    <title>“difflocks”</title>
-    <link href="http://example.com/2026/06/22/3d/difflocks/"/>
-    <id>http://example.com/2026/06/22/3d/difflocks/</id>
-    <published>2026-06-22T07:28:35.000Z</published>
-    <updated>2026-06-23T02:22:44.814Z</updated>
-    
-    <summary type="html">
-    
-    </summary>
-    
-    
-  </entry>
-  
-  <entry>
     <title>“pixel3dmm”</title>
     <link href="http://example.com/2026/06/15/3d/pixel3dmm/"/>
     <id>http://example.com/2026/06/15/3d/pixel3dmm/</id>
     <published>2026-06-15T03:17:09.000Z</published>
-    <updated>2026-07-15T09:09:55.412Z</updated>
+    <updated>2026-07-19T07:44:26.784Z</updated>
     
     <summary type="html">
     
@@ -72,7 +58,7 @@
       
         
         
-          &lt;p&gt;![][/images/3D/Pasted_image_20260622135821.png]&lt;/p&gt;
+          &lt;p&gt;![avatar][/images/3D/Pasted_image_20260622135821.png]&lt;/p&gt;
 &lt;p&gt;核心：屏幕空间稠密先验(screen-space dense priors)。&lt;/p&gt;
 &lt;h1 id=&quot;search-uv-机制详解&quot;&gt;&lt;a
         
@@ -81,6 +67,8 @@
     </summary>
     
       <category term="FLAME" scheme="http://example.com/categories/FLAME/"/>
+    
+      <category term="3D" scheme="http://example.com/categories/FLAME/3D/"/>
     
     
       <category term="3D" scheme="http://example.com/tags/3D/"/>
@@ -543,6 +531,32 @@
     
     
       <category term="LLM" scheme="http://example.com/tags/LLM/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>muduo</title>
+    <link href="http://example.com/2023/08/12/muduo-xue-xi/muduo-xue-xi/"/>
+    <id>http://example.com/2023/08/12/muduo-xue-xi/muduo-xue-xi/</id>
+    <published>2023-08-12T02:15:31.000Z</published>
+    <updated>2025-12-18T03:21:20.381Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;线程安全的对象生命期管理&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#线程安全的对象生命期管理&quot;&gt;&lt;/a&gt;
+        
+      
+    
+    </summary>
+    
+      <category term="muduo" scheme="http://example.com/categories/muduo/"/>
+    
+    
+      <category term="muduo" scheme="http://example.com/tags/muduo/"/>
     
   </entry>
   
