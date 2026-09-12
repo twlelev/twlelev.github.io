@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>twlelev的博客</title>
+  
+  <subtitle>学海无涯</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="https://twlelev.github.io/"/>
+  <updated>2026-09-12T04:00:00.000Z</updated>
+  <id>https://twlelev.github.io/</id>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>常用 Skills 汇总</title>
+    <link href="https://twlelev.github.io/2026/09/12/skills/chang-yong-skills-hui-zong/"/>
+    <id>https://twlelev.github.io/2026/09/12/skills/chang-yong-skills-hui-zong/</id>
+    <published>2026-09-12T04:00:00.000Z</published>
+    <updated>2026-09-12T04:00:00.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;这是一份个人常用 Skills 导航，按“我要完成什么”来分类。Skill 可以理解为给 AI agent 的专业工作手册：既可以直接点名，也可以用自然语言描述任务，让 Codex 自动选择合适的 Skill。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;显式调用示例：&lt;code&gt;$pdf 把这份报告整理成 PDF&lt;/code&gt;&lt;br&gt;&lt;br /&gt;
+自然语言示例：&lt;code&gt;把这组数据做成带图表的 Excel，并检查公式。&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+    
+    </summary>
+    
+      <category term="skills" scheme="https://twlelev.github.io/categories/skills/"/>
+    
+    
+      <category term="Codex" scheme="https://twlelev.github.io/tags/Codex/"/>
+    
+      <category term="Skills" scheme="https://twlelev.github.io/tags/Skills/"/>
+    
+      <category term="AI Agent" scheme="https://twlelev.github.io/tags/AI-Agent/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>3D Face UV Texture：10 篇代表论文架构图与具体实现框架</title>
+    <link href="https://twlelev.github.io/2026/08/04/3d/face-uv-texture-architecture-papers/"/>
+    <id>https://twlelev.github.io/2026/08/04/3d/face-uv-texture-architecture-papers/</id>
+    <published>2026-08-03T16:00:00.000Z</published>
+    <updated>2026-09-12T01:29:53.669Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;3d-face-uv-texture10-篇代表论文架构图与具体实现框架&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#3d-face-uv-texture10-篇代表论文架构图与具体实现框架&quot;&gt;&lt;/a&gt; 3D Face UV
+        
+      
+    
+    </summary>
+    
+      <category term="3D" scheme="https://twlelev.github.io/categories/3D/"/>
+    
+      <category term="Face UV Texture" scheme="https://twlelev.github.io/categories/3D/Face-UV-Texture/"/>
+    
+      <category term="Texture Generation" scheme="https://twlelev.github.io/categories/3D/Face-UV-Texture/Texture-Generation/"/>
+    
+    
+      <category term="3D" scheme="https://twlelev.github.io/tags/3D/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>代码/知识图谱工具：codebase-memory-mcp 与 graphify</title>
+    <link href="https://twlelev.github.io/2026/06/23/skills/codebase-memory-graphify/"/>
+    <id>https://twlelev.github.io/2026/06/23/skills/codebase-memory-graphify/</id>
+    <published>2026-06-23T06:31:46.000Z</published>
+    <updated>2026-09-12T01:29:53.685Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;两个把&amp;quot;一堆文件 → 知识图谱 → 喂给 AI agent&amp;quot;的工具，定位互补：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;codebase-memory-mcp&lt;/strong&gt; — 只吃&lt;strong&gt;代码&lt;/strong&gt;，极致省
+        
+      
+    
+    </summary>
+    
+      <category term="skills" scheme="https://twlelev.github.io/categories/skills/"/>
+    
+    
+      <category term="AI Agent" scheme="https://twlelev.github.io/tags/AI-Agent/"/>
+    
+      <category term="Claude Code" scheme="https://twlelev.github.io/tags/Claude-Code/"/>
+    
+      <category term="知识图谱" scheme="https://twlelev.github.io/tags/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1/"/>
+    
+      <category term="MCP" scheme="https://twlelev.github.io/tags/MCP/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>“pixel3dmm”</title>
+    <link href="https://twlelev.github.io/2026/06/15/3d/pixel3dmm/"/>
+    <id>https://twlelev.github.io/2026/06/15/3d/pixel3dmm/</id>
+    <published>2026-06-15T03:17:09.000Z</published>
+    <updated>2026-09-12T01:29:53.669Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;![[/images/3D/Pasted image 20260622135821.png]]&lt;/p&gt;
+&lt;p&gt;核心：屏幕空间稠密先验(screen-space dense priors)。&lt;/p&gt;
+&lt;h1 id=&quot;search-uv-机制详解&quot;&gt;&lt;a
+        
+      
+    
+    </summary>
+    
+      <category term="FLAME" scheme="https://twlelev.github.io/categories/FLAME/"/>
+    
+    
+      <category term="3D" scheme="https://twlelev.github.io/tags/3D/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>reconstruct中相机相关基础</title>
+    <link href="https://twlelev.github.io/2026/05/18/3d/3d-reconstruct-zhong-xiang-ji-xiang-guan-ji-chu/"/>
+    <id>https://twlelev.github.io/2026/05/18/3d/3d-reconstruct-zhong-xiang-ji-xiang-guan-ji-chu/</id>
+    <published>2026-05-18T07:20:39.000Z</published>
+    <updated>2026-09-12T01:29:53.669Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;相机参数-位姿-fov-与-uv-反投&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#相机参数-位姿-fov-与-uv-反投&quot;&gt;&lt;/a&gt; 相机参数、位姿、FOV 与 UV
+        
+      
+    
+    </summary>
+    
+      <category term="基础" scheme="https://twlelev.github.io/categories/%E5%9F%BA%E7%A1%80/"/>
+    
+    
+      <category term="3D" scheme="https://twlelev.github.io/tags/3D/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>GPT-SoVITS</title>
+    <link href="https://twlelev.github.io/2026/04/15/tts/gpt-sovits/"/>
+    <id>https://twlelev.github.io/2026/04/15/tts/gpt-sovits/</id>
+    <published>2026-04-15T06:02:09.000Z</published>
+    <updated>2026-09-12T01:29:53.670Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;gpt-sovits-架构全链路详解&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#gpt-sovits-架构全链路详解&quot;&gt;&lt;/a&gt; GPT-SoVITS 架构全链路详解&lt;/h1&gt;
+&lt;h2 id=&quot;第一阶段-参考音频预处理&quot;&gt;&lt;a
+        
+      
+    
+    </summary>
+    
+      <category term="TTS" scheme="https://twlelev.github.io/categories/TTS/"/>
+    
+    
+      <category term="TTS" scheme="https://twlelev.github.io/tags/TTS/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>VibeVoice 声音克隆微调实践</title>
+    <link href="https://twlelev.github.io/2026/04/03/tts/vibe-voice-finetune-shi-jian/"/>
+    <id>https://twlelev.github.io/2026/04/03/tts/vibe-voice-finetune-shi-jian/</id>
+    <published>2026-04-03T07:55:22.000Z</published>
+    <updated>2026-09-12T01:29:53.670Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;模型架构速览&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#模型架构速览&quot;&gt;&lt;/a&gt; 模型架构速览&lt;/h2&gt;
+&lt;p&gt;VibeVoice 本质上是 &lt;strong&gt;Qwen2.5 LLM + 扩散解码头&lt;/strong&gt;
+        
+      
+    
+    </summary>
+    
+      <category term="TTS" scheme="https://twlelev.github.io/categories/TTS/"/>
+    
+    
+      <category term="TTS" scheme="https://twlelev.github.io/tags/TTS/"/>
+    
+      <category term="Voice Cloning" scheme="https://twlelev.github.io/tags/Voice-Cloning/"/>
+    
+      <category term="Fine-tuning" scheme="https://twlelev.github.io/tags/Fine-tuning/"/>
+    
+      <category term="VibeVoice" scheme="https://twlelev.github.io/tags/VibeVoice/"/>
+    
+      <category term="Diffusion" scheme="https://twlelev.github.io/tags/Diffusion/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>qwen-tts</title>
+    <link href="https://twlelev.github.io/2026/04/01/tts/qwen-tts/"/>
+    <id>https://twlelev.github.io/2026/04/01/tts/qwen-tts/</id>
+    <published>2026-04-01T08:01:36.000Z</published>
+    <updated>2026-09-12T01:29:53.670Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;qwen3-tts-整体网络框架&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#qwen3-tts-整体网络框架&quot;&gt;&lt;/a&gt; Qwen3-TTS 整体网络框架&lt;/h1&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code
+        
+      
+    
+    </summary>
+    
+      <category term="qwen-tts" scheme="https://twlelev.github.io/categories/qwen-tts/"/>
+    
+    
+      <category term="TTS" scheme="https://twlelev.github.io/tags/TTS/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Claude Code使用</title>
+    <link href="https://twlelev.github.io/2026/03/25/claude-code-shi-yong/"/>
+    <id>https://twlelev.github.io/2026/03/25/claude-code-shi-yong/</id>
+    <published>2026-03-25T07:53:08.000Z</published>
+    <updated>2026-09-12T01:29:53.670Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;claude-code-最佳实践&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#claude-code-最佳实践&quot;&gt;&lt;/a&gt; Claude Code 最佳实践&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;基于：&lt;a
+        
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Helios</title>
+    <link href="https://twlelev.github.io/2026/03/09/aigc/helios/"/>
+    <id>https://twlelev.github.io/2026/03/09/aigc/helios/</id>
+    <published>2026-03-09T10:02:07.000Z</published>
+    <updated>2026-09-12T01:29:53.669Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;heliospipeline-vs-2d-图像生成-pipeline-的核心区别&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#heliospipeline-vs-2d-图像生成-pipeline-的核心区别&quot;&gt;&lt;/a&gt;
+        
+      
+    
+    </summary>
+    
+      <category term="Videos" scheme="https://twlelev.github.io/categories/Videos/"/>
+    
+    
+      <category term="AIGC" scheme="https://twlelev.github.io/tags/AIGC/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>强化学习V值学习之td_target实验分析</title>
+    <link href="https://twlelev.github.io/2026/01/09/qiang-hua-xue-xi/qiang-hua-xue-xi-v-zhi-xue-xi-zhi-td-target-shi-yan-fen-xi/"/>
+    <id>https://twlelev.github.io/2026/01/09/qiang-hua-xue-xi/qiang-hua-xue-xi-v-zhi-xue-xi-zhi-td-target-shi-yan-fen-xi/</id>
+    <published>2026-01-09T07:01:53.000Z</published>
+    <updated>2026-09-12T01:29:53.693Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;强化学习实验报告ppo-算法中不同-td-target-对-value-网络拟合性能的影响分析&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot;
+        
+      
+    
+    </summary>
+    
+      <category term="强化学习" scheme="https://twlelev.github.io/categories/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0/"/>
+    
+    
+      <category term="PPO" scheme="https://twlelev.github.io/tags/PPO/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Z-Image相关技术解析</title>
+    <link href="https://twlelev.github.io/2025/12/26/aigc/z-image-xiang-guan-ji-zhu-jie-xi/"/>
+    <id>https://twlelev.github.io/2025/12/26/aigc/z-image-xiang-guan-ji-zhu-jie-xi/</id>
+    <published>2025-12-26T08:45:34.000Z</published>
+    <updated>2026-09-12T01:29:53.670Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;z-image基于单流扩散transformer的高效图像生成基础模型深度解析&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#z-image基于单流扩散transformer的高效图像生成基础模型深度解析&quot;&gt;&lt;/a&gt;
+        
+      
+    
+    </summary>
+    
+      <category term="AIGC" scheme="https://twlelev.github.io/categories/AIGC/"/>
+    
+    
+      <category term="AIGC" scheme="https://twlelev.github.io/tags/AIGC/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>python环境</title>
+    <link href="https://twlelev.github.io/2025/12/24/python-huan-jing/python-huan-jing/"/>
+    <id>https://twlelev.github.io/2025/12/24/python-huan-jing/python-huan-jing/</id>
+    <published>2025-12-24T02:39:49.000Z</published>
+    <updated>2026-09-12T01:29:53.685Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;python中一些库与torch cuda以及python版本绑定，其对应关系如下：&lt;/p&gt;
+&lt;p&gt;&lt;a
+        
+      
+    
+    </summary>
+    
+      <category term="Python环境" scheme="https://twlelev.github.io/categories/Python%E7%8E%AF%E5%A2%83/"/>
+    
+    
+      <category term="Python环境" scheme="https://twlelev.github.io/tags/Python%E7%8E%AF%E5%A2%83/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>FlashAttention</title>
+    <link href="https://twlelev.github.io/2025/12/23/aigc/flashattention/"/>
+    <id>https://twlelev.github.io/2025/12/23/aigc/flashattention/</id>
+    <published>2025-12-23T02:58:30.000Z</published>
+    <updated>2026-09-12T01:29:53.669Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;1-标准注意力机制的问题&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#1-标准注意力机制的问题&quot;&gt;&lt;/a&gt; 1.
+        
+      
+    
+    </summary>
+    
+      <category term="AIGC_Infer" scheme="https://twlelev.github.io/categories/AIGC-Infer/"/>
+    
+    
+      <category term="AIGC_Infer" scheme="https://twlelev.github.io/tags/AIGC-Infer/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>AIGC-FaceSwap生图相关技术总结</title>
+    <link href="https://twlelev.github.io/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/"/>
+    <id>https://twlelev.github.io/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/</id>
+    <published>2025-12-21T00:49:43.000Z</published>
+    <updated>2026-09-12T01:29:53.669Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;相关paper核心详解&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#相关paper核心详解&quot;&gt;&lt;/a&gt; 相关Paper核心详解&lt;/h1&gt;
+&lt;h2 id=&quot;ipadapter&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot;
+        
+      
+    
+    </summary>
+    
+      <category term="AIGC" scheme="https://twlelev.github.io/categories/AIGC/"/>
+    
+    
+      <category term="AIGC" scheme="https://twlelev.github.io/tags/AIGC/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>LCM LORA</title>
+    <link href="https://twlelev.github.io/2025/12/19/aigc/lcm-lora/"/>
+    <id>https://twlelev.github.io/2025/12/19/aigc/lcm-lora/</id>
+    <published>2025-12-19T07:04:10.000Z</published>
+    <updated>2026-09-12T01:29:53.670Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;技术深度解析lcm-lora-原理与-scheduler-源码实现&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#技术深度解析lcm-lora-原理与-scheduler-源码实现&quot;&gt;&lt;/a&gt; 技术深度解析：LCM-LoRA 原理与
+        
+      
+    
+    </summary>
+    
+      <category term="AIGC" scheme="https://twlelev.github.io/categories/AIGC/"/>
+    
+    
+      <category term="AIGC" scheme="https://twlelev.github.io/tags/AIGC/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>DDIM核心原理</title>
+    <link href="https://twlelev.github.io/2025/12/18/aigc/ddim/"/>
+    <id>https://twlelev.github.io/2025/12/18/aigc/ddim/</id>
+    <published>2025-12-18T07:31:01.000Z</published>
+    <updated>2026-09-12T01:29:53.669Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;ddpm与ddim区别&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#ddpm与ddim区别&quot;&gt;&lt;/a&gt; DDPM与DDIM区别&lt;/h2&gt;
+&lt;p&gt;DDPM 假设反向过程是一个马尔科夫链，反向采样必须一步步迭代，&lt;span
+        
+      
+    
+    </summary>
+    
+      <category term="AIGC" scheme="https://twlelev.github.io/categories/AIGC/"/>
+    
+    
+      <category term="AIGC" scheme="https://twlelev.github.io/tags/AIGC/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>DDPM核心原理与简单工程实现</title>
+    <link href="https://twlelev.github.io/2025/12/18/aigc/ddpm/"/>
+    <id>https://twlelev.github.io/2025/12/18/aigc/ddpm/</id>
+    <published>2025-12-18T03:21:20.000Z</published>
+    <updated>2026-09-12T01:29:53.669Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;1核心思想&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#1核心思想&quot;&gt;&lt;/a&gt; 1.核心思想&lt;/h2&gt;
+&lt;p&gt;Diffusion
+        
+      
+    
+    </summary>
+    
+      <category term="AIGC" scheme="https://twlelev.github.io/categories/AIGC/"/>
+    
+    
+      <category term="AIGC" scheme="https://twlelev.github.io/tags/AIGC/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>git常用命令</title>
+    <link href="https://twlelev.github.io/2025/12/18/git/git-chang-yong-ming-ling/"/>
+    <id>https://twlelev.github.io/2025/12/18/git/git-chang-yong-ming-ling/</id>
+    <published>2025-12-18T02:37:52.000Z</published>
+    <updated>2026-09-12T01:29:53.671Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;硬重置到远程分支&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#硬重置到远程分支&quot;&gt;&lt;/a&gt; 硬重置到远程分支&lt;/h1&gt;
+&lt;p&gt;需要重新拉取远程分支，放弃本地更改。&lt;/p&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code
+        
+      
+    
+    </summary>
+    
+      <category term="git" scheme="https://twlelev.github.io/categories/git/"/>
+    
+    
+      <category term="git" scheme="https://twlelev.github.io/tags/git/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>TensorRT动态尺寸推理技术</title>
+    <link href="https://twlelev.github.io/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/"/>
+    <id>https://twlelev.github.io/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/</id>
+    <published>2025-06-26T07:52:26.000Z</published>
+    <updated>2026-09-12T01:29:53.670Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;tensorrt-动态尺寸推理技术方案深度解析&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#tensorrt-动态尺寸推理技术方案深度解析&quot;&gt;&lt;/a&gt; TensorRT 动态尺寸推理技术方案深度解析&lt;/h1&gt;
+&lt;p&gt;在 Stable
+        
+      
+    
+    </summary>
+    
+      <category term="TensorRT" scheme="https://twlelev.github.io/categories/TensorRT/"/>
+    
+    
+      <category term="TensorRT" scheme="https://twlelev.github.io/tags/TensorRT/"/>
+    
+  </entry>
+  
+</feed>

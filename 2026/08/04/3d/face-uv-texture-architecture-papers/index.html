@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="用于记录学习笔记的个人网站" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>3D Face UV Texture：10 篇代表论文架构图与具体实现框架 |  twlelev的博客</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-3D/Face_UV_Texture_Architecture_Papers"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  3D Face UV Texture：10 篇代表论文架构图与具体实现框架
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2026/08/04/3d/face-uv-texture-architecture-papers/" class="article-date">
+  <time datetime="2026-08-03T16:00:00.000Z" itemprop="datePublished">2026-08-04</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/3D/">3D</a> / <a class="article-category-link" href="/categories/3D/Face-UV-Texture/">Face UV Texture</a> / <a class="article-category-link" href="/categories/3D/Face-UV-Texture/Texture-Generation/">Texture Generation</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">4.7k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">19 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="3d-face-uv-texture10-篇代表论文架构图与具体实现框架"><a class="markdownIt-Anchor" href="#3d-face-uv-texture10-篇代表论文架构图与具体实现框架"></a> 3D Face UV Texture：10 篇代表论文架构图与具体实现框架</h1>
+<p>本文对应 <a href="./Face_UV_Texture_Representative_10_Papers.md">10 篇代表论文优缺点对比</a>，逐篇给出论文原始架构图、数据流和实现简介。所有图片均来自论文或论文作者提供的正式素材，仅做原图裁切、白底合成和文件重命名，没有重新生成网络结构。</p>
+<h2 id="效果展示"><a class="markdownIt-Anchor" href="#效果展示"></a> 效果展示</h2>
+<p><img src="/images/3D/face_uv_texture_albedo_results_panel_v3_all_representatives.png" alt="10 篇人脸 UV、Albedo 与 PBR 代表论文的原始结果面板" /></p>
+<p><em>效果总览：每张卡片对应下表的一篇论文。除 UV-IDM 与 OMGTex 使用官方仓库提供的示例输出外，其余均为论文结果图；全部仅做裁切、等比例缩放和排版，不做图像生成或跨论文归一化。不同工作面对的输入、UV 拓扑和输出定义不同，图中不表示统一质量排序。</em></p>
+<h2 id="总览"><a class="markdownIt-Anchor" href="#总览"></a> 总览</h2>
+<table>
+<thead>
+<tr>
+<th>论文</th>
+<th>方法类型</th>
+<th>输入</th>
+<th>核心可学习模块</th>
+<th>输出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yin et al.</td>
+<td>弱监督 sampler + GAN completion</td>
+<td>单张人脸、估计形状</td>
+<td>UV sampler、UV generator、3 个 discriminator</td>
+<td>完整 RGB UV</td>
+</tr>
+<tr>
+<td>FFHQ-UV</td>
+<td>数据生产与非线性纹理基底</td>
+<td>单张野外人脸</td>
+<td>StyleGAN 编辑；后续 GAN texture decoder</td>
+<td>规范化 RGB UV 数据集</td>
+</tr>
+<tr>
+<td>UV-IDM</td>
+<td>Identity-conditioned latent diffusion</td>
+<td>单张人脸</td>
+<td>ICM、UV-VAE、cross-attention LDM</td>
+<td>BFM RGB UV</td>
+</tr>
+<tr>
+<td>FreeUV</td>
+<td>双域 diffusion + inference assembly</td>
+<td>单张人脸</td>
+<td>appearance network、structure network、Cross-Assembly</td>
+<td>GT-free RGB UV</td>
+</tr>
+<tr>
+<td>OMGTex</td>
+<td>Geometry-free image-to-UV diffusion</td>
+<td>真实或风格化单图</td>
+<td>FLUX.1、条件 LoRA、gradient-guided alignment</td>
+<td>可编辑 RGB UV</td>
+</tr>
+<tr>
+<td>FaceRefiner</td>
+<td>Training-free 逐样本优化</td>
+<td>输入图、mesh/camera、已有完整 UV</td>
+<td>style transfer、differentiable renderer</td>
+<td>身份细化 RGB UV</td>
+</tr>
+<tr>
+<td>HiFiAlbedo</td>
+<td>VQ codebook + unsupervised domain adaptation</td>
+<td>单图或同身份多图</td>
+<td>UV encoder、dual discriminator、cross-attention</td>
+<td>diffuse albedo</td>
+</tr>
+<tr>
+<td>UVAPM</td>
+<td>参数模型 + detail VAE</td>
+<td>单图</td>
+<td>UVAPM basis、detail model、differentiable renderer</td>
+<td>coarse-to-fine albedo</td>
+</tr>
+<tr>
+<td>OpenDelight</td>
+<td>Delighting prior + 多视角融合</td>
+<td>野外人脸图/视频</td>
+<td>ViT-DLM、UNet detail enhancement</td>
+<td>diffuse albedo / capture asset</td>
+</tr>
+<tr>
+<td>MARCUS Avatar</td>
+<td>级联 diffusion + 多材质联合估计</td>
+<td>单张人脸</td>
+<td>task LoRA、三分支 DiT、Cross-Intrinsic Attention</td>
+<td>4K PBR maps</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="1-yin-et-al-2021uv-sampler-负责抄对generator-负责补全"><a class="markdownIt-Anchor" href="#1-yin-et-al-2021uv-sampler-负责抄对generator-负责补全"></a> 1. Yin et al. (2021)：UV sampler 负责“抄对”，generator 负责“补全”</h2>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2106.08148">论文：Weakly-Supervised Photo-realistic Texture Generation for 3D Face Reconstruction</a></p>
+<p><img src="/images/3D/01_yin2021_overview.png" alt="Yin et al. 方法总览" /></p>
+<p><em>图 1：论文 Figure 3。左侧构造弱监督 UV，中央是 UV sampler 与 UV generator，右侧通过可微渲染和三个判别器约束整体人脸、侧脸 UV 与中央五官 UV。</em></p>
+<p>简介：这篇工作把单图人脸纹理生成明确拆成两个问题。<strong>UV sampler</strong> 学习从输入图像坐标到 canonical UV 坐标的采样关系，尽量只搬运真实可见像素；<strong>UV generator</strong> 再对残缺 UV 做补全。这样避免让一个网络同时学习精确对应关系和大面积内容生成。</p>
+<p>具体数据流：</p>
+<ol>
+<li>输入图像 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi></mrow><annotation encoding="application/x-tex">I</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span></span></span></span> 经现成的 shape regressor 获得粗 3D 形状和相机；传统投影得到不完整的监督纹理 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><msub><mi>V</mi><mrow><mi>g</mi><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">UV_{gt}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.28055599999999997em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span>。</li>
+<li>BFM 平均纹理 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><msub><mi>V</mi><mrow><mi>b</mi><mi>f</mi><mi>m</mi></mrow></msub></mrow><annotation encoding="application/x-tex">UV_{bfm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">m</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span> 与 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><msub><mi>V</mi><mrow><mi>g</mi><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">UV_{gt}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.28055599999999997em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span> 经 Poisson blending 得到伪完整监督 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><msub><mi>V</mi><mrow><mi>b</mi><mi>l</mi></mrow></msub></mrow><annotation encoding="application/x-tex">UV_{bl}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。</li>
+<li>UV sampler 输出采样场，将 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi></mrow><annotation encoding="application/x-tex">I</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span></span></span></span> 变为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><msub><mi>V</mi><mrow><mi>s</mi><mi>a</mi><mi>m</mi><mi>p</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><annotation encoding="application/x-tex">UV_{sample}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">e</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span>；以 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><msub><mi>V</mi><mrow><mi>g</mi><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">UV_{gt}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.28055599999999997em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span> 和渲染回输入视角的重建误差监督采样准确性。</li>
+<li>UV generator 把 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><msub><mi>V</mi><mrow><mi>s</mi><mi>a</mi><mi>m</mi><mi>p</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><annotation encoding="application/x-tex">UV_{sample}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">e</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span> 补成 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><msub><mi>V</mi><mrow><mi>p</mi><mi>r</mi><mi>e</mi><mi>d</mi></mrow></msub></mrow><annotation encoding="application/x-tex">UV_{pred}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span>，以 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><msub><mi>V</mi><mrow><mi>b</mi><mi>l</mi></mrow></msub></mrow><annotation encoding="application/x-tex">UV_{bl}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 提供像素监督。</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><msub><mi>V</mi><mrow><mi>p</mi><mi>r</mi><mi>e</mi><mi>d</mi></mrow></msub></mrow><annotation encoding="application/x-tex">UV_{pred}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span> 被旋转并渲染成正面/侧面图送入 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mrow><mi>f</mi><mi>a</mi><mi>c</mi><mi>e</mi></mrow></msub></mrow><annotation encoding="application/x-tex">D_{face}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.02778em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">e</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span>；侧脸和中央五官裁块分别送入 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mrow><mi>s</mi><mi>d</mi></mrow></msub></mrow><annotation encoding="application/x-tex">D_{sd}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.02778em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mrow><mi>c</mi><mi>t</mi><mi>r</mi></mrow></msub></mrow><annotation encoding="application/x-tex">D_{ctr}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2805559999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.02778em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，避免局部模糊和结构漂移。</li>
+</ol>
+<p>实现本质：这是 <strong>CNN sampling field + image-to-image generator + differentiable rendering + multi-part GAN</strong>，不是 diffusion；最终输出仍是包含拍摄光照的 RGB texture。</p>
+<hr />
+<h2 id="2-ffhq-uv-2023先规范化多视图再生产大规模-uv-数据"><a class="markdownIt-Anchor" href="#2-ffhq-uv-2023先规范化多视图再生产大规模-uv-数据"></a> 2. FFHQ-UV (2023)：先规范化多视图，再生产大规模 UV 数据</h2>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2211.13874">论文：FFHQ-UV: Normalized Facial UV-Texture Dataset for 3D Face Reconstruction</a></p>
+<p><img src="/images/3D/02_ffhquv_pipeline.png" alt="FFHQ-UV 数据生产架构" /></p>
+<p><em>图 2：论文 Figure 2。该图是 UV 数据生产框架，而非端到端 diffusion 网络。</em></p>
+<p>简介：FFHQ-UV 的核心贡献不是“输入一张图直接生成 UV 的新网络”，而是一个自动化数据引擎：先把野外图像变成光照、姿态、表情更受控的多视图，再将它们融合成高质量 canonical UV。生成的 54,165 张 1024×1024 UV 随后用于训练非线性 GAN texture decoder。</p>
+<p>具体数据流：</p>
+<ol>
+<li>将输入人脸反演到 StyleGAN latent space，编辑出正面、左侧、右侧的 normalized multi-view faces，同时弱化原始姿态、表情、眼镜、头发和照明干扰。</li>
+<li>对三个视角分别进行 3D face fitting 和 UV unwrapping，得到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mi>l</mi></msub><mo separator="true">,</mo><msub><mi>T</mi><mi>f</mi></msub><mo separator="true">,</mo><msub><mi>T</mi><mi>r</mi></msub></mrow><annotation encoding="application/x-tex">T_l,T_f,T_r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。</li>
+<li>使用预定义 visibility masks 线性融合三个 UV，最大化真实可见纹理覆盖率。</li>
+<li>依据 face parsing 与亮度规则检测眼球、口腔、鼻孔等错位 artifact；用 Poisson editing 修补局部区域。</li>
+<li>对脸外、耳朵和脖颈等缺失区域使用 template UV，并通过颜色匹配与 Laplacian pyramid blending 得到最终 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>T</mi><mo>^</mo></mover><mrow><mi>f</mi><mi>i</mi><mi>n</mi><mi>a</mi><mi>l</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\hat T_{final}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.232878em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9467699999999999em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span></span><span style="top:-3.25233em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.16666em;"><span class="mord">^</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span>。</li>
+</ol>
+<p>实现本质：它用 <strong>StyleGAN 编辑 + 传统 3D unwrap + mask blending + 图像融合</strong> 换取规模化 UV 数据。后续 texture decoder 才是学习式纹理基底；因此比较网络架构时，应把它视为数据/先验路线，而不是与 UV-IDM 完全同类的生成器。</p>
+<hr />
+<h2 id="3-uv-idm-cvpr-2024将-identity-condition-注入-uv-latent-diffusion"><a class="markdownIt-Anchor" href="#3-uv-idm-cvpr-2024将-identity-condition-注入-uv-latent-diffusion"></a> 3. UV-IDM (CVPR 2024)：将 identity condition 注入 UV latent diffusion</h2>
+<p><a target="_blank" rel="noopener" href="https://openaccess.thecvf.com/content/CVPR2024/html/Li_UV-IDM_Identity-Conditioned_Latent_Diffusion_Model_for_Face_UV-Texture_Generation_CVPR_2024_paper.html">论文：UV-IDM: Identity-Conditioned Latent Diffusion Model for Face UV-Texture Generation</a></p>
+<p><img src="/images/3D/03_uvidm_architecture.png" alt="UV-IDM 架构" /></p>
+<p><em>图 3：论文 Figure 4。上方为 Identity-Conditioned Module，左下为 UV-VAE，右下为 latent diffusion denoiser。雪花表示冻结，火焰表示训练。</em></p>
+<p>简介：UV-IDM 将完整人脸 UV 看作一个条件生成问题：LDM 负责学习 BFM-UV 的完整纹理分布，Identity-Conditioned Module（ICM）把输入中可靠、可见且属于皮肤的 texel 变成条件，约束扩散过程不要把人物“换脸”。</p>
+<p>具体数据流：</p>
+<ol>
+<li>ICM 中，冻结的 Deep3D 估计 3D 顶点与相机，冻结的 BiSeNet 预测人脸分割；二者 remap 到 UV 后形成 visibility mask <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>M</mi><mrow><mi>v</mi><mi>i</mi><mi>s</mi></mrow></msub></mrow><annotation encoding="application/x-tex">M_{vis}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.10903em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">s</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 与 semantic mask <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>M</mi><mrow><mi>s</mi><mi>e</mi><mi>g</mi></mrow></msub></mrow><annotation encoding="application/x-tex">M_{seg}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:-0.10903em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span>。</li>
+<li>两个 mask 与输入反投影纹理逐点相乘，得到去除头发、眼镜和不可见区的 incomplete UV condition <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span></span></span>；嵌入网络 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>τ</mi><mi>θ</mi></msub></mrow><annotation encoding="application/x-tex">\tau_\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.1132em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 将其编码为条件 token。</li>
+<li>独立训练 UV-VAE：编码器 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">E</mi></mrow><annotation encoding="application/x-tex">\mathcal E</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathcal" style="margin-right:0.08944em;">E</span></span></span></span> 把 256×256 UV 压缩为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>32</mn><mo>×</mo><mn>32</mn><mo>×</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">32\times32\times4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">3</span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">3</span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">4</span></span></span></span> latent，解码器 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">D</mi></mrow><annotation encoding="application/x-tex">\mathcal D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathcal" style="margin-right:0.02778em;">D</span></span></span></span> 重建 UV；损失由 KL、GAN 与 LPIPS 组成。</li>
+<li>在 latent space 中训练 LDM denoiser <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϵ</mi><mi>θ</mi></msub></mrow><annotation encoding="application/x-tex">\epsilon_\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">ϵ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>；<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>τ</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\tau_\theta(y)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.1132em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span></span></span></span> 通过多层 cross-attention 注入 U-Net，在每个去噪时间步提供身份约束。</li>
+<li>训练顺序是先训练 VAE，再冻结 VAE，联合训练 ICM 与 LDM；推理后将去噪 latent 经 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">D</mi></mrow><annotation encoding="application/x-tex">\mathcal D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathcal" style="margin-right:0.02778em;">D</span></span></span></span> 解码为完整 BFM UV。</li>
+</ol>
+<p>实现本质：相较一般 Stable Diffusion，关键改动是 <strong>UV 专用 VAE + 几何/分割构造的 partial-UV condition + 多尺度 cross-attention</strong>。</p>
+<hr />
+<h2 id="4-freeuv-cvpr-2025分别学习真实外观与-uv-结构推理时组装"><a class="markdownIt-Anchor" href="#4-freeuv-cvpr-2025分别学习真实外观与-uv-结构推理时组装"></a> 4. FreeUV (CVPR 2025)：分别学习真实外观与 UV 结构，推理时组装</h2>
+<p><a target="_blank" rel="noopener" href="https://openaccess.thecvf.com/content/CVPR2025/html/Yang_FreeUV_Ground-Truth-Free_Realistic_Facial_UV_Texture_Recovery_via_Cross-Assembly_Inference_CVPR_2025_paper.html">论文：FreeUV: Ground-Truth-Free Realistic Facial UV Texture Recovery via Cross-Assembly Inference</a></p>
+<p><img src="/images/3D/04_freeuv_framework.png" alt="FreeUV 架构" /></p>
+<p><em>图 4：论文 Figure 3。左侧 appearance network 在野外数据上学习真实细节，中间 structure network 在 3DMM 域学习 UV 结构，右侧在不重新训练的情况下 Cross-Assembly。</em></p>
+<p>简介：真实照片有细节却没有完整 UV 真值；3DMM UV 结构正确却过于平滑。FreeUV 不要求一个训练集同时具备两者，而是把这两个知识源拆开训练，再在推理阶段交叉组装。</p>
+<p>具体数据流：</p>
+<ol>
+<li><strong>Appearance network <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϕ</mi><mi>a</mi></msub></mrow><annotation encoding="application/x-tex">\phi_a</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">ϕ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">a</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong>：在 in-the-wild 数据上训练。Flaw-Tolerant Facial Detail Extractor <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ψ</mi><mi>a</mi></msub></mrow><annotation encoding="application/x-tex">\psi_a</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">ψ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">a</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 用冻结 CLIP image encoder 提取展开 UV 中的身份细节，并用 channel attention 降低破损/错位 texel 的影响；ControlNets 接收 2D UV mask 与 landmark 条件。</li>
+<li><strong>Structure network <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϕ</mi><mi>s</mi></msub></mrow><annotation encoding="application/x-tex">\phi_s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">ϕ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong>：在可合成完整真值的 3DMM 域训练。UV Structure Aligner <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ψ</mi><mi>s</mi></msub></mrow><annotation encoding="application/x-tex">\psi_s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">ψ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 以 self-attention 建模 canonical UV 的长距离结构，ControlNet 注入 completed UV coordinate map。</li>
+<li><strong>Cross-Assembly inference</strong>：保留 appearance branch 的生成 U-Net 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ψ</mi><mi>a</mi></msub></mrow><annotation encoding="application/x-tex">\psi_a</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">ψ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">a</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，接入 structure branch 的 UV aligner/ControlNet，使同一次去噪同时获得真实皮肤外观和稳定 UV 布局。</li>
+<li>最后进行 Lab color adjustment，缓解 classifier-free guidance 放大细节时产生的整体色偏。</li>
+</ol>
+<p>实现本质：它是 <strong>两个异域 diffusion/ControlNet 专家在推理期组合</strong>。优势是不需要 paired image–UV GT；风险是两个专家在大面积不可见区仍可能对身份作出不一致猜测。</p>
+<hr />
+<h2 id="5-omgtex-cvpr-2026绕开-3d-fitting直接学习-image-to-uv"><a class="markdownIt-Anchor" href="#5-omgtex-cvpr-2026绕开-3d-fitting直接学习-image-to-uv"></a> 5. OMGTex (CVPR 2026)：绕开 3D fitting，直接学习 image-to-UV</h2>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2605.25778">论文：OMGTex: One-stage Multi-style Facial Texture Reconstruction without Geometry Guidance</a></p>
+<p><img src="/images/3D/05_omgtex_pipeline.png" alt="OMGTex 架构" /></p>
+<p><em>图 5：论文 Figure 3。左侧生成 CANVAS paired data，右侧用冻结 FLUX.1 和可训练条件 LoRA 学习从人脸图像到 texture latent 的映射。</em></p>
+<p>简介：传统方法先拟合 3DMM 再反投影 texel，一旦输入存在手部、眼镜、面具、强风格化或极端姿态，几何拟合可能先失败。OMGTex 直接把单张图像映射为 canonical UV，把几何依赖转移为数据学习和推理时对齐约束。</p>
+<p>具体数据流：</p>
+<ol>
+<li><strong>CANVAS 构建</strong>：AvatarTex 先产生基础 facial texture；FLUX augmentation 将对应输入扩展为姿态、遮挡和多风格版本；人工 correction 修复 UV 标签中的系统性错误，形成 image–UV pair。</li>
+<li>输入图像经 VAE encoder 得到 conditional embedding；目标 UV 被另一个 VAE 编码为 latent，并加噪作为 FLUX.1 的生成变量。</li>
+<li>冻结 FLUX.1 的 double-stream/single-stream 主干，只在各 block 的 self-attention QKV projection 上训练 LoRA，将 condition token 注入 noise-token 更新过程。</li>
+<li>以 rectified-flow/flow-matching 形式的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mrow><mi>R</mi><mi>F</mi></mrow></msub></mrow><annotation encoding="application/x-tex">L_{RF}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mord mathnormal mtight" style="margin-right:0.13889em;">F</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 监督 predicted latent 接近 ground-truth texture latent。</li>
+<li>推理得到 raw UV 后，以 Gradient-Guided Texture Alignment 对眼、口、眉等语义区域做梯度纠偏；编辑版本还可对指定区域注入参考特征。</li>
+</ol>
+<p>实现本质：这是 <strong>FLUX.1 backbone + parameter-efficient condition LoRA + inference-time gradient correction</strong>。它去掉显式 geometry guidance，但 canonical 对齐并未消失，而是由 paired data 与后验梯度共同承担。</p>
+<hr />
+<h2 id="6-facerefiner-2026把可微渲染变成-uv-精修的反馈回路"><a class="markdownIt-Anchor" href="#6-facerefiner-2026把可微渲染变成-uv-精修的反馈回路"></a> 6. FaceRefiner (2026)：把可微渲染变成 UV 精修的反馈回路</h2>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2601.04520">论文：FaceRefiner: Training-Free Generation Refinement for High-Fidelity 3D Facial Texture Reconstruction</a></p>
+<p><img src="/images/3D/06_facerefiner_overview.jpg" alt="FaceRefiner 架构" /></p>
+<p><em>图 6：论文 Figure 2。灰框准备输入，蓝框在 UV 空间执行 style/content optimization，橙框把当前 UV 渲染回输入相机并提供 rendering loss。</em></p>
+<p>简介：FaceRefiner 不是新的 UV generator，而是一个 training-free 后处理器。完整生成 UV 提供全局 content；从原图反投影得到的残缺 UV 虽有黑洞，却包含最可靠的身份 style。优化目标是在不破坏完整性的前提下，把真实可见细节迁回生成 UV。</p>
+<p>具体数据流：</p>
+<ol>
+<li>输入图 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi></mrow><annotation encoding="application/x-tex">I</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span></span></span></span> 经任意 3D face reconstruction 得到 mesh <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">M</mi></mrow><annotation encoding="application/x-tex">\mathcal M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathcal">M</span></span></span></span>、camera pose <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">P</mi></mrow><annotation encoding="application/x-tex">\mathcal P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathcal" style="margin-right:0.08222em;">P</span></span></span></span> 和 sampled partial texture <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mi>S</mi></msub></mrow><annotation encoding="application/x-tex">I_S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05764em;">S</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>；已有生成方法给出完整但不够像输入的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mi>C</mi></msub></mrow><annotation encoding="application/x-tex">I_C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07153em;">C</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。</li>
+<li>待优化纹理 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mi>X</mi></msub></mrow><annotation encoding="application/x-tex">I_X</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">X</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 同时接受 content loss（保持 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mi>C</mi></msub></mrow><annotation encoding="application/x-tex">I_C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07153em;">C</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 的完整布局）和 ROI style loss（从 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mi>S</mi></msub></mrow><annotation encoding="application/x-tex">I_S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05764em;">S</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 的有效区域恢复肤色、斑点、眼周等身份特征）。</li>
+<li>可微渲染器用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>I</mi><mi>X</mi></msub><mo separator="true">,</mo><mi mathvariant="script">M</mi><mo separator="true">,</mo><mi mathvariant="script">P</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(I_X,\mathcal M,\mathcal P)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">X</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathcal">M</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathcal" style="margin-right:0.08222em;">P</span><span class="mclose">)</span></span></span></span> 生成输入视角 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mi>R</mi></msub></mrow><annotation encoding="application/x-tex">I_R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>；rendering loss 直接度量 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mi>R</mi></msub></mrow><annotation encoding="application/x-tex">I_R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 与原图 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi></mrow><annotation encoding="application/x-tex">I</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span></span></span></span> 的像素/感知差异。</li>
+<li>渲染梯度反传到 UV texel；五阶段优化逐步降低对初始 content 的依赖并加强输入视角约束，减轻一次优化出现的 content leakage。</li>
+</ol>
+<p>实现本质：这是 <strong>neural style transfer optimizer + differentiable renderer</strong>；没有额外训练数据，但每个样本都要迭代优化，且结果上限受初始 UV 和 mesh/camera 精度限制。</p>
+<hr />
+<h2 id="7-hifialbedo-2024先学高频纹理字典再适配到-albedo-域"><a class="markdownIt-Anchor" href="#7-hifialbedo-2024先学高频纹理字典再适配到-albedo-域"></a> 7. HiFiAlbedo (2024)：先学高频纹理字典，再适配到 albedo 域</h2>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2406.13149">论文：HiFiAlbedo: High-Fidelity Face Albedo Estimation via Texture Codebook</a></p>
+<p><img src="/images/3D/07a_hifialbedo_texture_pipeline.png" alt="HiFiAlbedo 纹理重建阶段" /></p>
+<p><em>图 7a：论文 Figure 3。VQ texture codebook 和 decoder 冻结，只微调 image-to-UV encoder；latent/image 双判别器同时约束隐空间分布和多视图渲染真实性。</em></p>
+<p><img src="/images/3D/07b_hifialbedo_domain_adaptation.png" alt="HiFiAlbedo albedo 域适配" /></p>
+<p><em>图 7b：论文 Figure 4。同身份多图经共享 encoder 后，由 learnable query 与 key/value latent 做 cross-attention，提取跨场景稳定的 albedo latent。</em></p>
+<p>简介：直接在小规模 Light-Stage albedo 上训练容易过拟合且缺少毛孔、痣和肤色细节。HiFiAlbedo 先从大规模高分辨率 RGB faces 学习“高质量人脸纹理长什么样”，再利用同一个人的 albedo 在不同场景中应保持不变这一约束，把 texture prior 迁移到 albedo domain。</p>
+<p>具体实现分两阶段：</p>
+<ol>
+<li><strong>Texture codebook / UV reconstruction</strong>：VQGAN 的 quantizer <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">Q</mi></mrow><annotation encoding="application/x-tex">\mathcal Q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.78055em;vertical-align:-0.09722em;"></span><span class="mord mathcal">Q</span></span></span></span>、texture codebook <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="script">C</mi><mi>T</mi></msup></mrow><annotation encoding="application/x-tex">\mathcal C^T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8413309999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathcal" style="margin-right:0.05834em;">C</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413309999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span></span></span></span> 和 decoder <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">G</mi></mrow><annotation encoding="application/x-tex">\mathcal G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.78055em;vertical-align:-0.09722em;"></span><span class="mord mathcal" style="margin-right:0.0593em;">G</span></span></span></span> 先在大规模人脸上训练并冻结；image encoder <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="script">E</mi><mrow><mi>u</mi><mi>v</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\mathcal E_{uv}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathcal" style="margin-right:0.08944em;">E</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.08944em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 将单图编码到该 codebook。<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mrow><mi>l</mi><mi>a</mi><mi>t</mi><mi>e</mi><mi>n</mi><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">D_{latent}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.02778em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 对齐有限真实 UV 的 latent 分布，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mrow><mi>i</mi><mi>m</mi><mi>a</mi><mi>g</mi><mi>e</mi></mrow></msub></mrow><annotation encoding="application/x-tex">D_{image}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:-0.02778em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span><span class="mord mathnormal mtight">e</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span> 对齐随机视角渲染与真实脸分布。</li>
+<li><strong>Texture-to-albedo adaptation</strong>：对同身份、不同光照的多张图先做 attribute filtering；冻结 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="script">E</mi><mrow><mi>u</mi><mi>v</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\mathcal E_{uv}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathcal" style="margin-right:0.08944em;">E</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.08944em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 提取并拼接特征，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mi>k</mi></msub><mi mathvariant="normal">/</mi><msub><mi>P</mi><mi>v</mi></msub></mrow><annotation encoding="application/x-tex">P_k/P_v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">/</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 生成 key/value，learnable query latent 经 cross-attention 提取跨图共享成分。</li>
+<li>共享 latent reshape 后经 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">Q</mi></mrow><annotation encoding="application/x-tex">\mathcal Q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.78055em;vertical-align:-0.09722em;"></span><span class="mord mathcal">Q</span></span></span></span> 与 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">G</mi></mrow><annotation encoding="application/x-tex">\mathcal G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.78055em;vertical-align:-0.09722em;"></span><span class="mord mathcal" style="margin-right:0.0593em;">G</span></span></span></span> 解码为 albedo；贴回 3D face 渲染，以 LPIPS 与 group identity loss 约束重建结果仍对应各输入身份。</li>
+</ol>
+<p>实现本质：它把 <strong>VQ codebook 的高频生成能力</strong> 与 <strong>同身份多图的不变性监督</strong> 结合。单图可推理，多图会更好地排除特定光照。</p>
+<hr />
+<h2 id="8-uvapm-2025低维参数保证稳定高频-vae-恢复个性细节"><a class="markdownIt-Anchor" href="#8-uvapm-2025低维参数保证稳定高频-vae-恢复个性细节"></a> 8. UVAPM (2025)：低维参数保证稳定，高频 VAE 恢复个性细节</h2>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2506.13233">论文：UVAPM: A UV Albedo Parametric Model for High-Quality Face Albedo Generation</a></p>
+<p><img src="/images/3D/08a_uvapm_coefficient_framework.png" alt="UVAPM 系数优化框架" /></p>
+<p><em>图 8a：论文 Figure 2。UVAPM 用 RGB 三组 basis 和系数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi></mrow><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span></span></span></span> 产生 coarse albedo；detail model 用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi></mrow><annotation encoding="application/x-tex">\delta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span></span></span></span> 产生 value-channel 高频残差；几何、光照和材质参数经可微渲染共同拟合输入。</em></p>
+<p><img src="/images/3D/08b_uvapm_detail_generator.png" alt="UVAPM detail generator" /></p>
+<p><em>图 8b：论文 Figure 5。左侧 coarse generator 预测低频 value，二者相减得到高频 residual；右侧 VAE 学习该 detail distribution。</em></p>
+<p>简介：UVAPM 试图保留传统 3DMM “参数少、可解释、易优化”的优势，同时解决线性纹理基底过平滑的问题。低频肤色和大结构由 UV albedo parametric basis 控制，高频胡须、眉毛、眼窝和皮肤纹理由 detail latent 补充。</p>
+<p>具体数据流：</p>
+<ol>
+<li>UVAPM 为 RGB 通道学习 basis <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>B</mi><mi>r</mi></msub><mo separator="true">,</mo><msub><mi>B</mi><mi>g</mi></msub><mo separator="true">,</mo><msub><mi>B</mi><mi>b</mi></msub></mrow><annotation encoding="application/x-tex">B_r,B_g,B_b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">b</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>；albedo coefficient <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi></mrow><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span></span></span></span> 线性组合得到 coarse RGB，再转 HSV。</li>
+<li>UV detail model 由 coefficient <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi></mrow><annotation encoding="application/x-tex">\delta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span></span></span></span> 产生 value-channel residual；它与 coarse <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span> 相加，再和原有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><mi mathvariant="normal">/</mi><mi>S</mi></mrow><annotation encoding="application/x-tex">H/S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.08125em;">H</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span> 合成为最终 RGB albedo <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mrow><mi>R</mi><mi>G</mi><mi>B</mi></mrow></msub></mrow><annotation encoding="application/x-tex">T_{RGB}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.32833099999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.00773em;">R</span><span class="mord mathnormal mtight">G</span><span class="mord mathnormal mtight" style="margin-right:0.05017em;">B</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。</li>
+<li>HIFI3D++ 用 identity/expression coefficients <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>β</mi><mo separator="true">,</mo><mi>ξ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(\beta,\xi)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.04601em;">ξ</span><span class="mclose">)</span></span></span></span> 产生 shape，SH coefficient <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span></span></span></span> 产生 illumination；pose <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span></span></span></span>、几何、albedo 与光照共同进入 differentiable renderer。</li>
+<li>对输入图优化 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>α</mi><mo separator="true">,</mo><mi>δ</mi><mo separator="true">,</mo><mi>β</mi><mo separator="true">,</mo><mi>ξ</mi><mo separator="true">,</mo><mi>θ</mi><mo separator="true">,</mo><mi>γ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(\alpha,\delta,\beta,\xi,\theta,\gamma)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.04601em;">ξ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mclose">)</span></span></span></span>，以渲染重建损失反向更新参数。</li>
+<li>detail VAE 的训练目标来自真实 albedo 的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span> 通道减去 coarse generator 预测值，迫使 latent 只承载高频 residual，而不是重新学习肤色和低频结构。</li>
+</ol>
+<p>实现本质：这是 <strong>显式低维参数模型 + learned residual VAE + analysis-by-synthesis optimization</strong>，控制性强，但低维 basis 会限制训练集之外的罕见外观。</p>
+<hr />
+<h2 id="9-opendelight-siggraph-2026用-source-aware-token-融合两种去光照数据"><a class="markdownIt-Anchor" href="#9-opendelight-siggraph-2026用-source-aware-token-融合两种去光照数据"></a> 9. OpenDelight (SIGGRAPH 2026)：用 source-aware token 融合两种去光照数据</h2>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2605.05636">论文：OpenDelight: Learning a Delighting Prior for Facial Appearance Capture in the Wild</a></p>
+<p><img src="/images/3D/09_opendelight_base_network.jpg" alt="OpenDelight 基础去光照网络" /></p>
+<p><em>图 9：论文 Figure 4。OLAT 与 rendered-scan 样本分别附加不同 source-aware tokens；ViT 处理图像与数据源 token，decoder 只接收图像 token。</em></p>
+<p>简介：FaceOLAT 接近真实照片分布，但 uniform-light albedo 较模糊并可能烘焙镜面；渲染 Light-Stage scans 的 albedo 锐利且物理正确，却与真实照片存在 domain gap。OpenDelight 用 Dataset Latent Modulation（DLM）让小容量 source token 吸收数据集风格，让大容量 backbone 专注学习共享的 delighting mechanism。</p>
+<p>具体实现：</p>
+<ol>
+<li>皮肤区域输入被切成 patch tokens，并附加对应数据源的 4 个 source-aware tokens <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>d</mi><mi>i</mi><mi>o</mi></msubsup></mrow><annotation encoding="application/x-tex">d_i^o</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.953104em;vertical-align:-0.258664em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.664392em;"><span style="top:-2.441336em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">o</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.258664em;"><span></span></span></span></span></span></span></span></span></span> 或 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>d</mi><mi>i</mi><mi>r</mi></msubsup></mrow><annotation encoding="application/x-tex">d_i^r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.953104em;vertical-align:-0.258664em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.664392em;"><span style="top:-2.441336em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.258664em;"><span></span></span></span></span></span></span></span></span></span>。</li>
+<li>MAE 初始化的 ViT-Base encoder 对图像和 source token 做 self-attention；编码后丢弃 source token，只将图像 token unpatchify 并送入轻量 convolutional decoder。</li>
+<li>基础预测 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>A</mi><mo>^</mo></mover><mo>=</mo><msub><mi>F</mi><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow></msub><mo stretchy="false">(</mo><mi>I</mi><mo separator="true">,</mo><msup><mi>d</mi><mo>∗</mo></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\hat A=F_{base}(I,d^*)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9467699999999999em;vertical-align:0em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9467699999999999em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">A</span></span><span style="top:-3.25233em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.11110999999999999em;"><span class="mord">^</span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">e</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.688696em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> 使用 L1 + LPIPS 监督；推理野外图像时显式选择 rendered-scan token，将输出导向更锐利、物理更正确的 albedo style。</li>
+<li>因 ViT 没有 skip connection，另训练 UNet <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>F</mi><mrow><mi>d</mi><mi>e</mi><mi>t</mi><mi>a</mi><mi>i</mi><mi>l</mi></mrow></msub><mo stretchy="false">(</mo><mi>I</mi><mo separator="true">,</mo><mover accent="true"><mi>A</mi><mo>^</mo></mover><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">F_{detail}(I,\hat A)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.19677em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9467699999999999em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">A</span></span><span style="top:-3.25233em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.11110999999999999em;"><span class="mord">^</span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> 恢复毛孔等高频细节。基础网络工作在 512×512，detail network 工作在 768×768。</li>
+<li>完整 capture pipeline：野外视频 → COLMAP/2DGS/Wrap3D 几何 → 16 个视角分别 delight → 融合成 1K UV → 优化全局 SH illumination → 反射率超分到 4K。</li>
+</ol>
+<p>实现本质：它不是单图 complete-UV diffusion，而是 <strong>delighting prior + multi-view UV fusion + simplified inverse rendering</strong>，目标是可重光照采集而非单张好看的 baked texture。</p>
+<hr />
+<h2 id="10-marcus-avatar-marc-2026从-uv-补全一路做到-4k-pbr-maps"><a class="markdownIt-Anchor" href="#10-marcus-avatar-marc-2026从-uv-补全一路做到-4k-pbr-maps"></a> 10. MARCUS Avatar / MARC (2026)：从 UV 补全一路做到 4K PBR maps</h2>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2606.28144">论文：MARCUS Avatar</a>；<a target="_blank" rel="noopener" href="https://luh1124.github.io/MARCUS-Avatar-Projectpage/">项目页</a></p>
+<p><img src="/images/3D/10a_marcus_inference_pipeline.png" alt="MARCUS 完整推理管线" /></p>
+<p><em>图 10a：论文整体 pipeline。单图先恢复几何并反投影 incomplete UV，之后依次执行 texture inpainting、light homogenization、material estimation 与 4K super-resolution。</em></p>
+<p><img src="/images/3D/10b_marcus_training_pipeline.png" alt="MARCUS PBR 训练架构" /></p>
+<p><em>图 10b：论文训练架构。左侧是 albedo、normal、roughness/specular/displacement 三个联合 diffusion 分支和可微 GGX shader；右侧是 inpainting / homogenization 的单任务 LoRA。</em></p>
+<p>简介：这篇论文把人脸纹理问题定义成完整资产生产链，而非只生成一张 RGB UV。它先解决不可见区域，再移除烘焙光照，最后联合预测相互耦合的 intrinsic/PBR maps，从而支持新 HDRI 下的材质重光照。</p>
+<p>推理框架：</p>
+<ol>
+<li>单图 geometry frontend 融合 ConvNeXt-V2 局部特征与冻结 DINOv3 语义特征，回归人脸几何和相机；将可见像素反投影到 UV 得到 incomplete texture。</li>
+<li><strong>Inpainting LoRA</strong> 补全侧脸、额头和遮挡区；<strong>Light-Homogenization LoRA</strong> 消除局部阴影、高光和曝光差，使纹理接近 intrinsic albedo。</li>
+<li><strong>Material estimation</strong> 联合输出 albedo、normal、roughness、specular 与 displacement；最后用超分模块将 1K maps 提升到 4K。</li>
+</ol>
+<p>训练框架：</p>
+<ol>
+<li>冻结 Qwen2.5-VL / multimodal diffusion transformer 与 VAE 主干，只训练 task-specific LoRA，降低少量 PBR scans 训练时的先验破坏。</li>
+<li>材质阶段将 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mrow><mi>a</mi><mi>l</mi><mi>b</mi></mrow></msub></mrow><annotation encoding="application/x-tex">T_{alb}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">b</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mrow><mi>n</mi><mi>r</mi><mi>m</mi></mrow></msub></mrow><annotation encoding="application/x-tex">T_{nrm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">m</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mrow><mi>r</mi><mi>o</mi><mi>u</mi><mi>g</mi><mi>h</mi><mi mathvariant="normal">/</mi><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi mathvariant="normal">/</mi><mi>d</mi><mi>i</mi><mi>s</mi><mi>p</mi></mrow></msub></mrow><annotation encoding="application/x-tex">T_{rough/spec/disp}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.03853em;vertical-align:-0.3551999999999999em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.34480000000000005em;"><span style="top:-2.5198em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span><span class="mord mathnormal mtight">h</span><span class="mord mtight">/</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">c</span><span class="mord mtight">/</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">p</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3551999999999999em;"><span></span></span></span></span></span></span></span></span></span> 编码成三个 batch 分支；每个分支有独立 LoRA。</li>
+<li>在 DiT block 内执行 Batch-Dimension Cross-Intrinsic Attention，使同一 texel 的颜色、法线和反射属性互相解释，减少跨图不一致。</li>
+<li>解码后的 PBR maps 与几何 position/normal/tangent 一起进入 microfacet GGX shader；可微 BRDF rendering loss 检查这些材质图在新光照下是否共同产生正确外观。</li>
+<li>Inpainting 与 homogenization 各用单任务 LoRA；homogenization 的训练通过环境光照/阴影合成数据构造输入与目标对。</li>
+</ol>
+<p>实现本质：这是 <strong>级联 UV diffusion + 多分支 intrinsic diffusion + differentiable BRDF supervision</strong>。它输出最完整，但也最容易发生前级几何/补全错误向后级材质分解传播。</p>
+<hr />
+<h2 id="架构路线的核心差异"><a class="markdownIt-Anchor" href="#架构路线的核心差异"></a> 架构路线的核心差异</h2>
+<table>
+<thead>
+<tr>
+<th>关键问题</th>
+<th>代表方法</th>
+<th>解决方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>如何把真实可见像素放到正确 UV 位置</td>
+<td>Yin、FFHQ-UV、UV-IDM、FaceRefiner</td>
+<td>learned sampler、3D unwrap/remap 或 differentiable render</td>
+</tr>
+<tr>
+<td>没有完整 paired UV GT 如何训练</td>
+<td>Yin、FreeUV</td>
+<td>pseudo-GT 或 appearance/structure 分域训练</td>
+</tr>
+<tr>
+<td>如何防止生成纹理“换脸”</td>
+<td>UV-IDM、FaceRefiner、HiFiAlbedo</td>
+<td>partial-UV cross-attention、输入视角渲染反馈、group identity constraint</td>
+</tr>
+<tr>
+<td>如何摆脱脆弱的 3D fitting</td>
+<td>OMGTex</td>
+<td>image-to-UV paired learning + gradient-guided alignment</td>
+</tr>
+<tr>
+<td>如何从 baked RGB 走向可重光照 albedo</td>
+<td>HiFiAlbedo、UVAPM、OpenDelight</td>
+<td>codebook domain adaptation、显式参数分解、delighting prior</td>
+</tr>
+<tr>
+<td>如何形成引擎可用 PBR asset</td>
+<td>MARCUS Avatar</td>
+<td>homogenization + joint intrinsic maps + differentiable GGX loss</td>
+</tr>
+</tbody>
+</table>
+<p>架构原图目录：<a href="/H:/Paper_Miner/3D/Face_UV_Texture_Albedo_Comparison/architecture_figures">architecture_figures</a>。</p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://twlelev.github.io/2026/08/04/3d/face-uv-texture-architecture-papers/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/3D/" rel="tag">3D</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2026/09/12/skills/chang-yong-skills-hui-zong/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            常用 Skills 汇总
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2026/06/23/skills/codebase-memory-graphify/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">代码/知识图谱工具：codebase-memory-mcp 与 graphify</div>
+      </a>
+    
+  </nav>
+
+  
+   
+  
+   
+    <script src="https://cdn.staticfile.org/twikoo/1.4.18/twikoo.all.min.js"></script>
+    <div id="twikoo" class="twikoo"></div>
+    <script>
+        twikoo.init({
+            envId: ""
+        })
+    </script>
+ 
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2015-2026
+        <i class="ri-heart-fill heart_icon"></i> twlelev的博客
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="twlelev的博客"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories/skills/">Skills</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+ 
+    
+        <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.css">
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/katex.min.js"></script>
+        <script src="https://cdn.staticfile.org/KaTeX/0.15.1/contrib/auto-render.min.js"></script>
+        
+    
+ 
+<!-- busuanzi  -->
+
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>
