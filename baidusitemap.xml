@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://twlelev.github.io/2026/09/12/skills/chang-yong-skills-hui-zong/</loc>
-    <lastmod>2026-09-12</lastmod>
+    <lastmod>2026-09-17</lastmod>
   </url>
   <url>
     <loc>https://twlelev.github.io/2026/01/09/qiang-hua-xue-xi/qiang-hua-xue-xi-v-zhi-xue-xi-zhi-td-target-shi-yan-fen-xi/</loc>
@@ -17,11 +17,11 @@
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
-    <loc>https://twlelev.github.io/2025/12/24/python-huan-jing/python-huan-jing/</loc>
+    <loc>https://twlelev.github.io/2026/06/23/skills/codebase-memory-graphify/</loc>
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
-    <loc>https://twlelev.github.io/2026/06/23/skills/codebase-memory-graphify/</loc>
+    <loc>https://twlelev.github.io/2025/12/24/python-huan-jing/python-huan-jing/</loc>
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
@@ -37,7 +37,7 @@
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
-    <loc>https://twlelev.github.io/2023/04/26/cuda/cuda-bian-cheng-jian-jie/</loc>
+    <loc>https://twlelev.github.io/2023/04/13/git/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/</loc>
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
@@ -45,11 +45,11 @@
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
-    <loc>https://twlelev.github.io/2023/04/13/git/git-shang-chuan-ben-di-cang-ku-dao-yuan-cheng-cang-ku/</loc>
+    <loc>https://twlelev.github.io/2025/12/18/git/git-chang-yong-ming-ling/</loc>
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
-    <loc>https://twlelev.github.io/2025/12/18/git/git-chang-yong-ming-ling/</loc>
+    <loc>https://twlelev.github.io/2023/04/26/cuda/cuda-bian-cheng-jian-jie/</loc>
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
@@ -57,19 +57,15 @@
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
-    <loc>https://twlelev.github.io/2025/12/19/aigc/lcm-lora/</loc>
+    <loc>https://twlelev.github.io/2023/07/08/ncnn/ncnn/</loc>
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
-    <loc>https://twlelev.github.io/2025/12/26/aigc/z-image-xiang-guan-ji-zhu-jie-xi/</loc>
+    <loc>https://twlelev.github.io/2024/12/18/llm/da-mo-xing-shi-zhan-ying/</loc>
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
     <loc>https://twlelev.github.io/2026/04/15/tts/gpt-sovits/</loc>
-    <lastmod>2026-09-12</lastmod>
-  </url>
-  <url>
-    <loc>https://twlelev.github.io/2026/04/03/tts/vibe-voice-finetune-shi-jian/</loc>
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
@@ -81,15 +77,31 @@
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
-    <loc>https://twlelev.github.io/2024/12/18/llm/da-mo-xing-shi-zhan-ying/</loc>
+    <loc>https://twlelev.github.io/2026/04/03/tts/vibe-voice-finetune-shi-jian/</loc>
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
-    <loc>https://twlelev.github.io/2023/07/08/ncnn/ncnn/</loc>
+    <loc>https://twlelev.github.io/2025/12/19/aigc/lcm-lora/</loc>
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
-    <loc>https://twlelev.github.io/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/</loc>
+    <loc>https://twlelev.github.io/2025/12/26/aigc/z-image-xiang-guan-ji-zhu-jie-xi/</loc>
+    <lastmod>2026-09-12</lastmod>
+  </url>
+  <url>
+    <loc>https://twlelev.github.io/2026/05/18/3d/3d-reconstruct-zhong-xiang-ji-xiang-guan-ji-chu/</loc>
+    <lastmod>2026-09-12</lastmod>
+  </url>
+  <url>
+    <loc>https://twlelev.github.io/2026/06/15/3d/pixel3dmm/</loc>
+    <lastmod>2026-09-12</lastmod>
+  </url>
+  <url>
+    <loc>https://twlelev.github.io/2026/03/09/aigc/helios/</loc>
+    <lastmod>2026-09-12</lastmod>
+  </url>
+  <url>
+    <loc>https://twlelev.github.io/2026/08/04/3d/face-uv-texture-architecture-papers/</loc>
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
@@ -101,23 +113,11 @@
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
-    <loc>https://twlelev.github.io/2026/03/09/aigc/helios/</loc>
-    <lastmod>2026-09-12</lastmod>
-  </url>
-  <url>
     <loc>https://twlelev.github.io/2025/12/23/aigc/flashattention/</loc>
     <lastmod>2026-09-12</lastmod>
   </url>
   <url>
-    <loc>https://twlelev.github.io/2026/08/04/3d/face-uv-texture-architecture-papers/</loc>
-    <lastmod>2026-09-12</lastmod>
-  </url>
-  <url>
-    <loc>https://twlelev.github.io/2026/06/15/3d/pixel3dmm/</loc>
-    <lastmod>2026-09-12</lastmod>
-  </url>
-  <url>
-    <loc>https://twlelev.github.io/2026/05/18/3d/3d-reconstruct-zhong-xiang-ji-xiang-guan-ji-chu/</loc>
+    <loc>https://twlelev.github.io/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/</loc>
     <lastmod>2026-09-12</lastmod>
   </url>
 </urlset> 

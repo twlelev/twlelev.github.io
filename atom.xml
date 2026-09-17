@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://twlelev.github.io/"/>
-  <updated>2026-09-12T04:00:00.000Z</updated>
+  <updated>2026-09-17T04:00:00.000Z</updated>
   <id>https://twlelev.github.io/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
@@ -16,26 +16,23 @@
     <link href="https://twlelev.github.io/2026/09/12/skills/chang-yong-skills-hui-zong/"/>
     <id>https://twlelev.github.io/2026/09/12/skills/chang-yong-skills-hui-zong/</id>
     <published>2026-09-12T04:00:00.000Z</published>
-    <updated>2026-09-12T04:00:00.000Z</updated>
+    <updated>2026-09-17T04:00:00.000Z</updated>
     
     <summary type="html">
     
-      &lt;p&gt;这是一份个人常用 Skills 导航，按“我要完成什么”来分类。Skill 可以理解为给 AI agent 的专业工作手册：既可以直接点名，也可以用自然语言描述任务，让 Codex 自动选择合适的 Skill。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;显式调用示例：&lt;code&gt;$pdf 把这份报告整理成 PDF&lt;/code&gt;&lt;br&gt;&lt;br /&gt;
-自然语言示例：&lt;code&gt;把这组数据做成带图表的 Excel，并检查公式。&lt;/code&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+      &lt;p&gt;这份汇总只收录我个人安装／自定义的 Skills，不包含 Codex 系统自带技能，也不包含随应用提供的官方插件与运行时技能。&lt;/p&gt;
+&lt;p&gt;目前整理了三个：论文检索 &lt;code&gt;paper-search&lt;/code&gt;、文献分析 &lt;code&gt;research-lit&lt;/code&gt;，以及回答结构调整 &lt;code&gt;i-have-adhd&lt;/code&gt;。&lt;/p&gt;
     
     </summary>
     
       <category term="skills" scheme="https://twlelev.github.io/categories/skills/"/>
     
     
+      <category term="AI Agent" scheme="https://twlelev.github.io/tags/AI-Agent/"/>
+    
       <category term="Codex" scheme="https://twlelev.github.io/tags/Codex/"/>
     
       <category term="Skills" scheme="https://twlelev.github.io/tags/Skills/"/>
-    
-      <category term="AI Agent" scheme="https://twlelev.github.io/tags/AI-Agent/"/>
     
   </entry>
   
@@ -93,13 +90,13 @@
       <category term="skills" scheme="https://twlelev.github.io/categories/skills/"/>
     
     
-      <category term="AI Agent" scheme="https://twlelev.github.io/tags/AI-Agent/"/>
-    
       <category term="Claude Code" scheme="https://twlelev.github.io/tags/Claude-Code/"/>
     
       <category term="知识图谱" scheme="https://twlelev.github.io/tags/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1/"/>
     
       <category term="MCP" scheme="https://twlelev.github.io/tags/MCP/"/>
+    
+      <category term="AI Agent" scheme="https://twlelev.github.io/tags/AI-Agent/"/>
     
   </entry>
   
