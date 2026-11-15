@@ -152,6 +152,220 @@
     
     
     <article
+  id="post-3D/3Dhead/ProHead"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/2026/11/08/3d/3dhead/prohead/"
+    >ProHead：从单张照片到三维头部资产</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2026/11/08/3d/3dhead/prohead/" class="article-date">
+  <time datetime="2026-11-07T16:00:00.000Z" itemprop="datePublished">2026-11-08</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/3D/">3D</a> / <a class="article-category-link" href="/categories/3D/3Dhead/">3Dhead</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="prohead从单张照片到三维头部资产"><a class="markdownIt-Anchor" href="#prohead从单张照片到三维头部资产"></a> ProHead：从单张照片到三维头部资产</h1>
+<p>我的相关工作围绕一个目标展开：<strong>从单张人像照片生成具有统一网格结构和完整颜色贴图的三维头部，并将重建、纹理优化、数据建设和结果验证连接成完整流程。</strong></p>
+<p>目前已形成从照片输入到头部模型、UV 贴图和组合渲染的阶段成果。本文结合项目论文 v1 与更新后的模型结果，集中介绍整体方案、已完成的工作和当前效果。</p>
+<h2 id="overview整体流程"><a class="markdownIt-Anchor" href="#overview整体流程"></a> Overview：整体流程</h2>
+<p><img src="/images/3D/3Dhead/00-prohead-overview.png" alt="Draft.md 中的 ProHead 总体框架：共享图像对齐、头部与纹理重建、区域毛发预测及资产组装" /></p>
+<p><a href="/images/3D/3Dhead/00-prohead-overview.png">查看流程图原图</a></p>
+<p>整体框架采用当前 <code>Draft.md</code> 中的 overview。一张 RGB 照片经过统一对齐后，分别进入头部表面重建和区域毛发预测两条支路，最后组合为带纹理网格与毛发的头部资产。</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>完成的工作</th>
+<th>形成的结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>头部几何重建</td>
+<td>结合稠密图像信息与图像特征，直接预测网格顶点</td>
+<td>统一拓扑的头部模型</td>
+</tr>
+<tr>
+<td>纹理补全</td>
+<td>结合 UV 特征与可见 BaseColor，预测完整颜色贴图</td>
+<td>与头部表面对齐的 RGB UV 图集</td>
+</tr>
+<tr>
+<td>区域毛发重建</td>
+<td>预测头发、胡须和眉毛的区域发丝，并在变形后的区域表面放置发根</td>
+<td>各区域的发丝曲线及头发颜色</td>
+</tr>
+<tr>
+<td>资产组装</td>
+<td>组合带纹理网格与区域毛发</td>
+<td>网格与毛发共同构成的头部资产</td>
+</tr>
+</tbody>
+</table>
+<p><strong>几何侧负责头部形状和图像对应，纹理侧负责全头颜色与局部细节。</strong> 两者通过明确的对应关系连接，照片中的鼻部、面颊和唇部信息才能放到相应的三维表面。</p>
+<p>这里的 UV 贴图可以理解为头部表面的展开图，BaseColor 是用于表面着色的基础颜色。各阶段输出可以分别检查，再将同一网格和贴图组合渲染，观察最终表面效果。</p>
+<p><em>这张图展示当前论文草稿的整体框架。本文下文侧重头部网格与 UV 纹理的阶段成果，其中包含历史 PCA 基础贴图与细化方案；这些结果与整体框架图分别说明，不代表已验证全部毛发组装能力。六样本结果和多视角图没有附加外部纹理恢复。</em></p>
+<h2 id="阶段成果输入照片到头部资产"><a class="markdownIt-Anchor" href="#阶段成果输入照片到头部资产"></a> 阶段成果：输入照片到头部资产</h2>
+<p><img src="/images/3D/3Dhead/01-%E5%A4%B4%E9%83%A8%E8%B5%84%E4%BA%A7%E7%BB%BC%E5%90%88%E5%B1%95%E7%A4%BA.png" alt="多人物头部资产综合展示" /></p>
+<p>每行依次展示输入照片、正面重建、几何、网格结构、完整 UV 贴图、三组指定灯光，以及张嘴、微笑和压眉演示。不同人物沿用相同的网格连接关系和 UV 布局，便于使用一致的方式组织模型、管理贴图和检查结果。</p>
+<p>这组成果已将照片、头部几何和外观组织为可渲染的组合，并进行了后续绑定接入探索。表情演示借助适配的外部 Ada 绑定，灯光由展示程序指定；图中未包含头发、胡须和眉毛的独立毛发资产。</p>
+<h2 id="几何重建恢复人物形状建立表面对应"><a class="markdownIt-Anchor" href="#几何重建恢复人物形状建立表面对应"></a> 几何重建：恢复人物形状，建立表面对应</h2>
+<p>几何侧的工作从照片信息预测开始，建立模板顶点与输入图像之间的对应，再结合局部观察和整体头部信息恢复人物形状。输出包括头部网格、修正后的图像对应和相对深度，供后续贴图对齐与遮挡处理使用。</p>
+<p><img src="/images/3D/3Dhead/05-%E5%AF%B9%E5%BA%94%E4%B8%8E%E5%A4%B4%E9%83%A8%E5%87%A0%E4%BD%95.png" alt="初始对应、网络修正后的对应与预测头部几何" /></p>
+<p>左列为初始搜索到的照片位置，中列为网络修正后的对应，右列为预测的三维头部。两组对应点使用相同顶点子集和颜色，便于观察位置变化；纯几何视图则用于检查脸型、五官和表面结构。</p>
+<p>这一部分同时关注<strong>图像信息是否取对位置，以及最后生成的三维形状是否合理</strong>。统一网格结构还让不同人物的输出保留一致的顶点顺序和表面组织，为贴图管理、模型编辑和后续绑定提供基础。</p>
+<h2 id="纹理生成先完整再补充局部细节"><a class="markdownIt-Anchor" href="#纹理生成先完整再补充局部细节"></a> 纹理生成：先完整，再补充局部细节</h2>
+<h3 id="完整基础贴图"><a class="markdownIt-Anchor" href="#完整基础贴图"></a> 完整基础贴图</h3>
+<p>照片只提供一个视角，可见皮肤以外的区域缺少直接观察。因此，纹理侧首先生成覆盖完整头部的基础贴图，建立整体肤色和区域之间的颜色衔接，再进一步恢复细节。</p>
+<p><img src="/images/3D/3Dhead/06-%E5%AE%8C%E6%95%B4%E5%9F%BA%E7%A1%80%E7%BA%B9%E7%90%86%E5%AF%B9%E7%85%A7.png" alt="完整基础纹理与直接增强的对照" /></p>
+<p>这组样例使用相同照片、网格和共享底图。橙色列为不经过 PCA 纹理空间约束的直接增强，绿色列为经过该约束的贴图及对应渲染。对照中可以看到，直接增强容易出现明显的人脸覆盖边界，完整纹理约束后的全头颜色更加连续。</p>
+<p>这部分工作主要解决完整性与整体颜色。耳侧、头顶和背侧等不可见区域依然包含模型补全，人物特有的真实外观需要额外观测才能确认。</p>
+<h3 id="局部纹理细化"><a class="markdownIt-Anchor" href="#局部纹理细化"></a> 局部纹理细化</h3>
+<p><img src="/images/3D/3Dhead/02-%E5%87%A0%E4%BD%95%E4%B8%8E%E7%BA%B9%E7%90%86%E9%98%B6%E6%AE%B5%E7%BB%93%E6%9E%9C.png" alt="输入照片、重建几何、基础外观和细化外观" /></p>
+<p>从左到右为输入照片、重建几何、基础外观和细化外观。细化阶段在完整底图上增加鼻唇区域、面颊等位置的局部颜色变化，下方对相同区域进行放大。</p>
+<p>当前采用基础纹理与细化网络分工的方式，分别处理全局完整性和局部变化。已有结果能够呈现阶段间的差异，但浓密胡须等人物特征仍有丢失，细节保持还需要继续改善。</p>
+<h2 id="结果检查从贴图平面到三维表面"><a class="markdownIt-Anchor" href="#结果检查从贴图平面到三维表面"></a> 结果检查：从贴图平面到三维表面</h2>
+<h3 id="六个固定样本的重建结果"><a class="markdownIt-Anchor" href="#六个固定样本的重建结果"></a> 六个固定样本的重建结果</h3>
+<p>下面使用六个固定样本，展示同一组模型资源从基础贴图、可见颜色条件到最终 UV 和头部渲染的完整输出，便于逐步检查人物特征、肤色和五官边界。</p>
+<p><img src="/images/3D/3Dhead/03-%E7%BA%B9%E7%90%86%E5%90%8E%E5%A4%84%E7%90%86%E4%B8%8E%E7%BB%84%E5%90%88%E6%B8%B2%E6%9F%93.png" alt="六个固定样本的原始照片、PCA 基础贴图、可见 UV 条件、最终 UV 和头部渲染" /></p>
+<p>每行依次为原始照片、PCA 基础 UV、可见 UV BaseColor 条件、细化后的最终 UV，以及放回原图构图的头部渲染。样本为 FFHQ 02183、05539、15196、28548、45299 和 60494。</p>
+<p>这些图使用模型直接输出，没有额外的 restored 纹理。头部渲染覆盖范围之外保留了原始照片的背景与头发，它们属于上下文，不是生成结果。<a href="/images/3D/3Dhead/07-%E7%BA%B9%E7%90%86%E6%81%A2%E5%A4%8D%E9%AB%98%E6%B8%85%E5%AF%B9%E7%85%A7.png">查看 FFHQ 02183 高清结果</a>，其中同时展示最终贴图、可见 UV 条件、支持范围和独立头部渲染。</p>
+<h3 id="多角度检查"><a class="markdownIt-Anchor" href="#多角度检查"></a> 多角度检查</h3>
+<p><img src="/images/3D/3Dhead/08-%E5%90%8E%E5%A4%84%E7%90%86%E7%BA%B9%E7%90%86%E5%A4%9A%E8%A7%86%E8%A7%92.png" alt="同一预测网格与最终 UV 纹理的多视角结果" /></p>
+<p>每行依次展示原始照片、最终 UV 和六个旋转视角。固定同一个预测网格和同一张最终贴图，在正面拟合的仿射投影下旋转到 −75°、−45°、−15°、+15°、+45°、+75°，检查耳侧、面颊边缘和轮廓附近的连续性。</p>
+<p>这些视角由生成的模型旋转得到，输入仍是一张照片。检查重点是已有资产在不同角度下的外观衔接，未观测区域的真实性还需要独立验证。</p>
+<h3 id="相同输入的纹理对照"><a class="markdownIt-Anchor" href="#相同输入的纹理对照"></a> 相同输入的纹理对照</h3>
+<p><img src="/images/3D/3Dhead/09-%E5%90%8C%E8%BE%93%E5%85%A5%E7%BA%B9%E7%90%86%E6%96%B9%E6%B3%95%E5%AF%B9%E6%AF%94.png" alt="相同照片下 FaceRefiner、MARCUS-Avatar、Direct RGB 分支与 PCA 加细化分支的 UV 对比" /></p>
+<p>新版对比图从左到右为原始照片、FaceRefiner、MARCUS-Avatar、<code>refactor/pipeline-v2</code> 和 <code>prohead-pipeline</code>。后两列分别展示 Direct RGB 与 PCA 基础贴图加细化两条分支，使用相同的八张输入照片。</p>
+<p>各列保留对应方法和分支的实际输出。不同分支使用各自的模型资源，不同方法的 UV 布局也存在差异，因此这张图用于观察肤色、局部细节和完整性，不能作为单独替换纹理模块的受控消融或逐像素误差排名。</p>
+<h2 id="数据建设结合头部资产与真实照片"><a class="markdownIt-Anchor" href="#数据建设结合头部资产与真实照片"></a> 数据建设：结合头部资产与真实照片</h2>
+<p><img src="/images/3D/3Dhead/10-%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE%E5%BB%BA%E8%AE%BE.png" alt="基于头部资产和真实照片的两条数据构建路线" /></p>
+<table>
+<thead>
+<tr>
+<th>路线</th>
+<th>已记录的建设内容</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>头部资产扩展</td>
+<td>从 1,500 组 MetaHuman 头部与配对贴图出发，组合形状和外观，再通过 Unreal Engine 渲染</td>
+<td>提供带有几何和颜色标注的训练样本</td>
+</tr>
+<tr>
+<td>真实照片扩展</td>
+<td>从 FFHQ、CelebA 等正面人像生成 UV，质量筛选后保留约 35,000 张贴图，再分配到头部资产渲染</td>
+<td>扩展真实人脸的外观变化</td>
+</tr>
+</tbody>
+</table>
+<p>两条路线使用统一的网格和 UV 布局，连接数据构建与重建训练。约 35,000 指保留的照片来源贴图数量，同一贴图可以用于多张渲染图；其中不可见区域包含推测内容。这里沿用论文 v1 的数据记录。</p>
+<h2 id="阶段验证已有结果说明了什么"><a class="markdownIt-Anchor" href="#阶段验证已有结果说明了什么"></a> 阶段验证：已有结果说明了什么</h2>
+<h3 id="对应修正"><a class="markdownIt-Anchor" href="#对应修正"></a> 对应修正</h3>
+<p><img src="/images/3D/3Dhead/11-%E5%AF%B9%E5%BA%94%E4%BF%AE%E6%AD%A3%E7%BB%9F%E8%AE%A1.png" alt="固定合成验证记录上的初始对应误差与网络输出误差" /></p>
+<p>论文 v1 在 64 条合成验证记录上，将初始搜索位置和网络输出位置与相同参考坐标比较。</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th style="text-align:right">初始对应</th>
+<th style="text-align:right">网络输出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>平均对应误差，越低越好</td>
+<td style="text-align:right">9.93 px</td>
+<td style="text-align:right">2.35 px</td>
+</tr>
+<tr>
+<td>误差在 5 px 内的对应比例，越高越好</td>
+<td style="text-align:right">36.32%</td>
+<td style="text-align:right">93.07%</td>
+</tr>
+<tr>
+<td>误差在 10 px 内的对应比例，越高越好</td>
+<td style="text-align:right">64.36%</td>
+<td style="text-align:right">99.58%</td>
+</tr>
+</tbody>
+</table>
+<p>平均误差按未取整数据计算下降 <strong>76.28%</strong>，64 条记录的平均误差均降低。这说明在该组固定样本上，重建网络能够修正自身初始对应中的偏差。误差使用 1024×1024 对齐图像坐标，数据按记录划分，尚未建立人物独立性。</p>
+<h3 id="其他阶段对照"><a class="markdownIt-Anchor" href="#其他阶段对照"></a> 其他阶段对照</h3>
+<table>
+<thead>
+<tr>
+<th>验证内容</th>
+<th>已记录结果</th>
+<th>范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>图像几何信息预测</td>
+<td>DenseImage4 相对 DenseImage3 的表面位置编码误差下降 21.25%，法线角误差下降 13.35%</td>
+<td>200 个固定样本的权重对比，训练轮数及部分设置不同；基础颜色误差未同步改善</td>
+</tr>
+<tr>
+<td>几何方案筛选</td>
+<td>完整改进组相对原始基线的归一化三维误差下降 12.17%</td>
+<td>历史四组实验，每组 5 个 epoch、单个随机种子，关闭纹理分支</td>
+</tr>
+</tbody>
+</table>
+<p>这些验证分别服务于对应修正、图像预测和几何方案筛选。它们具有各自的实验背景，跨人物泛化、复杂输入和最终资产质量仍需更完整的测试。</p>
+<h2 id="当前进展与后续方向"><a class="markdownIt-Anchor" href="#当前进展与后续方向"></a> 当前进展与后续方向</h2>
+<p>目前已形成照片到固定拓扑头部、完整 UV BaseColor 和组合渲染的阶段流程，并沉淀了纹理质量排查、数据构建和内部验证记录。基于这些输出，还完成了多角度检查、指定灯光展示和外部绑定下的轻度表情演示。</p>
+<p>后续工作主要集中在四个方面：</p>
+<ul>
+<li><strong>人物特征与纹理细节</strong>：改善胡须、皱纹等局部特征的保持，减少颜色漂移与 UV 边界问题。</li>
+<li><strong>复杂输入稳定性</strong>：分别检查侧脸、遮挡和异常光照下的重建表现。</li>
+<li><strong>几何与相机一致性</strong>：加强图像视角对齐、导出网格和三维投影之间的一致性。</li>
+<li><strong>独立人物与资产验证</strong>：补充未见人物测试，以及绑定变形和后续编辑流程中的检查。</li>
+</ul>
+<p>本篇展示以头部网格和颜色贴图为核心。多视角与表情图反映当前的检查和接入探索，完整生产可用性仍需进一步验证。</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/3D/" rel="tag">3D</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ProHead/" rel="tag">ProHead</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+   
+  
+</article>
+
+<article
   id="post-skills/常用-Skills-汇总"
   class="article article-type-post"
   itemscope
