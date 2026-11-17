@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>AI 会话记忆与知识库实施方案提示词</title>
+      <link href="/2026/11/15/ai-skill/vibe-coding-xiao-ji/"/>
+      <url>/2026/11/15/ai-skill/vibe-coding-xiao-ji/</url>
+      
+        <content type="html"><![CDATA[<h1 id="ai-会话记忆与知识库实施方案提示词"><a class="markdownIt-Anchor" href="#ai-会话记忆与知识库实施方案提示词"></a> AI 会话记忆与知识库实施方案提示词</h1><h2 id="使用场景"><a class="markdownIt-Anchor" href="#使用场景"></a> 使用场景</h2><p>适合已经积累了论文笔记、研究想法和实验记录，想把重要 AI 会话里的信息整理到各项目 <code>memory/</code> 目录的人。复制下面的提示词即可。换项目时，可以把对话名称替换成自己的背景资料。</p><h2 id="可复制提示词"><a class="markdownIt-Anchor" href="#可复制提示词"></a> 可复制提示词</h2><pre class="highlight"><code class="text">请参考我在「个人知识库论文整理」对话中提出的设想，帮我设计一套适用于 Codex 等 AI 工具的个人知识库与长期记忆管理方案。如果无法读取该对话，请以以下背景为准，并标明会影响实施的假设。每次重要会话结束后，我希望让 AI 提炼值得复用的信息，交付 Markdown 草稿和拟归档位置。我会人工检查、补充遗漏、修改或删除不重要的内容，再把通过审核的条目保存到对应项目的 memory/ 目录。科研项目中，一次会话可能涉及多篇论文、多个想法和多组实验，希望这些信息可以按研究对象单独更新，并能追溯到原文或实验结果。请新建一个 Space，并在其中创建「AI 会话记忆与知识库实施方案」Page，完成以下工作：1. 给出适合多项目的目录树，明确全局记忆、项目记忆、会话摘要和决策记录各自收录什么。用论文、想法和实验说明一场会话的内容怎样归到不同条目。2. 设计会话结束后的提炼、人工审核、归档和更新流程。说明哪些信息值得保留、哪些可以跳过，以及怎样处理待确认的推断和对旧结论的更正。3. 提供五个可直接复制的 Markdown 模板，分别用于会话摘要、长期有效的知识、重要决策、未解决问题和待办事项。按需包含来源、适用范围和验证状态。4. 给出项目 AGENTS.md 示例，说明 Codex 如何从项目索引开始，按当前任务读取少量相关且仍有效的条目，以及如何处理冲突或缺失的记忆。5. 分析重复信息、过时记忆、错误累积和上下文污染，给出可以手工执行的维护办法。6. 给出分阶段实施计划，并以一个活跃课题设计小规模试点。对比有无记忆时的表现，检查结论能否追溯、失效信息是否被误用，以及需要我重复交代多少背景。请把人工审核作为归档入口，允许一次会话无需留档。本次只交付方案 Page，不创建定时任务，也不替我创建、修改或归档本地记忆文件。</code></pre><h2 id="演讲学习笔记把对智能体的纠正变成可执行的约束"><a class="markdownIt-Anchor" href="#演讲学习笔记把对智能体的纠正变成可执行的约束"></a> 演讲学习笔记：把对智能体的纠正变成可执行的约束</h2><p>Lauren Tan 在《All Code Is Slop (Except Mine)》中分享了 Grok Bot 团队怎样在交付量上升后验证代码质量。她认为智能体会复用代码库里已经存在的写法。演示中的一个例子是为解决界面闪烁而加的 <code>setTimeout</code>。补丁被复制进共享模块以后，时间线最终记录了 183 个定时器。知识库也会遇到类似的问题。过时结论留在常被读取的位置，就可能成为下一次回答的依据。<a href="https://www.youtube.com/watch?v=O_zcc6Xl12g&amp;t=470s">定时器案例（07:50）</a></p><p>值得学习的点:<br /><strong>每次纠正智能体，都问这类错误能否用代码结构、lint 或测试拦住。</strong><br /><strong>遇到第二次同类错误，就把你的纠正变成流程里的一项检查。</strong></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> AI-skill </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Codex </tag>
+            
+            <tag> 提示词 </tag>
+            
+            <tag> 知识库 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>ProHead：从单张照片到三维头部资产</title>
       <link href="/2026/11/08/3d/3dhead/prohead/"/>
       <url>/2026/11/08/3d/3dhead/prohead/</url>
@@ -29,8 +58,10 @@
         </tags>
       
     </entry>
-
-<entry>
+    
+    
+    
+    <entry>
       <title>常用 Skills 汇总</title>
       <link href="/2026/09/12/skills/chang-yong-skills-hui-zong/"/>
       <url>/2026/09/12/skills/chang-yong-skills-hui-zong/</url>
@@ -47,9 +78,9 @@
       
         <tags>
             
-            <tag> AI Agent </tag>
-            
             <tag> Codex </tag>
+            
+            <tag> AI Agent </tag>
             
             <tag> Skills </tag>
             

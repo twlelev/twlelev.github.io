@@ -6,10 +6,41 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://twlelev.github.io/"/>
-  <updated>2026-09-17T04:00:00.000Z</updated>
+  <updated>2026-11-17T15:52:00.000Z</updated>
   <id>https://twlelev.github.io/</id>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>AI 会话记忆与知识库实施方案提示词</title>
+    <link href="https://twlelev.github.io/2026/11/15/ai-skill/vibe-coding-xiao-ji/"/>
+    <id>https://twlelev.github.io/2026/11/15/ai-skill/vibe-coding-xiao-ji/</id>
+    <published>2026-11-15T13:35:24.000Z</published>
+    <updated>2026-11-17T15:52:00.000Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;ai-会话记忆与知识库实施方案提示词&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#ai-会话记忆与知识库实施方案提示词&quot;&gt;&lt;/a&gt; AI 会话记忆与知识库实施方案提示词&lt;/h1&gt;
+&lt;h2 id=&quot;使用场景&quot;&gt;&lt;a
+        
+      
+    
+    </summary>
+    
+      <category term="AI-skill" scheme="https://twlelev.github.io/categories/AI-skill/"/>
+    
+    
+      <category term="Codex" scheme="https://twlelev.github.io/tags/Codex/"/>
+    
+      <category term="提示词" scheme="https://twlelev.github.io/tags/%E6%8F%90%E7%A4%BA%E8%AF%8D/"/>
+    
+      <category term="知识库" scheme="https://twlelev.github.io/tags/%E7%9F%A5%E8%AF%86%E5%BA%93/"/>
+    
+  </entry>
   
   <entry>
     <title>ProHead：从单张照片到三维头部资产</title>
@@ -40,8 +71,8 @@
       <category term="ProHead" scheme="https://twlelev.github.io/tags/ProHead/"/>
     
   </entry>
-
-<entry>
+  
+  <entry>
     <title>常用 Skills 汇总</title>
     <link href="https://twlelev.github.io/2026/09/12/skills/chang-yong-skills-hui-zong/"/>
     <id>https://twlelev.github.io/2026/09/12/skills/chang-yong-skills-hui-zong/</id>
@@ -58,9 +89,9 @@
       <category term="skills" scheme="https://twlelev.github.io/categories/skills/"/>
     
     
-      <category term="AI Agent" scheme="https://twlelev.github.io/tags/AI-Agent/"/>
-    
       <category term="Codex" scheme="https://twlelev.github.io/tags/Codex/"/>
+    
+      <category term="AI Agent" scheme="https://twlelev.github.io/tags/AI-Agent/"/>
     
       <category term="Skills" scheme="https://twlelev.github.io/tags/Skills/"/>
     
@@ -71,7 +102,7 @@
     <link href="https://twlelev.github.io/2026/08/04/3d/face-uv-texture-architecture-papers/"/>
     <id>https://twlelev.github.io/2026/08/04/3d/face-uv-texture-architecture-papers/</id>
     <published>2026-08-03T16:00:00.000Z</published>
-    <updated>2026-09-12T01:29:53.669Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -101,7 +132,7 @@
     <link href="https://twlelev.github.io/2026/06/23/skills/codebase-memory-graphify/"/>
     <id>https://twlelev.github.io/2026/06/23/skills/codebase-memory-graphify/</id>
     <published>2026-06-23T06:31:46.000Z</published>
-    <updated>2026-09-12T01:29:53.685Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -135,7 +166,7 @@
     <link href="https://twlelev.github.io/2026/06/15/3d/pixel3dmm/"/>
     <id>https://twlelev.github.io/2026/06/15/3d/pixel3dmm/</id>
     <published>2026-06-15T03:17:09.000Z</published>
-    <updated>2026-09-12T01:29:53.669Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -163,7 +194,7 @@
     <link href="https://twlelev.github.io/2026/05/18/3d/3d-reconstruct-zhong-xiang-ji-xiang-guan-ji-chu/"/>
     <id>https://twlelev.github.io/2026/05/18/3d/3d-reconstruct-zhong-xiang-ji-xiang-guan-ji-chu/</id>
     <published>2026-05-18T07:20:39.000Z</published>
-    <updated>2026-09-12T01:29:53.669Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -189,7 +220,7 @@
     <link href="https://twlelev.github.io/2026/04/15/tts/gpt-sovits/"/>
     <id>https://twlelev.github.io/2026/04/15/tts/gpt-sovits/</id>
     <published>2026-04-15T06:02:09.000Z</published>
-    <updated>2026-09-12T01:29:53.670Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -216,7 +247,7 @@
     <link href="https://twlelev.github.io/2026/04/03/tts/vibe-voice-finetune-shi-jian/"/>
     <id>https://twlelev.github.io/2026/04/03/tts/vibe-voice-finetune-shi-jian/</id>
     <published>2026-04-03T07:55:22.000Z</published>
-    <updated>2026-09-12T01:29:53.670Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -251,7 +282,7 @@
     <link href="https://twlelev.github.io/2026/04/01/tts/qwen-tts/"/>
     <id>https://twlelev.github.io/2026/04/01/tts/qwen-tts/</id>
     <published>2026-04-01T08:01:36.000Z</published>
-    <updated>2026-09-12T01:29:53.670Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -278,7 +309,7 @@
     <link href="https://twlelev.github.io/2026/03/25/claude-code-shi-yong/"/>
     <id>https://twlelev.github.io/2026/03/25/claude-code-shi-yong/</id>
     <published>2026-03-25T07:53:08.000Z</published>
-    <updated>2026-09-12T01:29:53.670Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -302,7 +333,7 @@
     <link href="https://twlelev.github.io/2026/03/09/aigc/helios/"/>
     <id>https://twlelev.github.io/2026/03/09/aigc/helios/</id>
     <published>2026-03-09T10:02:07.000Z</published>
-    <updated>2026-09-12T01:29:53.669Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -328,7 +359,7 @@
     <link href="https://twlelev.github.io/2026/01/09/qiang-hua-xue-xi/qiang-hua-xue-xi-v-zhi-xue-xi-zhi-td-target-shi-yan-fen-xi/"/>
     <id>https://twlelev.github.io/2026/01/09/qiang-hua-xue-xi/qiang-hua-xue-xi-v-zhi-xue-xi-zhi-td-target-shi-yan-fen-xi/</id>
     <published>2026-01-09T07:01:53.000Z</published>
-    <updated>2026-09-12T01:29:53.693Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -354,7 +385,7 @@
     <link href="https://twlelev.github.io/2025/12/26/aigc/z-image-xiang-guan-ji-zhu-jie-xi/"/>
     <id>https://twlelev.github.io/2025/12/26/aigc/z-image-xiang-guan-ji-zhu-jie-xi/</id>
     <published>2025-12-26T08:45:34.000Z</published>
-    <updated>2026-09-12T01:29:53.670Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -380,7 +411,7 @@
     <link href="https://twlelev.github.io/2025/12/24/python-huan-jing/python-huan-jing/"/>
     <id>https://twlelev.github.io/2025/12/24/python-huan-jing/python-huan-jing/</id>
     <published>2025-12-24T02:39:49.000Z</published>
-    <updated>2026-09-12T01:29:53.685Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -407,7 +438,7 @@
     <link href="https://twlelev.github.io/2025/12/23/aigc/flashattention/"/>
     <id>https://twlelev.github.io/2025/12/23/aigc/flashattention/</id>
     <published>2025-12-23T02:58:30.000Z</published>
-    <updated>2026-09-12T01:29:53.669Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -433,7 +464,7 @@
     <link href="https://twlelev.github.io/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/"/>
     <id>https://twlelev.github.io/2025/12/21/aigc/aigc-faceswap-sheng-tu-xiang-guan-ji-zhu-zong-jie/</id>
     <published>2025-12-21T00:49:43.000Z</published>
-    <updated>2026-09-12T01:29:53.669Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -460,7 +491,7 @@
     <link href="https://twlelev.github.io/2025/12/19/aigc/lcm-lora/"/>
     <id>https://twlelev.github.io/2025/12/19/aigc/lcm-lora/</id>
     <published>2025-12-19T07:04:10.000Z</published>
-    <updated>2026-09-12T01:29:53.670Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -486,7 +517,7 @@
     <link href="https://twlelev.github.io/2025/12/18/aigc/ddim/"/>
     <id>https://twlelev.github.io/2025/12/18/aigc/ddim/</id>
     <published>2025-12-18T07:31:01.000Z</published>
-    <updated>2026-09-12T01:29:53.669Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -513,7 +544,7 @@
     <link href="https://twlelev.github.io/2025/12/18/aigc/ddpm/"/>
     <id>https://twlelev.github.io/2025/12/18/aigc/ddpm/</id>
     <published>2025-12-18T03:21:20.000Z</published>
-    <updated>2026-09-12T01:29:53.669Z</updated>
+    <updated>2026-11-17T15:51:59.000Z</updated>
     
     <summary type="html">
     
@@ -532,61 +563,6 @@
     
     
       <category term="AIGC" scheme="https://twlelev.github.io/tags/AIGC/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>git常用命令</title>
-    <link href="https://twlelev.github.io/2025/12/18/git/git-chang-yong-ming-ling/"/>
-    <id>https://twlelev.github.io/2025/12/18/git/git-chang-yong-ming-ling/</id>
-    <published>2025-12-18T02:37:52.000Z</published>
-    <updated>2026-09-12T01:29:53.671Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h1 id=&quot;硬重置到远程分支&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#硬重置到远程分支&quot;&gt;&lt;/a&gt; 硬重置到远程分支&lt;/h1&gt;
-&lt;p&gt;需要重新拉取远程分支，放弃本地更改。&lt;/p&gt;
-&lt;pre class=&quot;highlight&quot;&gt;&lt;code
-        
-      
-    
-    </summary>
-    
-      <category term="git" scheme="https://twlelev.github.io/categories/git/"/>
-    
-    
-      <category term="git" scheme="https://twlelev.github.io/tags/git/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>TensorRT动态尺寸推理技术</title>
-    <link href="https://twlelev.github.io/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/"/>
-    <id>https://twlelev.github.io/2025/06/26/tensorrt/tensorrt-dong-tai-chi-cun-tui-li-ji-zhu/</id>
-    <published>2025-06-26T07:52:26.000Z</published>
-    <updated>2026-09-12T01:29:53.670Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h1 id=&quot;tensorrt-动态尺寸推理技术方案深度解析&quot;&gt;&lt;a class=&quot;markdownIt-Anchor&quot; href=&quot;#tensorrt-动态尺寸推理技术方案深度解析&quot;&gt;&lt;/a&gt; TensorRT 动态尺寸推理技术方案深度解析&lt;/h1&gt;
-&lt;p&gt;在 Stable
-        
-      
-    
-    </summary>
-    
-      <category term="TensorRT" scheme="https://twlelev.github.io/categories/TensorRT/"/>
-    
-    
-      <category term="TensorRT" scheme="https://twlelev.github.io/tags/TensorRT/"/>
     
   </entry>
   
