@@ -87,7 +87,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.1k</span>
+            <span class="post-count">1k</span>
         </span>
     </span>
 
@@ -112,41 +112,39 @@
     <div class="article-entry" itemprop="articleBody">
        
   <h1 id="qwen3-tts-整体网络框架"><a class="markdownIt-Anchor" href="#qwen3-tts-整体网络框架"></a> Qwen3-TTS 整体网络框架</h1>
-<pre class="highlight"><code class="mermaid">flowchart TD
-    SI[&quot;ref_mel [B, T_mel, 128]&quot;]
-    SO[&quot;spk_embed [B, D]&quot;]
-    IE[&quot;input_embeds [B, T, D]&quot;]
-    HS[&quot;hidden_states [B, T, D]&quot;]
-    CH[&quot;codec_head — codebook 0 logits [B,T,V]&quot;]
-    CP[&quot;Sub-Talker — codebook 1-15 logits [B,15,V]&quot;]
-    ST[&quot;speech_tokenizer — waveform&quot;]
+<pre class="mermaid">flowchart TD
+    SI["ref_mel [B, T_mel, 128]"]
+    SO["spk_embed [B, D]"]
+    IE["input_embeds [B, T, D]"]
+    HS["hidden_states [B, T, D]"]
+    CH["codec_head — codebook 0 logits [B,T,V]"]
+    CP["Sub-Talker — codebook 1-15 logits [B,15,V]"]
+    ST["speech_tokenizer — waveform"]
 
-    subgraph SE[&quot;SpeakerEncoder (ECAPA-TDNN)&quot;]
-        SI --&gt; SO
+    subgraph SE["SpeakerEncoder (ECAPA-TDNN)"]
+        SI --> SO
     end
 
-    subgraph MT[&quot;Main Talker (28层 Transformer Decoder)&quot;]
-        IE --&gt; HS
+    subgraph MT["Main Talker (28层 Transformer Decoder)"]
+        IE --> HS
     end
 
-    SO -- &quot;注入 idx 3000&quot; --&gt; IE
-    HS --&gt; CH
-    HS --&gt; CP
-    CH --&gt; ST
-    CP --&gt; ST
-</code></pre>
+    SO -- "注入 idx 3000" --> IE
+    HS --> CH
+    HS --> CP
+    CH --> ST
+    CP --> ST</pre>
 <h1 id="推理流程自回归逐步生成"><a class="markdownIt-Anchor" href="#推理流程自回归逐步生成"></a> 推理流程（自回归逐步生成）</h1>
-<pre class="highlight"><code class="mermaid">flowchart TD
-    P1[&quot;Step 1: Prefill — text + ref_audio → Main Talker&quot;]
-    A[&quot;Main Talker: hidden_state[t] → codebook[0]&quot;]
-    B[&quot;Sub-Talker: codebook[1] → [2] → … → [15]&quot;]
-    C[&quot;16个 codebook embeddings 求和 → 下一步输入&quot;]
-    P3[&quot;Step 3: 解码 — speech_tokenizer → waveform&quot;]
+<pre class="mermaid">flowchart TD
+    P1["Step 1: Prefill — text + ref_audio → Main Talker"]
+    A["Main Talker: hidden_state[t] → codebook[0]"]
+    B["Sub-Talker: codebook[1] → [2] → … → [15]"]
+    C["16个 codebook embeddings 求和 → 下一步输入"]
+    P3["Step 3: 解码 — speech_tokenizer → waveform"]
 
-    P1 --&gt; A --&gt; B --&gt; C
-    C -- &quot;下一时间步 t+1&quot; --&gt; A
-    C --&gt; P3
-</code></pre>
+    P1 --> A --> B --> C
+    C -- "下一时间步 t+1" --> A
+    C --> P3</pre>
 <h1 id="各模块维度汇总"><a class="markdownIt-Anchor" href="#各模块维度汇总"></a> 各模块维度汇总</h1>
 <table>
 <thead>

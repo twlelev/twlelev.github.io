@@ -228,11 +228,6 @@
 </article>
 
     
-    <article class="articles">
-    
-    
-    
-    
     <article
   id="post-3D/3Dhead/ProHead"
   class="article article-type-post"
@@ -1281,7 +1276,7 @@ PKG=$(python -c <span class="hljs-string">&quot;import graphify, os; print(os.pa
        
 <h2 itemprop="name">
   <a class="article-title" href="/2026/06/15/3d/pixel3dmm/"
-    >“pixel3dmm”</a> 
+    >pixel3dmm</a> 
 </h2>
  
 
@@ -1293,14 +1288,14 @@ PKG=$(python -c <span class="hljs-string">&quot;import graphify, os; print(os.pa
   <time datetime="2026-06-15T03:17:09.000Z" itemprop="datePublished">2026-06-15</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/FLAME/">FLAME</a>
+    <a class="article-category-link" href="/categories/FLAME/">FLAME</a> / <a class="article-category-link" href="/categories/FLAME/3D/">3D</a>
   </div>
    
     </div>
       
     <div class="article-entry" itemprop="articleBody">
        
-  <p>![[/images/3D/Pasted image 20260622135821.png]]</p>
+  <p><img src="/images/3D/Pasted_image_20260622135821.png" alt="avatar" /></p>
 <p>核心：屏幕空间稠密先验(screen-space dense priors)。</p>
 <h1 id="search-uv-机制详解"><a class="markdownIt-Anchor" href="#search-uv-机制详解"></a> “search uv” 机制详解</h1>
 <p>“search uv” 的本质是:<strong>用 KNN 在网络预测的 UV 图里,为每个 FLAME 顶点反查出它对应的图像像素位置</strong>,从而把&quot;per-pixel 的 UV 预测&quot;转成&quot;per-vertex 的 2D 重投影目标&quot;来拟合 FLAME 参数。</p>
@@ -2319,41 +2314,39 @@ finetuning-tts/inference_diffusion.py       # 推理（含 semantic feedback）
     <div class="article-entry" itemprop="articleBody">
        
   <h1 id="qwen3-tts-整体网络框架"><a class="markdownIt-Anchor" href="#qwen3-tts-整体网络框架"></a> Qwen3-TTS 整体网络框架</h1>
-<pre class="highlight"><code class="mermaid">flowchart TD
-    SI[&quot;ref_mel [B, T_mel, 128]&quot;]
-    SO[&quot;spk_embed [B, D]&quot;]
-    IE[&quot;input_embeds [B, T, D]&quot;]
-    HS[&quot;hidden_states [B, T, D]&quot;]
-    CH[&quot;codec_head — codebook 0 logits [B,T,V]&quot;]
-    CP[&quot;Sub-Talker — codebook 1-15 logits [B,15,V]&quot;]
-    ST[&quot;speech_tokenizer — waveform&quot;]
+<pre class="mermaid">flowchart TD
+    SI["ref_mel [B, T_mel, 128]"]
+    SO["spk_embed [B, D]"]
+    IE["input_embeds [B, T, D]"]
+    HS["hidden_states [B, T, D]"]
+    CH["codec_head — codebook 0 logits [B,T,V]"]
+    CP["Sub-Talker — codebook 1-15 logits [B,15,V]"]
+    ST["speech_tokenizer — waveform"]
 
-    subgraph SE[&quot;SpeakerEncoder (ECAPA-TDNN)&quot;]
-        SI --&gt; SO
+    subgraph SE["SpeakerEncoder (ECAPA-TDNN)"]
+        SI --> SO
     end
 
-    subgraph MT[&quot;Main Talker (28层 Transformer Decoder)&quot;]
-        IE --&gt; HS
+    subgraph MT["Main Talker (28层 Transformer Decoder)"]
+        IE --> HS
     end
 
-    SO -- &quot;注入 idx 3000&quot; --&gt; IE
-    HS --&gt; CH
-    HS --&gt; CP
-    CH --&gt; ST
-    CP --&gt; ST
-</code></pre>
+    SO -- "注入 idx 3000" --> IE
+    HS --> CH
+    HS --> CP
+    CH --> ST
+    CP --> ST</pre>
 <h1 id="推理流程自回归逐步生成"><a class="markdownIt-Anchor" href="#推理流程自回归逐步生成"></a> 推理流程（自回归逐步生成）</h1>
-<pre class="highlight"><code class="mermaid">flowchart TD
-    P1[&quot;Step 1: Prefill — text + ref_audio → Main Talker&quot;]
-    A[&quot;Main Talker: hidden_state[t] → codebook[0]&quot;]
-    B[&quot;Sub-Talker: codebook[1] → [2] → … → [15]&quot;]
-    C[&quot;16个 codebook embeddings 求和 → 下一步输入&quot;]
-    P3[&quot;Step 3: 解码 — speech_tokenizer → waveform&quot;]
+<pre class="mermaid">flowchart TD
+    P1["Step 1: Prefill — text + ref_audio → Main Talker"]
+    A["Main Talker: hidden_state[t] → codebook[0]"]
+    B["Sub-Talker: codebook[1] → [2] → … → [15]"]
+    C["16个 codebook embeddings 求和 → 下一步输入"]
+    P3["Step 3: 解码 — speech_tokenizer → waveform"]
 
-    P1 --&gt; A --&gt; B --&gt; C
-    C -- &quot;下一时间步 t+1&quot; --&gt; A
-    C --&gt; P3
-</code></pre>
+    P1 --> A --> B --> C
+    C -- "下一时间步 t+1" --> A
+    C --> P3</pre>
 <h1 id="各模块维度汇总"><a class="markdownIt-Anchor" href="#各模块维度汇总"></a> 各模块维度汇总</h1>
 <table>
 <thead>
